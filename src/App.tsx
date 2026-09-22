@@ -6,7 +6,7 @@ import { KnowledgeView } from './components/KnowledgeView';
 import { PracticeView } from './components/PracticeView';
 import { ExamLibraryView } from './components/ExamLibraryView';
 import { AccountView } from './components/AccountView';
-import { BenchmarkView } from './components/BenchmarkView';
+import { HCMBenchmarkView } from './components/HCMBenchmarkView';
 import { MinigameView } from './components/minigame/MinigameView';
 import { ExamRunnerModal } from './components/ExamRunnerModal';
 import { ExamPreviewModal } from './components/ExamPreviewModal';
@@ -226,7 +226,7 @@ export default function App() {
         )}
 
         {currentTab === 'benchmarks' && (
-          <BenchmarkView
+          <HCMBenchmarkView
             targetSchool={progress.profile.targetSchool}
             targetScore={progress.profile.targetScore}
             onUpdateTargetSchool={handleUpdateTargetSchool}
