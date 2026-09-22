@@ -165,21 +165,7 @@ export interface MathExam {
   };
 }
 
-export interface MathGradingResult {
-  totalScore: number;
-  maxScore: number; // 10.0
-  itemScores: {
-    itemId: string;
-    baiNumber: number;
-    score: number;
-    maxScore: number;
-    methodComment: string;
-    detailedFeedback: string;
-    sampleSolution: string;
-    studentAnswer: string;
-  }[];
-  overallComment: string;
-}
+// NOTE: MathGradingResultDetailed (defined in mathGradingService.ts) is the active grading result type.
 
 // ==================== MÔN TIẾNG ANH ====================
 export type EnglishQuestionType = 
@@ -243,24 +229,4 @@ export interface EnglishExam {
   };
 }
 
-export interface EnglishGradingResult {
-  totalScore: number;
-  maxScore: number; // 10.0
-  correctCount: number;
-  wrongCount: number;
-  partBreakdown: {
-    part1Score: number;
-    part2Score: number;
-    part3Score: number;
-    part4Score: number;
-  };
-  questionEvaluations: {
-    questionIndex: number;
-    studentAnswer: string;
-    correctAnswer: string;
-    isCorrect: boolean;
-    earnedScore: number;
-    explanation: string;
-    aiFeedback?: string;
-  }[];
-}
+// NOTE: EnglishGradingSubmissionResult (defined in englishGradingService.ts) is the active grading result type.

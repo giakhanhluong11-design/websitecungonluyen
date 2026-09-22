@@ -6,7 +6,7 @@ dotenv.config();
 
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
 import { getAiClient, setRuntimeApiKey, isAiConfigured, generateContentWithFallback, testGeminiApiKey } from "./server/geminiClient";
 import { generateFreshMathExam, generateFreshLiteratureExam, generateFreshEnglishExam } from "./server/examGenerators";
 

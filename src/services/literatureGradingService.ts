@@ -60,7 +60,6 @@ export async function gradeLiteratureSubmission(
   await new Promise(r => setTimeout(r, 600));
 
   const p1Text = (exam.part1?.passageText || '').toLowerCase();
-  const p2Text = (exam.part2?.passageText || '').toLowerCase();
 
   // 1. Chấm 4 câu đọc hiểu phần I (Tổng 3.0 điểm)
   const part1Scores = exam.part1.question1SubQuestions.map((q) => {

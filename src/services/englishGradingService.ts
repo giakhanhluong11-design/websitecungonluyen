@@ -1,15 +1,5 @@
 import { EnglishExam } from '../types/practiceExamTypes';
 
-export interface EnglishAiDiagnostic {
-  totalScore: number;
-  teacherReview: string;
-  topWeaknesses?: string[];
-  keyStrengths?: string[];
-  reviewTopics?: string[];
-  weakGrammarPoints: string[];
-  improvementTips: string[];
-}
-
 export interface EnglishGradingSubmissionResult {
   totalScore: number;
   maxScore: number;
