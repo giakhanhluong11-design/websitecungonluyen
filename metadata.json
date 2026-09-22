@@ -1,0 +1,6 @@
+{
+  "name": "Cùng Ôn Luyện",
+  "description": "Nền tảng ôn thi tuyển sinh vào lớp 10 môn Toán, Ngữ văn, Tiếng Anh và tra cứu, so sánh điểm chuẩn THPT các năm.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
