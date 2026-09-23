@@ -72,9 +72,14 @@ export default function App() {
 
   // ── Firebase auth listener ───────────────────────────────────────────────
   useEffect(() => {
+    const remember = typeof window !== 'undefined' && localStorage.getItem('cung_on_luyen_remember_login') === 'true';
+    if (!remember) {
+      // Khi vào web, mặc định tài khoản là Khách trừ khi người dùng đã nhấn Lưu đăng nhập
+      return;
+    }
     const unsubscribe = onAuthChange(async (user) => {
       if (user) {
-        handleLoginEmail(user.email, user.name);
+        handleLoginEmail(user.email, user.name, undefined, true);
         await handleSyncCloud(user.id);
       }
     });
@@ -82,14 +87,19 @@ export default function App() {
   }, []);
 
   // ── Auth handlers ────────────────────────────────────────────────────────
-  const handleLoginSuccess = async (user: AuthUser, _token: string) => {
-    handleLoginEmail(user.email, user.name, {
-      birthYear: user.birthYear,
-      currentSchool: user.currentSchool,
-      currentClass: user.currentClass,
-    });
+  const handleLoginSuccess = async (user: AuthUser, _token: string, rememberLogin?: boolean) => {
+    handleLoginEmail(
+      user.email,
+      user.name,
+      {
+        birthYear: user.birthYear,
+        currentSchool: user.currentSchool,
+        currentClass: user.currentClass,
+      },
+      rememberLogin
+    );
     showToast(
-      `Đăng nhập thành công! Chào mừng ${user.name || user.email} đã quay trở lại. Dữ liệu đang được đồng bộ với đám mây Firebase...`,
+      `Đăng nhập thành công! Chào mừng ${user.name || user.email}${rememberLogin ? ' (Đã lưu đăng nhập)' : ''}.`,
       'success'
     );
     await handleSyncCloud(user.id);
@@ -100,16 +110,16 @@ export default function App() {
     await logoutAuth();
     handleLogout();
     showToast(
-      'Đã đăng xuất tài khoản. Dữ liệu đã chuyển về trạng thái trắng (0). Đăng nhập lại bất kỳ lúc nào để khôi phục.',
+      'Đã đăng xuất tài khoản. Dữ liệu đã chuyển về trạng thái khách. Đăng nhập lại bất kỳ lúc nào để khôi phục.',
       'info'
     );
     setTimeout(clearToast, 4500);
   };
 
-  const handleLoginGoogleAndToast = (email: string, displayName?: string) => {
-    handleLoginGoogle(email, displayName);
+  const handleLoginGoogleAndToast = (email: string, displayName?: string, rememberLogin?: boolean) => {
+    handleLoginGoogle(email, displayName, rememberLogin);
     showToast(
-      `Đã đăng nhập Google (${email}) và đồng bộ lại đầy đủ toàn bộ tiến trình học tập!`,
+      `Đã đăng nhập Google (${email})${rememberLogin ? ' và lưu đăng nhập trên thiết bị' : ''}!`,
       'success'
     );
     setTimeout(clearToast, 4500);
@@ -253,6 +263,8 @@ export default function App() {
         {currentTab === 'account' && (
           <AccountView
             progress={progress}
+            exams={ALL_EXAMS}
+            darkMode={darkMode}
             onToggleDarkMode={toggleDarkMode}
             onUpdateProfile={handleUpdateProfile}
             onResetProgress={handleResetProgress}

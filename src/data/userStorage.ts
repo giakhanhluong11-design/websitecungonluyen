@@ -12,6 +12,29 @@ import { getCurrentUserId } from '../services/authService';
 
 const STORAGE_KEY = 'cung_on_luyen_progress_v3';
 const ACCOUNT_VAULT_PREFIX = 'cung_on_luyen_acc_vault_';
+export const REMEMBER_LOGIN_KEY = 'cung_on_luyen_remember_login';
+
+export function isRememberLoginEnabled(): boolean {
+  try {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(REMEMBER_LOGIN_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function setRememberLoginEnabled(enabled: boolean): void {
+  try {
+    if (typeof window === 'undefined') return;
+    if (enabled) {
+      localStorage.setItem(REMEMBER_LOGIN_KEY, 'true');
+    } else {
+      localStorage.removeItem(REMEMBER_LOGIN_KEY);
+    }
+  } catch (err) {
+    console.error('Failed to set remember login:', err);
+  }
+}
 
 // Không còn INITIAL_USER_PROFILE riêng — mọi user mới đều bắt đầu với BLANK_GUEST_PROFILE
 export const INITIAL_USER_PROGRESS: UserProgress = {
@@ -108,10 +131,16 @@ export function loadUserProgress(): UserProgress {
       localStorage.removeItem('cung_on_luyen_progress_v2');
     }
 
+    const rememberLogin = isRememberLoginEnabled();
+    const sessionActive = typeof window !== 'undefined' && sessionStorage.getItem('cung_on_luyen_session_active') === 'true';
+
+    // Khi vào web, mặc định tài khoản là Khách trừ khi người dùng đã nhấn Lưu đăng nhập
+    if (!rememberLogin && !sessionActive) {
+      return { ...BLANK_GUEST_PROGRESS };
+    }
+
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      // Người dùng mới: bắt đầu với trạng thái khách
-      saveUserProgress(BLANK_GUEST_PROGRESS);
       return { ...BLANK_GUEST_PROGRESS };
     }
 
@@ -171,6 +200,13 @@ export function logoutGoogleAccount(): UserProgress {
   if (current.profile?.email && current.profile?.isGoogleLinked) {
     saveToAccountVault(current.profile.email, current);
   }
+
+  setRememberLoginEnabled(false);
+  try {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('cung_on_luyen_session_active');
+    }
+  } catch {}
   
   const blankState: UserProgress = {
     ...BLANK_GUEST_PROGRESS,
@@ -192,7 +228,16 @@ export function logoutGoogleAccount(): UserProgress {
   return blankState;
 }
 
-export function loginGoogleAccount(email: string, displayName?: string): UserProgress {
+export function loginGoogleAccount(email: string, displayName?: string, rememberLogin?: boolean): UserProgress {
+  if (rememberLogin !== undefined) {
+    setRememberLoginEnabled(rememberLogin);
+  }
+  try {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('cung_on_luyen_session_active', 'true');
+    }
+  } catch {}
+
   const normalizedEmail = email.trim().toLowerCase();
   const existingVault = loadFromAccountVault(normalizedEmail);
 
@@ -260,8 +305,18 @@ export function loginGoogleAccount(email: string, displayName?: string): UserPro
 export function loginEmailAccount(
   email: string,
   displayName?: string,
-  extraProfile?: { birthYear?: number; currentSchool?: string; currentClass?: string }
+  extraProfile?: { birthYear?: number; currentSchool?: string; currentClass?: string },
+  rememberLogin?: boolean
 ): UserProgress {
+  if (rememberLogin !== undefined) {
+    setRememberLoginEnabled(rememberLogin);
+  }
+  try {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('cung_on_luyen_session_active', 'true');
+    }
+  } catch {}
+
   const normalizedEmail = email.trim().toLowerCase();
   const existingVault = loadFromAccountVault(normalizedEmail);
 
@@ -327,6 +382,13 @@ export function logoutAuthAccount(): UserProgress {
   if (current.profile?.email) {
     saveToAccountVault(current.profile.email, current);
   }
+
+  setRememberLoginEnabled(false);
+  try {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('cung_on_luyen_session_active');
+    }
+  } catch {}
 
   const blankState: UserProgress = {
     ...BLANK_GUEST_PROGRESS,

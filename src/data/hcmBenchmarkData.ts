@@ -10,6 +10,7 @@ export type HCMCluster =
 
 export interface HCMSchool {
   id: string;
+  ticker?: string; // Mã chứng khoán/giao dịch (VD: LHP, NTH, GDI...)
   name: string;
   shortName: string;
   district: string;
@@ -384,3 +385,47 @@ export const CHART_COLORS = [
   '#06b6d4', // Cyan
   '#f97316', // Orange
 ];
+
+export function getSchoolTicker(school: HCMSchool): string {
+  if (school.ticker) return school.ticker;
+  const map: Record<string, string> = {
+    lhp: 'LHP',
+    nch: 'NTH',
+    gd: 'GDI',
+    ntmk: 'NMK',
+    btx: 'BTX',
+    lqd: 'LQD',
+    tv: 'TVG',
+    tb: 'TBN',
+    pn: 'PNH',
+    tq: 'TKN',
+    nhg: 'NHC',
+    nhh: 'NHH',
+    td: 'TDU',
+    hvt: 'HVT',
+    mdc: 'MDC',
+    vd: 'VDU',
+    lh: 'LHO',
+    pt: 'PTH',
+    nb: 'NBE',
+    cg: 'CGI',
+    am: 'ANG',
+    cc: 'CCH',
+    bth: 'BDI',
+    th: 'THI',
+    tc: 'TCH',
+  };
+  if (map[school.id]) return map[school.id];
+  const words = school.shortName.split(/\s+/).filter(Boolean);
+  if (words.length >= 3) {
+    return (words[0][0] + words[1][0] + words[2][0]).toUpperCase();
+  }
+  return school.id.toUpperCase().padEnd(3, 'X').slice(0, 4);
+}
+
+export function getTop10Schools(year: HCMYear = '2025'): HCMSchool[] {
+  return [...HCM_SCHOOLS_DATA]
+    .sort((a, b) => b.scores[year] - a.scores[year])
+    .slice(0, 10);
+}
+

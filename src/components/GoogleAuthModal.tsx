@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { GoogleIcon } from './AccountView';
 import { X, Check, Mail, ShieldCheck, ArrowRight, Sparkles, RefreshCw } from 'lucide-react';
 import { UserProgress, UserProfile } from '../types';
+import { isRememberLoginEnabled, setRememberLoginEnabled } from '../data/userStorage';
 
 interface GoogleAuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLogin: (email: string, displayName?: string) => void;
+  onLogin: (email: string, displayName?: string, rememberLogin?: boolean) => void;
   currentProfile: UserProfile;
 }
 
@@ -20,11 +21,13 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
   const [customEmail, setCustomEmail] = useState('');
   const [customName, setCustomName] = useState('');
   const [syncing, setSyncing] = useState(false);
+  const [rememberLogin, setRememberLogin] = useState<boolean>(() => isRememberLoginEnabled());
 
   if (!isOpen) return null;
 
   const handleConfirm = () => {
     setSyncing(true);
+    setRememberLoginEnabled(rememberLogin);
     const targetEmail = selectedAccount === 'default' 
       ? 'nnkh93a@gmail.com' 
       : (customEmail.trim() || 'nnkh93a@gmail.com');
@@ -33,7 +36,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
       : (customName.trim() || targetEmail.split('@')[0]);
 
     setTimeout(() => {
-      onLogin(targetEmail, targetName);
+      onLogin(targetEmail, targetName, rememberLogin);
       setSyncing(false);
       onClose();
     }, 450);
@@ -186,6 +189,23 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
           <span>
             Bảo mật theo tiêu chuẩn Google OAuth. Khi đăng xuất, web tự động chuyển về dữ liệu trắng. Khi đăng nhập lại, toàn bộ dữ liệu của bạn sẽ được đồng bộ đầy đủ.
           </span>
+        </div>
+
+        {/* Lưu đăng nhập Checkbox */}
+        <div className="flex items-start gap-2.5 pt-0.5">
+          <input
+            id="google-remember-me-checkbox"
+            type="checkbox"
+            checked={rememberLogin}
+            onChange={(e) => setRememberLogin(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+          />
+          <label htmlFor="google-remember-me-checkbox" className="text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+            <span className="font-semibold text-slate-800 dark:text-slate-200">Lưu đăng nhập trên thiết bị này</span>
+            <span className="block text-[11px] text-slate-400 mt-0.5">
+              (Nếu không chọn, khi vào lại web sẽ tự động ở chế độ Khách)
+            </span>
+          </label>
         </div>
 
         {/* Modal Actions */}

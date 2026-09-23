@@ -21,13 +21,14 @@ import {
   requestForgotPassword, 
   AuthUser 
 } from '../services/authService';
+import { isRememberLoginEnabled, setRememberLoginEnabled } from '../data/userStorage';
 
 export type AuthModalMode = 'login' | 'register' | 'forgot';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (user: AuthUser, token: string) => void;
+  onSuccess: (user: AuthUser, token: string, rememberLogin?: boolean) => void;
   initialMode?: AuthModalMode;
 }
 
@@ -38,6 +39,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   initialMode = 'login'
 }) => {
   const [mode, setMode] = useState<AuthModalMode>(initialMode);
+
+  // Remember login state (Default unchecked as requested: "lúc vào web để tài khoản là khách nhé, chỉ khi nhấn lưu đăng nhập thì mới giữ tài khoản thôi")
+  const [rememberLogin, setRememberLogin] = useState<boolean>(() => isRememberLoginEnabled());
 
   // Form fields
   const [name, setName] = useState('');
@@ -178,7 +182,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const res = await loginWithGoogle();
       setIsSubmitting(false);
       if (res.success && res.user && res.token) {
-        onSuccess(res.user, res.token);
+        setRememberLoginEnabled(rememberLogin);
+        onSuccess(res.user, res.token, rememberLogin);
         onClose();
       } else if (res.error) {
         setServerError(res.error);
@@ -204,7 +209,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setIsSubmitting(false);
 
     if (res.success && res.user && res.token) {
-      onSuccess(res.user, res.token);
+      setRememberLoginEnabled(rememberLogin);
+      onSuccess(res.user, res.token, rememberLogin);
       onClose();
     } else {
       setServerError(res.error || 'Email hoặc mật khẩu không chính xác.');
@@ -235,7 +241,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setIsSubmitting(false);
 
     if (res.success && res.user && res.token) {
-      onSuccess(res.user, res.token);
+      setRememberLoginEnabled(rememberLogin);
+      onSuccess(res.user, res.token, rememberLogin);
       onClose();
     } else {
       setServerError(res.error || 'Đăng ký không thành công. Vui lòng thử lại.');
@@ -447,6 +454,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   {passwordErr}
                 </p>
               )}
+            </div>
+
+            {/* Lưu đăng nhập Checkbox */}
+            <div className="flex items-start gap-2.5 pt-1">
+              <input
+                id="login-remember-me-checkbox"
+                type="checkbox"
+                checked={rememberLogin}
+                onChange={(e) => setRememberLogin(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              />
+              <label htmlFor="login-remember-me-checkbox" className="text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+                <span className="font-semibold text-slate-800 dark:text-slate-200">Lưu đăng nhập trên thiết bị này</span>
+                <span className="block text-[11px] text-slate-400 mt-0.5">
+                  (Nếu không chọn, tài khoản sẽ tự động chuyển về Khách mỗi khi vào lại website)
+                </span>
+              </label>
             </div>
 
             {/* Submit Button */}
@@ -746,6 +770,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Lưu đăng nhập Checkbox */}
+            <div className="flex items-start gap-2.5 pt-1">
+              <input
+                id="register-remember-me-checkbox"
+                type="checkbox"
+                checked={rememberLogin}
+                onChange={(e) => setRememberLogin(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              />
+              <label htmlFor="register-remember-me-checkbox" className="text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+                <span className="font-semibold text-slate-800 dark:text-slate-200">Lưu đăng nhập trên thiết bị này</span>
+                <span className="block text-[11px] text-slate-400 mt-0.5">
+                  (Nếu không chọn, tài khoản sẽ tự động chuyển về Khách mỗi khi vào lại website)
+                </span>
+              </label>
             </div>
 
             {/* Submit Button */}

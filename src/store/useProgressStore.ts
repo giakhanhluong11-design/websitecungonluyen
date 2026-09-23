@@ -22,10 +22,15 @@ interface ProgressStore {
   progress: UserProgress;
 
   // Auth
-  handleLoginEmail: (email: string, name?: string, extraProfile?: { birthYear?: number; currentSchool?: string; currentClass?: string }) => void;
+  handleLoginEmail: (
+    email: string,
+    name?: string,
+    extraProfile?: { birthYear?: number; currentSchool?: string; currentClass?: string },
+    rememberLogin?: boolean
+  ) => void;
   handleSyncCloud: (userId: string) => Promise<void>;
   handleLogout: () => void;
-  handleLoginGoogle: (email: string, displayName?: string) => void;
+  handleLoginGoogle: (email: string, displayName?: string, rememberLogin?: boolean) => void;
 
   // Progress mutations
   handleToggleTopicComplete: (topicId: string) => void;
@@ -40,8 +45,8 @@ interface ProgressStore {
 export const useProgressStore = create<ProgressStore>((set, get) => ({
   progress: getUserProgress(),
 
-  handleLoginEmail: (email, name, extraProfile) => {
-    const updated = loginEmailAccount(email, name, extraProfile);
+  handleLoginEmail: (email, name, extraProfile, rememberLogin) => {
+    const updated = loginEmailAccount(email, name, extraProfile, rememberLogin);
     set({ progress: updated });
   },
 
@@ -59,8 +64,8 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     set({ progress: blank });
   },
 
-  handleLoginGoogle: (email, displayName) => {
-    const updated = loginGoogleAccount(email, displayName);
+  handleLoginGoogle: (email, displayName, rememberLogin) => {
+    const updated = loginGoogleAccount(email, displayName, rememberLogin);
     set({ progress: updated });
   },
 

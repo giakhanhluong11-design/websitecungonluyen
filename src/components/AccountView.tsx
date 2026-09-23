@@ -20,10 +20,12 @@ import {
   LogOut,
   ExternalLink,
   Check,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 import { UserProfile, UserProgress, Exam } from '../types';
 import { HCM_SCHOOLS } from '../data/examsData';
+import { isRememberLoginEnabled, setRememberLoginEnabled } from '../data/userStorage';
 
 // Official 4-color Google G Icon
 export const GoogleIcon: React.FC<{ className?: string }> = ({ className = "h-4 w-4" }) => (
@@ -98,11 +100,11 @@ export const AccountView: React.FC<AccountViewProps> = ({
   const [customGoogleEmail, setCustomGoogleEmail] = useState('');
   const [googleNotification, setGoogleNotification] = useState<string | null>(null);
 
-  // Available avatar choices
-  const AVATAR_OPTIONS = ['🎓', '🎒', '📚', '🏆', '⭐', '🚀', '💡', '🦁', '🐯', '🦉', '🎯', '✨'];
+  // Remember login state
+  const [rememberLogin, setRememberLogin] = useState<boolean>(() => isRememberLoginEnabled());
 
-  // Bookmarked exams list
-  const bookmarkedExams = exams.filter(e => progress.bookmarkedExamIds.includes(e.id));
+  // Bookmarked exams list (safeguarded against undefined exams)
+  const bookmarkedExams = (exams || []).filter(e => progress?.bookmarkedExamIds?.includes(e.id));
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -335,6 +337,45 @@ export const AccountView: React.FC<AccountViewProps> = ({
               </div>
             </div>
           )}
+
+          {/* Tùy chọn Lưu trạng thái đăng nhập (Ghi nhớ đăng nhập) */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850/80">
+            <div className="flex items-start sm:items-center gap-3">
+              <div className={`p-2 rounded-xl shrink-0 ${rememberLogin ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}>
+                <Lock className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  Lưu đăng nhập trên thiết bị này
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${rememberLogin ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>
+                    {rememberLogin ? '● Đã bật (Lưu tài khoản)' : '○ Đang tắt (Mặc định Khách)'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  {rememberLogin
+                    ? 'Tài khoản của bạn sẽ được giữ nguyên khi truy cập lại trang web.'
+                    : 'Khi vào lại web sẽ bắt đầu ở chế độ Khách (chỉ giữ tài khoản khi bạn chọn Lưu đăng nhập).'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              id="toggle-remember-login-btn"
+              onClick={() => {
+                const next = !rememberLogin;
+                setRememberLogin(next);
+                setRememberLoginEnabled(next);
+              }}
+              className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs ${
+                rememberLogin
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              {rememberLogin ? 'Đang lưu đăng nhập ✓' : 'Bật lưu đăng nhập'}
+            </button>
+          </div>
         </div>
       </div>
 
