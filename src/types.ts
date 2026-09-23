@@ -132,6 +132,7 @@ export interface UserProfile {
   googleDisplayName?: string;
   googlePhotoUrl?: string;
   linkedAt?: string;
+  birthYear?: number;
   targetSchool: string;
   targetScore: number;
   targetScores: {

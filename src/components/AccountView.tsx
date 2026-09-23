@@ -78,15 +78,15 @@ export const AccountView: React.FC<AccountViewProps> = ({
   onLogoutAuth,
   onStartExam
 }) => {
-  const [name, setName] = useState(progress.profile.name);
+  const [name, setName] = useState(progress.profile.name || '');
   const [avatar, setAvatar] = useState(progress.profile.avatar || '🎓');
-  const [email, setEmail] = useState(progress.profile.email || 'nnkh93a@gmail.com');
-  const [currentSchool, setCurrentSchool] = useState(progress.profile.currentSchool);
-  const [currentClass, setCurrentClass] = useState(progress.profile.currentClass || '9A1');
-  const [targetSchool, setTargetSchool] = useState(progress.profile.targetSchool);
-  const [targetScore, setTargetScore] = useState(progress.profile.targetScore);
-  const [nv2School, setNv2School] = useState(progress.profile.nv2School || 'THPT Bùi Thị Xuân');
-  const [nv3School, setNv3School] = useState(progress.profile.nv3School || 'THPT Tây Thạnh');
+  const [email, setEmail] = useState(progress.profile.email || '');
+  const [currentSchool, setCurrentSchool] = useState(progress.profile.currentSchool || '');
+  const [currentClass, setCurrentClass] = useState(progress.profile.currentClass || '');
+  const [targetSchool, setTargetSchool] = useState(progress.profile.targetSchool || '');
+  const [targetScore, setTargetScore] = useState(progress.profile.targetScore ?? 21.0);
+  const [nv2School, setNv2School] = useState(progress.profile.nv2School || '');
+  const [nv3School, setNv3School] = useState(progress.profile.nv3School || '');
   
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);

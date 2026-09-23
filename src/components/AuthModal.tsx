@@ -9,7 +9,9 @@ import {
   Loader2, 
   ArrowRight, 
   CheckCircle2, 
-  AlertCircle
+  AlertCircle,
+  School,
+  Calendar
 } from 'lucide-react';
 import { 
   validateEmail, 
@@ -43,6 +45,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // Register optional fields
+  const [birthYear, setBirthYear] = useState('');
+  const [currentSchool, setCurrentSchool] = useState('');
+  const [currentClass, setCurrentClass] = useState('');
+
   // Password visibility toggles
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -61,6 +68,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setMode(initialMode);
+      setName('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setBirthYear('');
+      setCurrentSchool('');
+      setCurrentClass('');
       setTouchedFields({});
       setServerError(null);
       setServerSuccess(null);
@@ -100,6 +114,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     return null;
   };
 
+  const getBirthYearError = (): string | null => {
+    if (mode !== 'register') return null;
+    if (!birthYear) return null; // tuỳ chọn
+    const year = parseInt(birthYear, 10);
+    if (isNaN(year) || year < 2000 || year > 2015) return 'Năm sinh không hợp lệ (2000–2015).';
+    return null;
+  };
+
   const isFormValid = (): boolean => {
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) return false;
@@ -130,6 +152,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       email: true,
       password: true,
       confirmPassword: true,
+      birthYear: true,
     });
   };
 
@@ -195,10 +218,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     if (!isFormValid()) return;
 
+    // Kiểm tra năm sinh nếu được điền
+    const birthYearNum = birthYear.trim() ? parseInt(birthYear.trim(), 10) : undefined;
+    if (birthYear.trim() && (isNaN(birthYearNum!) || birthYearNum! < 2000 || birthYearNum! > 2015)) return;
+
     setIsSubmitting(true);
     setServerError(null);
 
-    const res = await registerWithEmail(name, email, password);
+    const extraProfile = {
+      birthYear: birthYearNum,
+      currentSchool: currentSchool.trim() || undefined,
+      currentClass: currentClass.trim() || undefined,
+    };
+
+    const res = await registerWithEmail(name, email, password, extraProfile);
     setIsSubmitting(false);
 
     if (res.success && res.user && res.token) {
@@ -237,6 +270,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const passwordErr = getPasswordError();
   const nameErr = getNameError();
   const confirmErr = getConfirmPasswordError();
+  const birthYearErr = getBirthYearError();
 
   return (
     <div 
@@ -636,6 +670,82 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   {confirmErr}
                 </p>
               )}
+            </div>
+
+            {/* ── Thông tin tuỳ chọn ── */}
+            <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-2.5 font-medium uppercase tracking-wider">Thông tin học sinh (tuỳ chọn)</p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {/* Năm sinh */}
+                <div className="space-y-1">
+                  <label htmlFor="register-birthyear-input" className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Năm sinh
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                      <Calendar className="h-4 w-4" />
+                    </div>
+                    <input
+                      id="register-birthyear-input"
+                      type="number"
+                      value={birthYear}
+                      onChange={(e) => setBirthYear(e.target.value)}
+                      onBlur={() => handleBlur('birthYear')}
+                      placeholder="VD: 2010"
+                      min={2000}
+                      max={2015}
+                      className={`w-full h-10 pl-9 pr-2 rounded-xl border text-xs text-slate-900 dark:text-white bg-white dark:bg-slate-850 placeholder:text-slate-400 focus:outline-none transition-colors ${
+                        birthYearErr
+                          ? 'border-rose-500 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                          : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600'
+                      }`}
+                    />
+                  </div>
+                  {birthYearErr && (
+                    <p className="text-[11px] font-medium text-rose-600 dark:text-rose-400">{birthYearErr}</p>
+                  )}
+                </div>
+
+                {/* Lớp */}
+                <div className="space-y-1">
+                  <label htmlFor="register-class-input" className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Lớp
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                      <User className="h-4 w-4" />
+                    </div>
+                    <input
+                      id="register-class-input"
+                      type="text"
+                      value={currentClass}
+                      onChange={(e) => setCurrentClass(e.target.value)}
+                      placeholder="VD: 9A1"
+                      className="w-full h-10 pl-9 pr-2 rounded-xl border text-xs text-slate-900 dark:text-white bg-white dark:bg-slate-850 placeholder:text-slate-400 border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Tên trường */}
+              <div className="space-y-1 mt-2.5">
+                <label htmlFor="register-school-input" className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Tên trường
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                    <School className="h-4 w-4" />
+                  </div>
+                  <input
+                    id="register-school-input"
+                    type="text"
+                    value={currentSchool}
+                    onChange={(e) => setCurrentSchool(e.target.value)}
+                    placeholder="VD: THCS Lê Quý Đôn"
+                    className="w-full h-10 pl-10 pr-3.5 rounded-xl border text-xs text-slate-900 dark:text-white bg-white dark:bg-slate-850 placeholder:text-slate-400 border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Submit Button */}

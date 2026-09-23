@@ -12,7 +12,6 @@ import { ExamRunnerModal } from './components/ExamRunnerModal';
 import { ExamPreviewModal } from './components/ExamPreviewModal';
 import { GoogleAuthModal } from './components/GoogleAuthModal';
 import { AuthModal } from './components/AuthModal';
-import { GeminiApiKeyModal } from './components/GeminiApiKeyModal';
 import { onAuthChange, logoutAuth, AuthUser } from './services/authService';
 import { ALL_TOPICS } from './data/topicsData';
 import { ALL_EXAMS } from './data/examsData';
@@ -84,7 +83,11 @@ export default function App() {
 
   // ── Auth handlers ────────────────────────────────────────────────────────
   const handleLoginSuccess = async (user: AuthUser, _token: string) => {
-    handleLoginEmail(user.email, user.name);
+    handleLoginEmail(user.email, user.name, {
+      birthYear: user.birthYear,
+      currentSchool: user.currentSchool,
+      currentClass: user.currentClass,
+    });
     showToast(
       `Đăng nhập thành công! Chào mừng ${user.name || user.email} đã quay trở lại. Dữ liệu đang được đồng bộ với đám mây Firebase...`,
       'success'
@@ -335,11 +338,6 @@ export default function App() {
         onSuccess={handleLoginSuccess}
       />
 
-      {/* Gemini Config Modal */}
-      <GeminiApiKeyModal
-        isOpen={showGeminiConfigModal}
-        onClose={closeGeminiConfig}
-      />
     </div>
   );
 }

@@ -12,7 +12,6 @@ import {
   Target,
   LogOut,
   ChevronRight,
-  Sparkles,
   BarChart3,
   Gamepad2
 } from 'lucide-react';
@@ -205,19 +204,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Action Controls: Target School, Theme Toggle & Account */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Gemini AI Settings / Connection Button */}
-            {onOpenGeminiConfig && (
-              <button
-                id="navbar-gemini-ai-btn"
-                onClick={onOpenGeminiConfig}
-                title="Cấu hình Google Gemini AI chấm thi theo ma trận tuyển sinh 10"
-                className="flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-lg border border-purple-200/90 dark:border-purple-900/60 bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 dark:from-purple-950/50 dark:via-indigo-950/50 dark:to-pink-950/40 text-purple-700 dark:text-purple-300 hover:from-purple-100 hover:to-indigo-100 dark:hover:from-purple-900/70 dark:hover:to-indigo-900/70 transition-all shadow-2xs cursor-pointer active:scale-95 text-xs font-bold"
-                aria-label="Cấu hình Gemini AI"
-              >
-                <Sparkles className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400 fill-purple-500/20" />
-                <span className="hidden sm:inline">Gemini AI</span>
-              </button>
-            )}
 
             {/* Target School Badge / Button - Icon only with informative tooltip */}
             <button 
@@ -389,28 +375,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             );
           })}
 
-          {onOpenGeminiConfig && (
-            <button
-              id="drawer-gemini-ai-config-btn"
-              onClick={() => {
-                setIsDrawerOpen(false);
-                onOpenGeminiConfig();
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/40 dark:to-indigo-950/40 border border-purple-200/80 dark:border-purple-900/60 text-purple-700 dark:text-purple-300 font-bold transition-all cursor-pointer shadow-2xs hover:from-purple-100 hover:to-indigo-100 mt-2"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/60 dark:text-purple-300 shadow-xs">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs sm:text-sm font-bold truncate leading-tight">
-                  Cấu hình Gemini AI
-                </div>
-                <div className="text-[11px] text-purple-600/80 dark:text-purple-300/80 truncate">
-                  Chấm thi theo ma trận chuẩn
-                </div>
-              </div>
-            </button>
-          )}
         </div>
 
         {/* Drawer Footer Actions: Dark Mode & Sync */}

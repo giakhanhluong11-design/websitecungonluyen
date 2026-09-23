@@ -887,16 +887,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                   </p>
                 </div>
               </div>
-
-              {onOpenGeminiConfig && (
-                <button
-                  type="button"
-                  onClick={onOpenGeminiConfig}
-                  className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-slate-700 text-purple-700 dark:text-purple-300 text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
-                >
-                  Cấu hình AI
-                </button>
-              )}
             </div>
 
             <div className="p-4 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-900/60 text-xs sm:text-sm text-slate-700 dark:text-slate-300 space-y-2">

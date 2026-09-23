@@ -26,6 +26,9 @@ export interface AuthUser {
   avatar: string;
   authProvider: 'email' | 'google' | 'guest';
   photoURL?: string;
+  birthYear?: number;
+  currentSchool?: string;
+  currentClass?: string;
 }
 
 export interface AuthResponse {
@@ -193,7 +196,8 @@ export async function loginWithEmail(email: string, password: string): Promise<A
 export async function registerWithEmail(
   name: string,
   email: string,
-  password: string
+  password: string,
+  extraProfile?: { birthYear?: number; currentSchool?: string; currentClass?: string }
 ): Promise<AuthResponse> {
   if (!name || !name.trim()) {
     return { success: false, field: 'name', error: 'Vui lòng nhập họ và tên.' };
@@ -220,6 +224,11 @@ export async function registerWithEmail(
 
     const user = firebaseUserToAuthUser(result.user, 'email');
     user.name = name.trim(); // updateProfile chưa reflect ngay
+    // Gắn thêm thông tin tuỳ chọn
+    if (extraProfile?.birthYear) user.birthYear = extraProfile.birthYear;
+    if (extraProfile?.currentSchool) user.currentSchool = extraProfile.currentSchool;
+    if (extraProfile?.currentClass) user.currentClass = extraProfile.currentClass;
+
     const token = await result.user.getIdToken();
 
     setStoredToken(token);

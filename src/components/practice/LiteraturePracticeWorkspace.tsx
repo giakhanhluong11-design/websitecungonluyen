@@ -378,15 +378,6 @@ export const LiteraturePracticeWorkspace: React.FC<LiteraturePracticeWorkspacePr
                 </div>
               </div>
 
-              {!gradingResult.isAiGraded && onOpenGeminiConfig && (
-                <button
-                  onClick={onOpenGeminiConfig}
-                  className="self-start sm:self-center px-4 py-2.5 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-purple-600" />
-                  <span>Kích hoạt Gemini AI</span>
-                </button>
-              )}
             </div>
           </div>
 

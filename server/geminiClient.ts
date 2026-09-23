@@ -4,6 +4,17 @@ let aiClient: GoogleGenAI | null = null;
 let runtimeApiKey: string = "";
 let quotaCooldownUntil = 0;
 
+// Auto-init ngay khi module load — dùng GEMINI_API_KEY trong .env
+// User không cần nhập key thủ công qua modal
+if (process.env.GEMINI_API_KEY) {
+  runtimeApiKey = process.env.GEMINI_API_KEY.trim();
+  aiClient = new GoogleGenAI({
+    apiKey: runtimeApiKey,
+    httpOptions: { headers: { "User-Agent": "cung-on-luyen" } },
+  });
+  console.log("[GeminiClient] ✅ AI client khởi tạo tự động từ GEMINI_API_KEY");
+}
+
 export function setRuntimeApiKey(key: string) {
   runtimeApiKey = key.trim();
   if (runtimeApiKey) {

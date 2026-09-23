@@ -13,30 +13,26 @@ import { getCurrentUserId } from '../services/authService';
 const STORAGE_KEY = 'cung_on_luyen_progress_v3';
 const ACCOUNT_VAULT_PREFIX = 'cung_on_luyen_acc_vault_';
 
-export const INITIAL_USER_PROFILE: UserProfile = {
-  name: 'Nguyễn Hoàng Nam',
-  avatar: '🎓',
-  email: 'nnkh93a@gmail.com',
-  isGoogleLinked: true,
-  googleAccountId: 'nnkh93a@gmail.com',
-  googleDisplayName: 'Nguyễn Hoàng Nam',
-  linkedAt: '2025-05-01',
-  targetSchool: 'THPT Nguyễn Thị Minh Khai',
-  targetScore: 23.5,
-  targetScores: {
-    toan: 8.0,
-    van: 7.5,
-    anh: 8.0
-  },
-  nv2School: 'THPT Bùi Thị Xuân',
-  nv3School: 'THPT Tây Thạnh',
-  currentSchool: 'THCS Lê Quý Đôn (Quận 3)',
-  currentClass: '9A1',
-  city: 'TP. Hồ Chí Minh'
-};
-
+// Không còn INITIAL_USER_PROFILE riêng — mọi user mới đều bắt đầu với BLANK_GUEST_PROFILE
 export const INITIAL_USER_PROGRESS: UserProgress = {
-  profile: INITIAL_USER_PROFILE,
+  profile: {
+    name: '',
+    avatar: '🎓',
+    email: '',
+    isGoogleLinked: false,
+    targetSchool: '',
+    targetScore: 21.0,
+    targetScores: {
+      toan: 7.0,
+      van: 7.0,
+      anh: 7.0
+    },
+    nv2School: '',
+    nv3School: '',
+    currentSchool: '',
+    currentClass: '',
+    city: 'TP. Hồ Chí Minh'
+  },
   completedTopicIds: [],
   bookmarkedExamIds: [],
   practiceAttempts: [],
@@ -44,12 +40,7 @@ export const INITIAL_USER_PROGRESS: UserProgress = {
   studyTimeMinutes: 0,
   streakDays: 0,
   minigameResults: [],
-  minigameBestScores: {
-    'anh-flashcard-10': 1250,
-    'anh-matching-vocab': 1400,
-    'toan-matching-hangdangthuc': 1350,
-    'van-matching-tacgia': 1500
-  }
+  minigameBestScores: {}
 };
 
 export const BLANK_GUEST_PROFILE: UserProfile = {
@@ -119,24 +110,22 @@ export function loadUserProgress(): UserProgress {
 
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      saveUserProgress(INITIAL_USER_PROGRESS);
-      if (!loadFromAccountVault('nnkh93a@gmail.com')) {
-        saveToAccountVault('nnkh93a@gmail.com', INITIAL_USER_PROGRESS);
-      }
-      return INITIAL_USER_PROGRESS;
+      // Người dùng mới: bắt đầu với trạng thái khách
+      saveUserProgress(BLANK_GUEST_PROGRESS);
+      return { ...BLANK_GUEST_PROGRESS };
     }
 
     const parsed = JSON.parse(raw);
     return {
       ...parsed,
       minigameResults: parsed.minigameResults || [],
-      minigameBestScores: parsed.minigameBestScores || INITIAL_USER_PROGRESS.minigameBestScores || {},
+      minigameBestScores: parsed.minigameBestScores || {},
       profile: {
         ...(parsed.profile || {})
       }
     };
   } catch {
-    return INITIAL_USER_PROGRESS;
+    return { ...BLANK_GUEST_PROGRESS };
   }
 }
 
@@ -210,11 +199,13 @@ export function loginGoogleAccount(email: string, displayName?: string): UserPro
   let restored: UserProgress;
 
   if (existingVault) {
+    // User đã có dữ liệu trước đó — khôi phục và cập nhật thông tin Google
     restored = {
       ...existingVault,
       profile: {
         ...existingVault.profile,
         email: email.trim(),
+        name: displayName?.trim() || existingVault.profile.name || email.split('@')[0],
         isAuthenticated: true,
         authProvider: 'google',
         isGoogleLinked: true,
@@ -224,16 +215,8 @@ export function loginGoogleAccount(email: string, displayName?: string): UserPro
       }
     };
   } else {
-    const isDefault = normalizedEmail === 'nnkh93a@gmail.com';
-    const profile: UserProfile = isDefault ? {
-      ...INITIAL_USER_PROFILE,
-      email: email.trim(),
-      isAuthenticated: true,
-      authProvider: 'google',
-      isGoogleLinked: true,
-      googleAccountId: email.trim(),
-      googleDisplayName: displayName?.trim() || 'Nguyễn Hoàng Nam'
-    } : {
+    // User mới đăng nhập Google lần đầu — profile trắng
+    const profile: UserProfile = {
       name: displayName?.trim() || email.split('@')[0],
       avatar: '🎓',
       email: email.trim(),
@@ -243,17 +226,17 @@ export function loginGoogleAccount(email: string, displayName?: string): UserPro
       googleAccountId: email.trim(),
       googleDisplayName: displayName?.trim() || email.split('@')[0],
       linkedAt: new Date().toLocaleDateString('vi-VN'),
-      targetSchool: 'THPT Nguyễn Thị Minh Khai',
-      targetScore: 23.5,
+      targetSchool: '',
+      targetScore: 21.0,
       targetScores: {
-        toan: 8.0,
-        van: 7.5,
-        anh: 8.0
+        toan: 7.0,
+        van: 7.0,
+        anh: 7.0
       },
-      nv2School: 'THPT Bùi Thị Xuân',
-      nv3School: 'THPT Tây Thạnh',
-      currentSchool: 'THCS tại TP.HCM',
-      currentClass: '9A1',
+      nv2School: '',
+      nv3School: '',
+      currentSchool: '',
+      currentClass: '',
       city: 'TP. Hồ Chí Minh'
     };
 
@@ -264,7 +247,9 @@ export function loginGoogleAccount(email: string, displayName?: string): UserPro
       practiceAttempts: [],
       examAttempts: [],
       studyTimeMinutes: 0,
-      streakDays: 0
+      streakDays: 0,
+      minigameResults: [],
+      minigameBestScores: {}
     };
   }
 
@@ -272,13 +257,18 @@ export function loginGoogleAccount(email: string, displayName?: string): UserPro
   return restored;
 }
 
-export function loginEmailAccount(email: string, displayName?: string): UserProgress {
+export function loginEmailAccount(
+  email: string,
+  displayName?: string,
+  extraProfile?: { birthYear?: number; currentSchool?: string; currentClass?: string }
+): UserProgress {
   const normalizedEmail = email.trim().toLowerCase();
   const existingVault = loadFromAccountVault(normalizedEmail);
 
   let restored: UserProgress;
 
   if (existingVault) {
+    // User đã có dữ liệu — khôi phục và cập nhật tên/thông tin mới nhất
     restored = {
       ...existingVault,
       profile: {
@@ -291,15 +281,8 @@ export function loginEmailAccount(email: string, displayName?: string): UserProg
       }
     };
   } else {
-    const isDefault = normalizedEmail === 'nnkh93a@gmail.com';
-    const profile: UserProfile = isDefault ? {
-      ...INITIAL_USER_PROFILE,
-      email: email.trim(),
-      name: displayName?.trim() || 'Nguyễn Hoàng Nam',
-      isAuthenticated: true,
-      authProvider: 'email',
-      loginAt: new Date().toISOString()
-    } : {
+    // User mới — tạo profile trắng với thông tin từ đăng ký
+    const profile: UserProfile = {
       name: displayName?.trim() || email.split('@')[0],
       avatar: '🎓',
       email: email.trim(),
@@ -307,17 +290,18 @@ export function loginEmailAccount(email: string, displayName?: string): UserProg
       authProvider: 'email',
       loginAt: new Date().toISOString(),
       isGoogleLinked: false,
-      targetSchool: 'THPT Nguyễn Thị Minh Khai',
-      targetScore: 23.5,
+      birthYear: extraProfile?.birthYear,
+      currentSchool: extraProfile?.currentSchool || '',
+      currentClass: extraProfile?.currentClass || '',
+      targetSchool: '',
+      targetScore: 21.0,
       targetScores: {
-        toan: 8.0,
-        van: 7.5,
-        anh: 8.0
+        toan: 7.0,
+        van: 7.0,
+        anh: 7.0
       },
-      nv2School: 'THPT Bùi Thị Xuân',
-      nv3School: 'THPT Tây Thạnh',
-      currentSchool: 'THCS tại TP.HCM',
-      currentClass: '9A1',
+      nv2School: '',
+      nv3School: '',
       city: 'TP. Hồ Chí Minh'
     };
 
@@ -328,7 +312,9 @@ export function loginEmailAccount(email: string, displayName?: string): UserProg
       practiceAttempts: [],
       examAttempts: [],
       studyTimeMinutes: 0,
-      streakDays: 0
+      streakDays: 0,
+      minigameResults: [],
+      minigameBestScores: {}
     };
   }
 

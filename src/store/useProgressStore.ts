@@ -22,7 +22,7 @@ interface ProgressStore {
   progress: UserProgress;
 
   // Auth
-  handleLoginEmail: (email: string, name?: string) => void;
+  handleLoginEmail: (email: string, name?: string, extraProfile?: { birthYear?: number; currentSchool?: string; currentClass?: string }) => void;
   handleSyncCloud: (userId: string) => Promise<void>;
   handleLogout: () => void;
   handleLoginGoogle: (email: string, displayName?: string) => void;
@@ -40,8 +40,8 @@ interface ProgressStore {
 export const useProgressStore = create<ProgressStore>((set, get) => ({
   progress: getUserProgress(),
 
-  handleLoginEmail: (email, name) => {
-    const updated = loginEmailAccount(email, name);
+  handleLoginEmail: (email, name, extraProfile) => {
+    const updated = loginEmailAccount(email, name, extraProfile);
     set({ progress: updated });
   },
 
