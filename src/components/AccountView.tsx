@@ -49,6 +49,8 @@ export const GoogleIcon: React.FC<{ className?: string }> = ({ className = "h-4 
   </svg>
 );
 
+const AVATAR_OPTIONS = ['🎓', '🎒', '📚', '🏆', '⭐', '🚀', '💡', '🦁', '🐯', '🦉', '🎯', '✨'];
+
 interface AccountViewProps {
   progress: UserProgress;
   exams: Exam[];
@@ -654,14 +656,14 @@ export const AccountView: React.FC<AccountViewProps> = ({
               <div className="flex justify-between">
                 <span>Điểm TB hiện tại:</span>
                 <strong className="text-white">
-                  {progress.practiceAttempts.length + progress.examAttempts.length > 0
-                    ? ((progress.practiceAttempts.reduce((a, b) => a + b.score, 0) + progress.examAttempts.reduce((a, b) => a + b.score, 0)) / (progress.practiceAttempts.length + progress.examAttempts.length)).toFixed(1)
+                  {((progress?.practiceAttempts?.length || 0) + (progress?.examAttempts?.length || 0)) > 0
+                    ? (((progress?.practiceAttempts || []).reduce((a, b) => a + (b.score || 0), 0) + (progress?.examAttempts || []).reduce((a, b) => a + (b.score || 0), 0)) / ((progress?.practiceAttempts?.length || 0) + (progress?.examAttempts?.length || 0))).toFixed(1)
                     : '0.0'}đ
                 </strong>
               </div>
               <div className="flex justify-between">
                 <span>Chuỗi ngày học:</span>
-                <strong className="text-orange-400">{progress.streakDays} ngày 🔥</strong>
+                <strong className="text-orange-400">{progress?.streakDays || 0} ngày 🔥</strong>
               </div>
             </div>
           </div>

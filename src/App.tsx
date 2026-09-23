@@ -20,6 +20,7 @@ import { useTheme } from './components/ThemeWaterDropRipple';
 import { Exam } from './types';
 import { useProgressStore } from './store/useProgressStore';
 import { useAppStore } from './store/useAppStore';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { useState } from 'react';
 
 export default function App() {
@@ -179,6 +180,7 @@ export default function App() {
 
       {/* Main content */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 md:pb-12">
+        <ErrorBoundary>
         {currentTab === 'home' && (
           <HomeView
             progress={progress}
@@ -277,6 +279,7 @@ export default function App() {
             onStartExam={(exam) => setActiveExamToRun(exam)}
           />
         )}
+        </ErrorBoundary>
       </main>
 
       {/* Footer */}

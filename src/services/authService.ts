@@ -257,6 +257,7 @@ export async function registerWithEmail(
 export async function loginWithGoogle(): Promise<AuthResponse> {
   try {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     const result = await signInWithPopup(auth, provider);
     const user = firebaseUserToAuthUser(result.user, 'google');
     const token = await result.user.getIdToken();
@@ -267,14 +268,41 @@ export async function loginWithGoogle(): Promise<AuthResponse> {
     return { success: true, token, user };
   } catch (err: any) {
     const code = err?.code || '';
+    console.error('Lỗi đăng nhập Google Firebase:', code, err);
+
     if (code === 'auth/popup-closed-by-user') {
       return { success: false, error: 'Đăng nhập Google đã bị hủy.' };
     }
     if (code === 'auth/popup-blocked') {
-      return { success: false, error: 'Popup bị chặn. Vui lòng cho phép popup và thử lại.' };
+      return { 
+        success: false, 
+        error: 'Trình duyệt đang chặn cửa sổ đăng nhập (popup). Vui lòng cho phép mở popup cho trang này rồi thử lại.' 
+      };
     }
-    console.error('Lỗi đăng nhập Google:', err);
-    return { success: false, error: 'Không thể đăng nhập bằng Google. Vui lòng thử lại.' };
+    if (code === 'auth/unauthorized-domain') {
+      const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'domain hiện tại';
+      return {
+        success: false,
+        error: `Tên miền "${currentDomain}" chưa được cấp quyền (Authorized Domain) trên Firebase Console. Vui lòng thêm tên miền này vào Firebase Console > Authentication > Settings > Authorized domains.`,
+      };
+    }
+    if (code === 'auth/operation-not-allowed') {
+      return {
+        success: false,
+        error: 'Phương thức đăng nhập Google chưa được kích hoạt trên Firebase Console. Vui lòng bật Google trong Authentication > Sign-in method.',
+      };
+    }
+    if (code === 'auth/network-request-failed') {
+      return { success: false, error: 'Lỗi kết nối mạng đến Google. Vui lòng kiểm tra lại kết nối internet.' };
+    }
+    if (code === 'auth/cancelled-popup-request') {
+      return { success: false, error: 'Yêu cầu mở cửa sổ Google trước đó đã bị hủy để mở yêu cầu mới.' };
+    }
+
+    return { 
+      success: false, 
+      error: `Không thể đăng nhập bằng Google (${code || err?.message || 'Lỗi kết nối'}). Vui lòng kiểm tra cấu hình Firebase Console.` 
+    };
   }
 }
 
