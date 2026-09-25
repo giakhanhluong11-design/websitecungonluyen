@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { Navbar } from './components/Navbar';
+import React, { useEffect, useState } from 'react';
+import { Sidebar } from './components/Sidebar';
+import { TopHeader } from './components/TopHeader';
 import { MobileNav } from './components/MobileNav';
 import { HomeView } from './components/HomeView';
 import { KnowledgeView } from './components/KnowledgeView';
@@ -12,6 +13,7 @@ import { ExamRunnerModal } from './components/ExamRunnerModal';
 import { ExamPreviewModal } from './components/ExamPreviewModal';
 import { GoogleAuthModal } from './components/GoogleAuthModal';
 import { AuthModal } from './components/AuthModal';
+import { LoginPage } from './components/LoginPage';
 import { onAuthChange, logoutAuth, AuthUser } from './services/authService';
 import { ALL_TOPICS } from './data/topicsData';
 import { ALL_EXAMS } from './data/examsData';
@@ -21,7 +23,6 @@ import { Exam } from './types';
 import { useProgressStore } from './store/useProgressStore';
 import { useAppStore } from './store/useAppStore';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { useState } from 'react';
 
 export default function App() {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -70,6 +71,11 @@ export default function App() {
   // Exam modals are local since they're transient UI state
   const [activeExamToRun, setActiveExamToRun] = useState<Exam | null>(null);
   const [previewExam, setPreviewExam] = useState<Exam | null>(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
+
+  // ── Authentication gate: track whether user is logged in ────────────────
+  // User is considered authenticated when they have a real email (not guest)
+  const isAuthenticated = Boolean(progress.profile.email && progress.profile.email.trim() !== '');
 
   // ── Firebase auth listener ───────────────────────────────────────────────
   useEffect(() => {
@@ -126,60 +132,102 @@ export default function App() {
     setTimeout(clearToast, 4500);
   };
 
+  // ── Show LoginPage if not authenticated ────────────────────────────────
+  if (!isAuthenticated) {
+    return (
+      <LoginPage
+        onSuccess={async (user, token, rememberLogin) => {
+          await handleLoginSuccess(user, token, rememberLogin);
+        }}
+      />
+    );
+  }
+
   return (
     <div
       className={`min-h-screen ${
-        darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
-      } flex flex-col antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-200`}
+        darkMode ? 'dark text-slate-100' : 'text-slate-900'
+      } flex flex-col antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-200 relative`}
     >
-      {/* Toast */}
-      {toast && (
-        <div className="fixed top-20 right-4 sm:right-6 z-50 max-w-md animate-in fade-in slide-in-from-top-4 duration-300">
-          <div
-            className={`flex items-start gap-3 p-4 rounded-xl shadow-md border ${
-              toast.type === 'success'
-                ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
-                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100'
-            }`}
-          >
-            {toast.type === 'success' ? (
-              <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-            ) : (
-              <Info className="h-5 w-5 text-slate-600 dark:text-slate-400 shrink-0 mt-0.5" />
-            )}
-            <div className="flex-1 text-xs sm:text-sm font-medium leading-relaxed">
-              {toast.message}
+      {/* Background Image with slight blur & light overlay */}
+      <div 
+        className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
+        aria-hidden="true"
+      >
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-[3px] scale-105"
+          style={{
+            backgroundImage: `url('https://firebasestorage.googleapis.com/v0/b/giaovien40-b080f.firebasestorage.app/o/images%2FGemini_Generated_Image_cnko6qcnko6qcnko.png?alt=media&token=95dfe8ad-dbf9-4f7c-982d-b7995b8bb57e')`,
+          }}
+        />
+        {/* Lớp phủ sáng mờ nhẹ để đảm bảo chữ và bài học luôn rõ nét */}
+        <div 
+          className={`absolute inset-0 transition-colors duration-300 ${
+            darkMode 
+              ? 'bg-slate-950/85 backdrop-blur-[2px]' 
+              : 'bg-white/80 backdrop-blur-[2px]'
+          }`}
+        />
+      </div>
+
+      {/* Main app layout: Sidebar on the left + Right Content Area */}
+      <div className="relative z-10 flex min-h-screen w-full">
+        {/* Left Sidebar (Desktop sticky + Mobile slide drawer) */}
+        <Sidebar
+          currentTab={currentTab}
+          setCurrentTab={(tab) => {
+            setCurrentTab(tab);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          progress={progress}
+          darkMode={darkMode}
+          toggleDarkMode={toggleDarkMode}
+          onOpenAccount={() => handleNavigate('account')}
+          onLogout={handleLogoutAuth}
+          isMobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        />
+
+        {/* Right Content Area */}
+        <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+          {/* Top Header */}
+          <TopHeader
+            onToggleSidebar={() => setIsMobileSidebarOpen(true)}
+            progress={progress}
+            onOpenAccount={() => handleNavigate('account')}
+            onOpenGeminiConfig={openGeminiConfig}
+          />
+
+          {/* Toast */}
+          {toast && (
+            <div className="fixed top-20 right-4 sm:right-6 z-50 max-w-md animate-in fade-in slide-in-from-top-4 duration-300">
+              <div
+                className={`flex items-start gap-3 p-4 rounded-xl shadow-md border ${
+                  toast.type === 'success'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100'
+                }`}
+              >
+                {toast.type === 'success' ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                ) : (
+                  <Info className="h-5 w-5 text-slate-600 dark:text-slate-400 shrink-0 mt-0.5" />
+                )}
+                <div className="flex-1 text-xs sm:text-sm font-medium leading-relaxed">
+                  {toast.message}
+                </div>
+                <button
+                  onClick={clearToast}
+                  className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white p-1 text-xs cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
-            <button
-              onClick={clearToast}
-              className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white p-1 text-xs cursor-pointer"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* Navbar */}
-      <Navbar
-        currentTab={currentTab}
-        setCurrentTab={(tab) => {
-          setCurrentTab(tab);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        darkMode={darkMode}
-        toggleDarkMode={toggleDarkMode}
-        progress={progress}
-        onOpenAccount={() => handleNavigate('account')}
-        onOpenGoogleLogin={openGoogleLoginModal}
-        onLogoutGoogle={handleLogoutAuth}
-        onOpenAuthModal={openAuthModal}
-        onLogoutAuth={handleLogoutAuth}
-        onOpenGeminiConfig={openGeminiConfig}
-      />
-
-      {/* Main content */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 md:pb-12">
+          {/* Main content */}
+          <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-20 md:pb-12">
         <ErrorBoundary>
         {currentTab === 'home' && (
           <HomeView
@@ -309,6 +357,8 @@ export default function App() {
           </div>
         </div>
       </footer>
+        </div>
+      </div>
 
       {/* Mobile Bottom Navigation */}
       <MobileNav

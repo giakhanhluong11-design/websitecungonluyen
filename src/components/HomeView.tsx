@@ -23,6 +23,7 @@ import {
 import { UserProgress, Exam, Topic } from '../types';
 import { InteractiveBooks } from './InteractiveBooks';
 import { InteractiveGeometry } from './InteractiveGeometry';
+import { HomeDashboardWidgets } from './HomeDashboardWidgets';
 
 interface HomeViewProps {
   progress: UserProgress;
@@ -105,14 +106,24 @@ export const HomeView: React.FC<HomeViewProps> = ({
   }, [progress]);
 
   return (
-    <div className="w-full max-w-[1180px] mx-auto px-3.5 sm:px-6 lg:px-8 py-3 sm:py-5 flex flex-col gap-4 sm:gap-6 lg:gap-8 pb-16">
+    <div className="w-full max-w-[1180px] mx-auto px-3.5 sm:px-6 lg:px-8 py-3 sm:py-5 flex flex-col gap-5 sm:gap-7 pb-16">
       
       {/* ========================================================================= */}
-      {/* TIẾN TRÌNH TOÀN DIỆN TINH GỌN:                                            */}
-      {/* - Desktop: Nằm ở trên cùng (sm:order-1)                                   */}
-      {/* - Mobile: Nằm ở cuối cùng trang chủ (order-4), giãn cách đều đặn         */}
-      {/* - Mobile: Card ngoài hình vuông (aspect-square), thanh tiến trình phẳng    */}
+      {/* HOME DASHBOARD WIDGETS (Theo đúng layout thiết kế minh hoạ):             */}
+      {/* - Donut Chart tiến độ mục tiêu                                           */}
+      {/* - Bar chart tiến độ tuần                                                 */}
+      {/* - Bar chart tháng/môn                                                    */}
+      {/* - Wave curve chart xu hướng                                              */}
+      {/* - Recent activity list                                                   */}
       {/* ========================================================================= */}
+      <HomeDashboardWidgets
+        progress={progress}
+        onNavigate={onNavigate}
+        overallPercent={overallPercent}
+        totalCompletedTopics={totalCompletedTopics}
+        totalTopicsCount={totalTopicsCount}
+        allScores={allScores}
+      />
       <section 
         id="compact-progress-dashboard" 
         className="order-4 sm:order-1 w-full max-w-sm sm:max-w-none mx-auto aspect-square sm:aspect-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-xs transition-colors flex flex-col justify-between overflow-hidden"
