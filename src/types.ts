@@ -170,6 +170,8 @@ export interface UserProgress {
   examAttempts: ExamAttempt[];
   studyTimeMinutes: number;
   streakDays: number;
+  lastActiveDate?: string;
+  dailyStudyTime?: Record<string, number>; // Maps YYYY-MM-DD to minutes
   minigameResults?: MinigameResult[];
   minigameBestScores?: Record<string, number>;
 }

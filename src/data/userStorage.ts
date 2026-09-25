@@ -435,6 +435,44 @@ export function toggleTopicCompleted(topicId: string): UserProgress {
   return updated;
 }
 
+function getUpdatedDailyStats(current: UserProgress, studyMins: number, countAsStreak: boolean): Partial<UserProgress> {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  const dailyStudyTime = { ...(current.dailyStudyTime || {}) };
+  dailyStudyTime[todayStr] = (dailyStudyTime[todayStr] || 0) + studyMins;
+
+  let streakDays = current.streakDays || 0;
+  let lastActiveDate = current.lastActiveDate;
+
+  if (countAsStreak) {
+    if (lastActiveDate !== todayStr) {
+      if (lastActiveDate) {
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const y_yyyy = yesterday.getFullYear();
+        const y_mm = String(yesterday.getMonth() + 1).padStart(2, '0');
+        const y_dd = String(yesterday.getDate()).padStart(2, '0');
+        const yesterdayStr = `${y_yyyy}-${y_mm}-${y_dd}`;
+
+        if (lastActiveDate === yesterdayStr) {
+          streakDays += 1;
+        } else {
+          streakDays = 1;
+        }
+      } else {
+        streakDays = 1;
+      }
+      lastActiveDate = todayStr;
+    }
+  }
+
+  return { dailyStudyTime, streakDays, lastActiveDate };
+}
+
 export function savePracticeAttempt(attempt: PracticeAttempt): UserProgress {
   const current = loadUserProgress();
   const studyMins = Math.max(1, Math.round(attempt.durationSpentSeconds / 60));
@@ -453,8 +491,11 @@ export function savePracticeAttempt(attempt: PracticeAttempt): UserProgress {
     userId: attempt.userId || current.profile?.email || 'student'
   };
 
+  const dailyStats = getUpdatedDailyStats(current, studyMins, true); // Practice attempt counts as streak
+
   const updated: UserProgress = {
     ...current,
+    ...dailyStats,
     studyTimeMinutes: (current.studyTimeMinutes || 0) + studyMins,
     practiceAttempts: [enriched, ...current.practiceAttempts]
   };
@@ -488,8 +529,11 @@ export function saveExamAttempt(attempt: ExamAttempt): UserProgress {
     userId: attempt.userId || current.profile?.email || 'student'
   };
 
+  const dailyStats = getUpdatedDailyStats(current, studyMins, false); // Exam attempt doesn't count as streak according to requirement (only chuyên đề)
+
   const updated: UserProgress = {
     ...current,
+    ...dailyStats,
     studyTimeMinutes: (current.studyTimeMinutes || 0) + studyMins,
     examAttempts: [enriched, ...current.examAttempts]
   };
@@ -566,10 +610,14 @@ export function saveMinigameResult(result: MinigameResult): { progress: UserProg
   };
 
   const updatedResults = [result, ...(current.minigameResults || [])];
+  
+  const studyMins = Math.max(1, Math.round(result.timeSeconds / 60));
+  const dailyStats = getUpdatedDailyStats(current, studyMins, false);
 
   const updated: UserProgress = {
     ...current,
-    studyTimeMinutes: (current.studyTimeMinutes || 0) + Math.max(1, Math.round(result.timeSeconds / 60)),
+    ...dailyStats,
+    studyTimeMinutes: (current.studyTimeMinutes || 0) + studyMins,
     minigameResults: updatedResults,
     minigameBestScores: updatedBestScores
   };

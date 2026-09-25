@@ -55,30 +55,19 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
   // Active game metadata
   const featuredGame = ALL_MINIGAMES.find(g => g.id === 'mathy-bird') || ALL_MINIGAMES[0];
 
-  // Build merged leaderboard
+  // Build user's real personal leaderboard from minigameResults
   const userResults = progress?.minigameResults || [];
-  const mergedLeaderboard: LeaderboardItem[] = [...INITIAL_PEER_LEADERBOARD];
-
-  // If user has a record, inject them into leaderboard
-  if (userBestScore > 0) {
-    mergedLeaderboard.push({
-      id: 'user-lb-current',
-      rank: 0,
-      playerName: progress?.profile?.name || 'Bạn',
+  const sortedLeaderboard: LeaderboardItem[] = [...userResults]
+    .sort((a, b) => b.score - a.score)
+    .map((item, index) => ({
+      id: item.id,
+      rank: index + 1,
+      playerName: progress?.profile?.name?.trim() || 'Bạn',
       subject: 'toan',
       subjectLabel: 'Toán',
       gameTitle: 'Mathy Bird',
-      score: userBestScore,
+      score: item.score,
       isCurrentUser: true
-    });
-  }
-
-  // Sort leaderboard descending by score
-  const sortedLeaderboard = mergedLeaderboard
-    .sort((a, b) => b.score - a.score)
-    .map((item, index) => ({
-      ...item,
-      rank: index + 1
     }));
 
   return (
@@ -269,7 +258,7 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
         </div>
       </section>
 
-      {/* LEADERBOARD (BẢNG XẾP HẠNG THÀNH TÍCH) */}
+      {/* LEADERBOARD (BẢNG THÀNH TÍCH & KỶ LỤC CỦA BẠN) */}
       <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
@@ -278,86 +267,82 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                Bảng Xếp Hạng Mathy Bird
+                Kỷ Lục Điểm Số Của Bạn (Mathy Bird)
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Top điểm số phản xạ và giải toán nhanh nhất của các sĩ tử ôn thi vào 10
+                Lịch sử thành tích và kỷ lục điểm số phản xạ thực tế qua các lượt chơi
               </p>
             </div>
           </div>
+          {userBestScore > 0 && (
+            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-3 py-1 rounded-xl border border-amber-200 dark:border-amber-900">
+              Điểm cao nhất: {userBestScore}
+            </span>
+          )}
         </div>
 
-        {/* Leaderboard Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 text-[11px] uppercase tracking-wider">
-                <th className="py-2.5 px-3 font-bold w-12 text-center">Hạng</th>
-                <th className="py-2.5 px-3 font-bold">Người chơi</th>
-                <th className="py-2.5 px-3 font-bold">Trò chơi</th>
-                <th className="py-2.5 px-3 font-bold text-right">Điểm số</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {sortedLeaderboard.map((item) => {
-                const isTop3 = item.rank <= 3;
-                const isMe = item.isCurrentUser;
+        {/* Leaderboard Table or Empty state */}
+        {sortedLeaderboard.length === 0 ? (
+          <div className="py-10 px-4 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
+            <Gamepad2 className="w-8 h-8 text-slate-400 mx-auto" />
+            <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+              Chưa có lượt chơi nào được ghi nhận
+            </p>
+            <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
+              Hãy nhấn nút "CHƠI NGAY" ở trên để giải toán vượt chướng ngại vật và thiết lập kỷ lục đầu tiên của bạn!
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs sm:text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 text-[11px] uppercase tracking-wider">
+                  <th className="py-2.5 px-3 font-bold w-12 text-center">Lần</th>
+                  <th className="py-2.5 px-3 font-bold">Người chơi</th>
+                  <th className="py-2.5 px-3 font-bold">Trò chơi</th>
+                  <th className="py-2.5 px-3 font-bold text-right">Điểm số</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {sortedLeaderboard.map((item) => {
+                  return (
+                    <tr
+                      key={item.id}
+                      className="bg-amber-50/50 dark:bg-amber-950/20 font-bold transition-colors"
+                    >
+                      <td className="py-3 px-3 text-center">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 font-bold text-xs">
+                          #{item.rank}
+                        </span>
+                      </td>
 
-                return (
-                  <tr
-                    key={item.id}
-                    className={`transition-colors ${
-                      isMe 
-                        ? 'bg-amber-50/70 dark:bg-amber-950/30 font-bold' 
-                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
-                    }`}
-                  >
-                    <td className="py-3 px-3 text-center">
-                      {item.rank === 1 ? (
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-400 text-slate-950 font-black text-xs">
-                          1
-                        </span>
-                      ) : item.rank === 2 ? (
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-300 text-slate-950 font-black text-xs">
-                          2
-                        </span>
-                      ) : item.rank === 3 ? (
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-600 text-white font-black text-xs">
-                          3
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 font-semibold">{item.rank}</span>
-                      )}
-                    </td>
-
-                    <td className="py-3 px-3">
-                      <div className="flex items-center gap-2">
-                        <span className={`font-semibold ${isMe ? 'text-amber-700 dark:text-amber-300' : 'text-slate-800 dark:text-slate-200'}`}>
-                          {item.playerName}
-                        </span>
-                        {isMe && (
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">
+                            {item.playerName}
+                          </span>
                           <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500 text-white font-bold">
                             Bạn
                           </span>
-                        )}
-                      </div>
-                    </td>
+                        </div>
+                      </td>
 
-                    <td className="py-3 px-3 text-slate-500 dark:text-slate-400">
-                      {item.gameTitle}
-                    </td>
+                      <td className="py-3 px-3 text-slate-500 dark:text-slate-400">
+                        {item.gameTitle}
+                      </td>
 
-                    <td className="py-3 px-3 text-right">
-                      <span className="font-mono font-black text-slate-900 dark:text-white text-sm sm:text-base">
-                        {item.score}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      <td className="py-3 px-3 text-right">
+                        <span className="font-mono font-black text-amber-600 dark:text-amber-400 text-sm sm:text-base">
+                          {item.score}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   );

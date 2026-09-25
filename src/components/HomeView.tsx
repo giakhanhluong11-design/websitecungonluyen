@@ -124,264 +124,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         totalTopicsCount={totalTopicsCount}
         allScores={allScores}
       />
-      <section 
-        id="compact-progress-dashboard" 
-        className="order-4 sm:order-1 w-full max-w-sm sm:max-w-none mx-auto aspect-square sm:aspect-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-xs transition-colors flex flex-col justify-between overflow-hidden"
-      >
-        {/* Row 1: Quick Status, Student Target & Vital Metrics Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-2.5 pb-2.5 sm:pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 text-[11px] sm:text-xs font-bold border border-indigo-100 dark:border-slate-700">
-              <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>{progress.profile.name || 'Học sinh'}</span>
-            </span>
-            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[220px] sm:max-w-none">
-              <Target className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-rose-500 dark:text-rose-400 shrink-0" />
-              <span className="truncate">NV1: <strong className="text-slate-900 dark:text-slate-100 font-bold">{progress.profile.targetSchool}</strong> ({progress.profile.targetScore}đ)</span>
-            </span>
-          </div>
 
-          {/* Quick Metrics Badges - Dịu mắt, tinh tế, độ bão hòa vừa phải */}
-          <div className="flex items-center flex-wrap gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
-            {/* Streak: Đỏ nhẹ nhàng (Rose/Red nhạt) */}
-            <div 
-              title="Chuỗi ngày ôn luyện liên tục"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50/90 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-semibold border border-rose-200/70 dark:border-rose-900/50"
-            >
-              <Flame className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-rose-500 fill-rose-400/80 dark:text-rose-400 dark:fill-rose-400/70" />
-              <span>{progress.streakDays} ngày</span>
-            </div>
-
-            {/* Giờ học: Hồng phấn dịu nhẹ (Soft Pink/Rose) */}
-            <div 
-              title="Thời gian học tập tích lũy"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-pink-50/90 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 font-semibold border border-pink-200/70 dark:border-pink-900/50"
-            >
-              <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-pink-500 dark:text-pink-400" />
-              <span>{studyHours}h</span>
-            </div>
-
-            {/* Điểm cao nhất: Vàng mật ong êm dịu (Soft Amber) */}
-            <div 
-              title="Điểm số cao nhất đạt được"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50/90 dark:bg-amber-950/40 text-amber-750 text-amber-800 dark:text-amber-300 font-semibold border border-amber-200/70 dark:border-amber-900/50"
-            >
-              <Award className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400 fill-amber-300/40" />
-              <span>Cao nhất: {maxScore}đ</span>
-            </div>
-
-            {/* Điểm trung bình: Xanh dịu */}
-            <div 
-              title="Điểm trung bình các lượt làm bài"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50/90 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold border border-emerald-200/70 dark:border-emerald-900/50 hidden sm:inline-flex"
-            >
-              <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-500 dark:text-emerald-400" />
-              <span>TB: {avgScore}đ</span>
-            </div>
-
-            {/* Toggle Detail History Button (visible on desktop) */}
-            <button
-              onClick={() => setShowProgressDetails(prev => !prev)}
-              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer text-xs border border-slate-200 dark:border-slate-700"
-              title="Xem chi tiết lịch sử và các dạng bài cần cải thiện"
-            >
-              <History className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>{showProgressDetails ? 'Thu gọn' : `Lịch sử (${totalSessions})`}</span>
-              {showProgressDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Row 2: Progress Bars - Chia 4 màu khác nhau rực rỡ */}
-        <div className="flex-1 flex flex-col justify-around py-1 sm:py-0 sm:pt-3">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-3">
-            
-            {/* 1. Overall Progress Bar: Tím / Indigo */}
-            <div 
-              onClick={() => onNavigate('knowledge')}
-              className="group sm:p-2.5 sm:rounded-xl sm:bg-indigo-50/60 sm:dark:bg-indigo-950/30 sm:border sm:border-indigo-200/80 sm:dark:border-indigo-800/50 sm:hover:border-indigo-400 transition-colors cursor-pointer flex flex-col justify-center"
-              title="Tổng tiến độ hoàn thành kiến thức 3 môn"
-            >
-              <div className="flex items-center justify-between text-xs sm:mb-1.5">
-                <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                  <span className="text-xs">Tổng thể</span>
-                </span>
-                <span className="font-extrabold text-xs text-indigo-700 dark:text-indigo-300">
-                  {overallPercent}%
-                </span>
-              </div>
-              <div className="w-full bg-indigo-100 dark:bg-indigo-950/80 h-2 sm:h-2 rounded-full overflow-hidden mt-1 sm:mt-0">
-                <div 
-                  className="bg-indigo-600 dark:bg-indigo-400 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${overallPercent}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-1 hidden sm:flex">
-                <span>Đã học</span>
-                <span className="font-medium text-indigo-600 dark:text-indigo-400">{totalCompletedTopics}/{totalTopicsCount} bài</span>
-              </div>
-            </div>
-
-            {/* 2. Môn Toán Progress Bar: Xanh Lam Biển (Sky) */}
-            <div 
-              onClick={() => onNavigate('practice', 'toan')}
-              className="group sm:p-2.5 sm:rounded-xl sm:bg-sky-50/60 sm:dark:bg-sky-950/30 sm:border sm:border-sky-200/80 sm:dark:border-sky-800/50 sm:hover:border-sky-400 transition-colors cursor-pointer flex flex-col justify-center"
-              title="Nhấp để luyện tập Môn Toán"
-            >
-              <div className="flex items-center justify-between text-xs sm:mb-1.5">
-                <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                  <Calculator className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
-                  <span className="text-xs">Toán học</span>
-                </span>
-                <span className="font-extrabold text-xs text-sky-600 dark:text-sky-400">
-                  {mathPercent}%
-                </span>
-              </div>
-              <div className="w-full bg-sky-100 dark:bg-sky-950/80 h-2 sm:h-2 rounded-full overflow-hidden mt-1 sm:mt-0">
-                <div 
-                  className="bg-sky-500 dark:bg-sky-400 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${mathPercent}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-1 hidden sm:flex">
-                <span>Tiến độ</span>
-                <span className="font-medium text-sky-600 dark:text-sky-400">{mathDone}/{mathTopics.length} chuyên đề</span>
-              </div>
-            </div>
-
-            {/* 3. Môn Ngữ văn Progress Bar: Xanh Lá (Emerald) */}
-            <div 
-              onClick={() => onNavigate('practice', 'van')}
-              className="group sm:p-2.5 sm:rounded-xl sm:bg-emerald-50/60 sm:dark:bg-emerald-950/30 sm:border sm:border-emerald-200/80 sm:dark:border-emerald-800/50 sm:hover:border-emerald-400 transition-colors cursor-pointer flex flex-col justify-center"
-              title="Nhấp để luyện tập Môn Ngữ văn"
-            >
-              <div className="flex items-center justify-between text-xs sm:mb-1.5">
-                <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                  <BookOpen className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span className="text-xs">Ngữ văn</span>
-                </span>
-                <span className="font-extrabold text-xs text-emerald-600 dark:text-emerald-400">
-                  {vanPercent}%
-                </span>
-              </div>
-              <div className="w-full bg-emerald-100 dark:bg-emerald-950/80 h-2 sm:h-2 rounded-full overflow-hidden mt-1 sm:mt-0">
-                <div 
-                  className="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${vanPercent}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-1 hidden sm:flex">
-                <span>Tiến độ</span>
-                <span className="font-medium text-emerald-600 dark:text-emerald-400">{vanDone}/{vanTopics.length} chuyên đề</span>
-              </div>
-            </div>
-
-            {/* 4. Môn Tiếng Anh Progress Bar: Cam / Hổ phách (Amber) */}
-            <div 
-              onClick={() => onNavigate('practice', 'anh')}
-              className="group sm:p-2.5 sm:rounded-xl sm:bg-amber-50/60 sm:dark:bg-amber-950/30 sm:border sm:border-amber-200/80 sm:dark:border-amber-800/50 sm:hover:border-amber-400 transition-colors cursor-pointer flex flex-col justify-center"
-              title="Nhấp để luyện tập Môn Tiếng Anh"
-            >
-              <div className="flex items-center justify-between text-xs sm:mb-1.5">
-                <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                  <Languages className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <span className="text-xs">Tiếng Anh</span>
-                </span>
-                <span className="font-extrabold text-xs text-amber-600 dark:text-amber-400">
-                  {anhPercent}%
-                </span>
-              </div>
-              <div className="w-full bg-amber-100 dark:bg-amber-950/80 h-2 sm:h-2 rounded-full overflow-hidden mt-1 sm:mt-0">
-                <div 
-                  className="bg-amber-500 dark:bg-amber-400 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${anhPercent}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-1 hidden sm:flex">
-                <span>Tiến độ</span>
-                <span className="font-medium text-amber-600 dark:text-amber-400">{anhDone}/{anhTopics.length} chuyên đề</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Expandable Section: Weak Topics & Recent Attempts */}
-        {showProgressDetails && (
-          <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs animate-in fade-in duration-200 shrink-0">
-            {/* Điểm kiến thức cần cải thiện */}
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between font-bold text-slate-900 dark:text-slate-100 mb-2">
-                <span className="flex items-center gap-1.5">
-                  <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-                  <span>Dạng bài cần lưu ý ({consolidatedWeakTopics.length})</span>
-                </span>
-              </div>
-              {consolidatedWeakTopics.length === 0 ? (
-                <p className="text-slate-500 dark:text-slate-400 text-[11px] py-1">
-                  Rất tốt! Chưa phát hiện dạng bài nào bị sai nhiều lần. Hãy duy trì phong độ!
-                </p>
-              ) : (
-                <div className="flex flex-wrap gap-1.5">
-                  {consolidatedWeakTopics.slice(0, 4).map(w => (
-                    <button
-                      key={w.topicId}
-                      onClick={() => onReviewTopic ? onReviewTopic(w.topicId) : onNavigate('knowledge', undefined, w.topicId)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-[11px] font-medium hover:border-indigo-400 transition-colors cursor-pointer"
-                    >
-                      <span className="truncate max-w-[150px]">{w.topicName}</span>
-                      <span className="px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-[10px] font-bold">
-                        {w.wrongCount} sai
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Lịch sử làm bài gần nhất */}
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between font-bold text-slate-900 dark:text-slate-100 mb-2">
-                <span className="flex items-center gap-1.5">
-                  <History className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-                  <span>Lịch sử gần đây ({allScores.length})</span>
-                </span>
-                {allScores.length > 0 && onClearHistory && (
-                  <button
-                    onClick={onClearHistory}
-                    className="text-[10px] text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 font-normal cursor-pointer"
-                  >
-                    <RotateCcw className="h-2.5 w-2.5" />
-                    <span>Đặt lại</span>
-                  </button>
-                )}
-              </div>
-              {allScores.length === 0 ? (
-                <p className="text-slate-500 dark:text-slate-400 text-[11px] py-1">
-                  Chưa có lượt làm bài nào. Hãy bấm &quot;Học Ngay&quot;, &quot;Luyện tập ngay&quot; hoặc &quot;Xem ngay&quot; ở bên dưới!
-                </p>
-              ) : (
-                <div className="space-y-1.5 max-h-28 overflow-y-auto pr-1">
-                  {allScores.slice(0, 3).map((item, idx) => (
-                    <div 
-                      key={idx} 
-                      className="flex items-center justify-between p-1.5 rounded-lg bg-white dark:bg-slate-800 text-[11px] border border-slate-200 dark:border-slate-700"
-                    >
-                      <span className="truncate max-w-[160px] font-medium text-slate-800 dark:text-slate-100">
-                        {item.type === 'exam' ? item.title : `Luyện tập (${item.correctCount}/${item.totalQuestions})`}
-                      </span>
-                      <span className="font-bold text-indigo-600 dark:text-indigo-400">
-                        {item.score}đ
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </section>
 
       {/* ========================================================================= */}
       {/* BANNER NGANG LỚN - "ÔN LUYỆN TUYỂN SINH" (HỌC KIẾN THỨC) */}
@@ -587,12 +330,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="pt-2 sm:pt-3">
                 <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-100 mb-1.5">
                   <span>Tiến độ luyện tập</span>
-                  <span className="font-bold text-white">{mathDone + vanDone + anhDone}/{topics.length || 30} chuyên đề</span>
+                  <span className="font-bold text-white">{mathDone + vanDone + anhDone}/{topics.length} chuyên đề</span>
                 </div>
                 <div className="w-full max-w-[280px] h-3 rounded-full bg-black/20 dark:bg-black/25 p-0.5 overflow-hidden backdrop-blur-xs">
                   <div 
                     className="h-full rounded-full bg-white transition-all duration-500 shadow-xs" 
-                    style={{ width: `${Math.max(12, overallPercent)}%` }}
+                    style={{ width: `${overallPercent}%` }}
                   />
                 </div>
               </div>
@@ -694,7 +437,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <div className="w-full max-w-[280px] h-3 rounded-full bg-black/20 dark:bg-black/25 p-0.5 overflow-hidden backdrop-blur-xs">
                   <div 
                     className="h-full rounded-full bg-white transition-all duration-500 shadow-xs" 
-                    style={{ width: `${Math.max(10, Math.round((exams.filter(e => e.userCompleted).length / Math.max(1, exams.length)) * 100))}%` }}
+                    style={{ width: `${Math.round((exams.filter(e => e.userCompleted).length / Math.max(1, exams.length)) * 100)}%` }}
                   />
                 </div>
               </div>

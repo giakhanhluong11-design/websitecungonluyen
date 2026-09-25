@@ -197,6 +197,13 @@ export default function App() {
             progress={progress}
             onOpenAccount={() => handleNavigate('account')}
             onOpenGeminiConfig={openGeminiConfig}
+            onNavigate={handleNavigate}
+            onSelectTopic={(topic) => {
+              setActiveSubject(topic.subjectId);
+              useAppStore.setState({ selectedKnowledgeTopic: topic, currentTab: 'knowledge' });
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onStartExam={(exam) => setActiveExamToRun(exam)}
           />
 
           {/* Toast */}

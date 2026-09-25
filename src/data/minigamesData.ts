@@ -76,13 +76,4 @@ export interface LeaderboardItem {
   isCurrentUser?: boolean;
 }
 
-export const INITIAL_PEER_LEADERBOARD: LeaderboardItem[] = [
-  { id: 'lb-1', rank: 1, playerName: 'Lê Minh Khôi (9A2)', subject: 'toan', subjectLabel: 'Toán', gameTitle: 'Mathy Bird', score: 32 },
-  { id: 'lb-2', rank: 2, playerName: 'Trần Thảo Vy (9B)', subject: 'toan', subjectLabel: 'Toán', gameTitle: 'Mathy Bird', score: 28 },
-  { id: 'lb-3', rank: 3, playerName: 'Phạm Đức Anh (9C)', subject: 'toan', subjectLabel: 'Toán', gameTitle: 'Mathy Bird', score: 25 },
-  { id: 'lb-4', rank: 4, playerName: 'Đỗ Quỳnh Anh (9A1)', subject: 'toan', subjectLabel: 'Toán', gameTitle: 'Mathy Bird', score: 21 },
-  { id: 'lb-5', rank: 5, playerName: 'Vũ Gia Bảo (9A4)', subject: 'toan', subjectLabel: 'Toán', gameTitle: 'Mathy Bird', score: 18 },
-  { id: 'lb-6', rank: 6, playerName: 'Nguyễn Bích Ngọc (9E)', subject: 'toan', subjectLabel: 'Toán', gameTitle: 'Mathy Bird', score: 15 },
-  { id: 'lb-7', rank: 7, playerName: 'Hoàng Quốc Việt (9B3)', subject: 'toan', subjectLabel: 'Toán', gameTitle: 'Mathy Bird', score: 12 },
-  { id: 'lb-8', rank: 8, playerName: 'Mai Phương Chi (9A1)', subject: 'toan', subjectLabel: 'Toán', gameTitle: 'Mathy Bird', score: 9 }
-];
+export const INITIAL_PEER_LEADERBOARD: LeaderboardItem[] = [];

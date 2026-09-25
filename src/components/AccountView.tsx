@@ -112,13 +112,13 @@ export const AccountView: React.FC<AccountViewProps> = ({
     e.preventDefault();
     onUpdateProfile({
       ...progress.profile,
-      name: name.trim() || 'Học sinh Lớp 9',
+      name: name.trim() || progress.profile.name || 'Học sinh',
       avatar,
-      email: email.trim() || 'nnkh93a@gmail.com',
-      currentSchool: currentSchool.trim() || 'THCS tại TP.HCM',
-      currentClass: currentClass.trim() || '9A1',
+      email: email.trim() || progress.profile.email || '',
+      currentSchool: currentSchool.trim() || progress.profile.currentSchool || '',
+      currentClass: currentClass.trim() || progress.profile.currentClass || '',
       targetSchool,
-      targetScore: Number(targetScore) || 23.5,
+      targetScore: Number(targetScore) || progress.profile.targetScore || 21.0,
       nv2School,
       nv3School
     });
@@ -127,12 +127,12 @@ export const AccountView: React.FC<AccountViewProps> = ({
   };
 
   const handleConfirmGoogleLink = () => {
-    const targetEmail = selectedGoogleAccount === 'default' 
-      ? 'nnkh93a@gmail.com' 
-      : (customGoogleEmail.trim() || 'nnkh93a@gmail.com');
-    const targetName = selectedGoogleAccount === 'default'
-      ? 'Nguyễn Hoàng Nam'
-      : (name || targetEmail.split('@')[0]);
+    const targetEmail = customGoogleEmail.trim() || email.trim();
+    if (!targetEmail) {
+      alert('Vui lòng nhập địa chỉ Google Email của bạn.');
+      return;
+    }
+    const targetName = name.trim() || targetEmail.split('@')[0];
     
     setEmail(targetEmail);
     if (onLoginGoogle) {
@@ -142,7 +142,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
     }
 
     setShowGoogleModal(false);
-    setGoogleNotification(`Đã đăng nhập Google (${targetEmail}) và đồng bộ lại toàn bộ dữ liệu thành công!`);
+    setGoogleNotification(`Đã liên kết tài khoản Google (${targetEmail}) thành công!`);
     setTimeout(() => setGoogleNotification(null), 4000);
   };
 
@@ -767,81 +767,25 @@ export const AccountView: React.FC<AccountViewProps> = ({
               </button>
             </div>
 
-            {/* Account List */}
+            {/* Account Form */}
             <div className="space-y-3">
-              {/* Default User Google Account */}
-              <div 
-                onClick={() => setSelectedGoogleAccount('default')}
-                className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${
-                  selectedGoogleAccount === 'default'
-                    ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/40 dark:border-indigo-500 ring-2 ring-indigo-500/20'
-                    : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-white font-bold text-sm">
-                    N
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Địa chỉ Gmail / Google của bạn <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Mail className="h-4 w-4" />
                   </div>
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                      Nguyễn Hoàng Nam
-                    </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      nnkh93a@gmail.com
-                    </p>
-                  </div>
+                  <input
+                    type="email"
+                    value={customGoogleEmail}
+                    onChange={(e) => setCustomGoogleEmail(e.target.value)}
+                    placeholder="emailcuaban@gmail.com"
+                    className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-indigo-600 transition"
+                    autoFocus
+                  />
                 </div>
-
-                {selectedGoogleAccount === 'default' && (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white">
-                    <Check className="h-3 w-3 stroke-[3]" />
-                  </span>
-                )}
-              </div>
-
-              {/* Custom Google Account Option */}
-              <div 
-                onClick={() => setSelectedGoogleAccount('custom')}
-                className={`p-3.5 rounded-xl border cursor-pointer transition-all space-y-2.5 ${
-                  selectedGoogleAccount === 'custom'
-                    ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/40 dark:border-indigo-500 ring-2 ring-indigo-500/20'
-                    : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                      <Mail className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                        Sử dụng một tài khoản Google khác
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        Nhập địa chỉ Gmail cá nhân hoặc tài khoản trường học
-                      </p>
-                    </div>
-                  </div>
-
-                  {selectedGoogleAccount === 'custom' && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white">
-                      <Check className="h-3 w-3 stroke-[3]" />
-                    </span>
-                  )}
-                </div>
-
-                {selectedGoogleAccount === 'custom' && (
-                  <div className="pt-1">
-                    <input
-                      type="email"
-                      value={customGoogleEmail}
-                      onChange={(e) => setCustomGoogleEmail(e.target.value)}
-                      placeholder="vidu@gmail.com"
-                      className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-900 dark:text-white dark:bg-slate-800 focus:outline-none focus:border-indigo-500"
-                      autoFocus
-                    />
-                  </div>
-                )}
               </div>
             </div>
 
