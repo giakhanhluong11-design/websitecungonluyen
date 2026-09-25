@@ -114,31 +114,21 @@ class SoundManager {
 interface MathProblem {
   question: string;
   correctAnswer: number;
-  options: number[]; // 3 options: [Top, Middle, Bottom]
-  correctIndex: number; // 0: Top, 1: Middle, 2: Bottom
+  options: number[]; // 2 options: [Top, Bottom]
+  correctIndex: number; // 0: Top, 1: Bottom
 }
 
-function generateDistractors(correct: number): [number, number] {
-  const candidateDeltas = [1, -1, 2, -2, 5, -5, 10, -10, 3, -3, 4, -4];
-  const shuffled = [...candidateDeltas].sort(() => Math.random() - 0.5);
-  const distractors: number[] = [];
+function generateDistractor(correct: number): number {
+  const candidateDeltas = [1, -1, 2, -2, 5, -5, 10, -10, 3, -3, 4, -4].sort(() => Math.random() - 0.5);
 
-  for (const d of shuffled) {
+  for (const d of candidateDeltas) {
     const val = correct + d;
-    if (val >= 0 && val !== correct && !distractors.includes(val)) {
-      distractors.push(val);
-      if (distractors.length === 2) break;
+    if (val >= 0 && val !== correct) {
+      return val;
     }
   }
 
-  while (distractors.length < 2) {
-    const fallback = Math.max(0, correct + (distractors.length + 1) * (Math.random() > 0.5 ? 2 : -2));
-    if (fallback !== correct && !distractors.includes(fallback)) {
-      distractors.push(fallback);
-    }
-  }
-
-  return [distractors[0], distractors[1]];
+  return correct > 5 ? correct - 2 : correct + 2;
 }
 
 function generateMathProblem(): MathProblem {
@@ -176,8 +166,8 @@ function generateMathProblem(): MathProblem {
     question = `${a} × ${b} = ?`;
   }
 
-  const [d1, d2] = generateDistractors(correctAnswer);
-  const options = [correctAnswer, d1, d2].sort(() => Math.random() - 0.5);
+  const distractor = generateDistractor(correctAnswer);
+  const options = [correctAnswer, distractor].sort(() => Math.random() - 0.5);
   const correctIndex = options.indexOf(correctAnswer);
 
   return {
@@ -331,14 +321,13 @@ class Obstacle {
   problem: MathProblem;
   scored = false;
 
-  // 3 gaps configuration
+  // 2 large portals configuration
   // Total playable height: 0 to 530 (ground is at 530)
-  // Gap 0 (Top): 50 - 165 (height 115)
-  // Wall 1: 165 - 225 (height 60)
-  // Gap 1 (Middle): 225 - 340 (height 115)
-  // Wall 2: 340 - 400 (height 60)
-  // Gap 2 (Bottom): 400 - 515 (height 115)
-  // Wall 3: 515 - 530 (height 15)
+  // Top Wall: 0 - 45 (height 45)
+  // Gap 0 (Top Portal): 45 - 235 (height 190 - super spacious!)
+  // Dividing Wall: 235 - 320 (height 85)
+  // Gap 1 (Bottom Portal): 320 - 510 (height 190 - super spacious!)
+  // Bottom Wall: 510 - 530 (height 20)
   portals: PortalZone[];
 
   constructor(x: number, speed: number) {
@@ -348,22 +337,16 @@ class Obstacle {
 
     this.portals = [
       {
-        top: 50,
-        bottom: 165,
+        top: 45,
+        bottom: 235,
         value: this.problem.options[0],
         isCorrect: this.problem.correctIndex === 0
       },
       {
-        top: 225,
-        bottom: 340,
+        top: 320,
+        bottom: 510,
         value: this.problem.options[1],
         isCorrect: this.problem.correctIndex === 1
-      },
-      {
-        top: 400,
-        bottom: 515,
-        value: this.problem.options[2],
-        isCorrect: this.problem.correctIndex === 2
       }
     ];
   }
@@ -377,10 +360,9 @@ class Obstacle {
 
     // 1. Draw solid wall segments
     const wallSegments = [
-      { y: 0, h: 50 },
-      { y: 165, h: 60 },
-      { y: 340, h: 60 },
-      { y: 515, h: groundY - 515 }
+      { y: 0, h: 45 },
+      { y: 235, h: 85 },
+      { y: 510, h: groundY - 510 }
     ];
 
     for (const seg of wallSegments) {
@@ -413,7 +395,7 @@ class Obstacle {
       }
     }
 
-    // 2. Draw 3 portals (Cổng đáp án)
+    // 2. Draw 2 portals (Cổng đáp án siêu rộng)
     this.portals.forEach((p, idx) => {
       const portalHeight = p.bottom - p.top;
       const portalCenterY = (p.top + p.bottom) / 2;
@@ -425,18 +407,18 @@ class Obstacle {
       ctx.fillRect(this.x + this.width - 4, p.top, 4, portalHeight);
 
       // Answer billboard/sign in the center of the gap
-      const badgeW = 60;
-      const badgeH = 34;
+      const badgeW = 68;
+      const badgeH = 38;
       const badgeX = portalCenterX - badgeW / 2;
       const badgeY = portalCenterY - badgeH / 2;
 
       // Soft glow
-      ctx.shadowColor = 'rgba(14, 165, 233, 0.4)';
-      ctx.shadowBlur = 10;
+      ctx.shadowColor = 'rgba(14, 165, 233, 0.45)';
+      ctx.shadowBlur = 12;
 
       // Rounded pill badge
       ctx.beginPath();
-      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 10);
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 12);
       const bgGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX, badgeY + badgeH);
       bgGrad.addColorStop(0, '#ffffff');
       bgGrad.addColorStop(1, '#f1f5f9');
@@ -448,19 +430,19 @@ class Obstacle {
       ctx.strokeStyle = '#0284c7';
       ctx.stroke();
 
-      // Portal number badge label (e.g. "A", "B", "C" or just the number)
+      // Portal number badge label
       ctx.shadowColor = 'transparent';
-      ctx.font = 'bold 18px "Inter", system-ui, -apple-system, sans-serif';
+      ctx.font = 'bold 20px "Inter", system-ui, -apple-system, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#0f172a';
       ctx.fillText(p.value.toString(), portalCenterX, portalCenterY);
 
-      // Small gate indicator top-right of badge
-      ctx.font = 'bold 9px system-ui';
+      // Gate indicator tag
+      ctx.font = 'bold 10px system-ui';
       ctx.fillStyle = '#64748b';
-      const slotName = idx === 0 ? 'TRÊN' : idx === 1 ? 'GIỮA' : 'DƯỚI';
-      ctx.fillText(slotName, portalCenterX, badgeY - 7);
+      const slotName = idx === 0 ? 'CỔNG TRÊN' : 'CỔNG DƯỚI';
+      ctx.fillText(slotName, portalCenterX, badgeY - 8);
     });
 
     ctx.restore();
@@ -979,7 +961,7 @@ export const MathyBirdGame: React.FC<MathyBirdGameProps> = ({
                 </div>
                 <div className="space-y-1">
                   <span className="font-bold text-emerald-400 block">3. Chọn cổng</span>
-                  <span className="text-slate-400">Bay vào đúng ô số ĐÚNG (Trên / Giữa / Dưới).</span>
+                  <span className="text-slate-400">Bay vào đúng ô số ĐÚNG (Cổng Trên hoặc Cổng Dưới).</span>
                 </div>
               </div>
 
@@ -1086,7 +1068,7 @@ export const MathyBirdGame: React.FC<MathyBirdGameProps> = ({
                 <strong>2. Giải toán nhanh:</strong> Phía trên đỉnh màn hình sẽ luôn hiển thị to một phép tính (+, -, ×).
               </p>
               <p>
-                <strong>3. 3 Cánh cổng đáp án:</strong> Bức tường di chuyển từ phải qua trái có 3 ô số (Cổng Trên, Cổng Giữa, Cổng Dưới). Chỉ có <strong>1 cổng chứa đáp án đúng</strong>.
+                <strong>3. 2 Cánh cổng đáp án siêu rộng:</strong> Bức tường di chuyển từ phải qua trái có 2 ô số rộng rãi (Cổng Trên và Cổng Dưới). Chỉ có <strong>1 cổng chứa đáp án đúng</strong>.
               </p>
               <p>
                 <strong>4. Điều kiện Game Over:</strong> Bay vào cổng đáp án sai, va chạm vào tường gạch hoặc chạm vào nóc/mặt đất.

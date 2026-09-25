@@ -274,7 +274,7 @@
           </div>
           <div>
             <span>3. Chọn cổng</span>
-            <p>Bay vào ô chứa đáp án đúng.</p>
+            <p>Bay vào cổng ĐÚNG (Trên hoặc Dưới).</p>
           </div>
         </div>
 
@@ -376,23 +376,15 @@
     }
 
     // -----------------------------------------------------------
-    // MATH GENERATOR
+    // MATH GENERATOR (2 OPTIONS: 1 ĐÚNG, 1 SAI NHIỄU)
     // -----------------------------------------------------------
-    function generateDistractors(correct) {
+    function generateDistractor(correct) {
       const deltas = [1, -1, 2, -2, 5, -5, 10, -10, 3, -3, 4, -4].sort(() => Math.random() - 0.5);
-      const res = [];
       for (const d of deltas) {
         const val = correct + d;
-        if (val >= 0 && val !== correct && !res.includes(val)) {
-          res.push(val);
-          if (res.length === 2) break;
-        }
+        if (val >= 0 && val !== correct) return val;
       }
-      while (res.length < 2) {
-        const fallback = Math.max(0, correct + (res.length + 1) * (Math.random() > 0.5 ? 2 : -2));
-        if (fallback !== correct && !res.includes(fallback)) res.push(fallback);
-      }
-      return res;
+      return correct > 5 ? correct - 2 : correct + 2;
     }
 
     function generateMathProblem() {
@@ -429,8 +421,8 @@
         question = `${a} × ${b} = ?`;
       }
 
-      const [d1, d2] = generateDistractors(correctAnswer);
-      const options = [correctAnswer, d1, d2].sort(() => Math.random() - 0.5);
+      const distractor = generateDistractor(correctAnswer);
+      const options = [correctAnswer, distractor].sort(() => Math.random() - 0.5);
       const correctIndex = options.indexOf(correctAnswer);
 
       return { question, correctAnswer, options, correctIndex };
@@ -536,7 +528,7 @@
     }
 
     // -----------------------------------------------------------
-    // ENTITY: OBSTACLE (3 PORTALS WALL)
+    // ENTITY: OBSTACLE (2 SIÊU CỔNG RỘNG RÃI)
     // -----------------------------------------------------------
     class Obstacle {
       constructor(x, speed) {
@@ -546,10 +538,10 @@
         this.problem = generateMathProblem();
         this.scored = false;
 
+        // 2 Cổng siêu rộng 190px mỗi cổng
         this.portals = [
-          { top: 50, bottom: 165, value: this.problem.options[0], isCorrect: this.problem.correctIndex === 0 },
-          { top: 225, bottom: 340, value: this.problem.options[1], isCorrect: this.problem.correctIndex === 1 },
-          { top: 400, bottom: 515, value: this.problem.options[2], isCorrect: this.problem.correctIndex === 2 }
+          { top: 45, bottom: 235, value: this.problem.options[0], isCorrect: this.problem.correctIndex === 0 },
+          { top: 320, bottom: 510, value: this.problem.options[1], isCorrect: this.problem.correctIndex === 1 }
         ];
       }
       update() {
@@ -559,10 +551,9 @@
         ctx.save();
         // Solid wall segments
         const wallSegments = [
-          { y: 0, h: 50 },
-          { y: 165, h: 60 },
-          { y: 340, h: 60 },
-          { y: 515, h: groundY - 515 }
+          { y: 0, h: 45 },
+          { y: 235, h: 85 },
+          { y: 510, h: groundY - 510 }
         ];
 
         for (const seg of wallSegments) {
@@ -581,19 +572,19 @@
           ctx.strokeRect(this.x, seg.y, this.width, seg.h);
         }
 
-        // Draw 3 Portals
+        // Draw 2 Portals
         this.portals.forEach((p, idx) => {
           const portalCenterY = (p.top + p.bottom) / 2;
           const portalCenterX = this.x + this.width / 2;
 
-          const badgeW = 60;
-          const badgeH = 34;
+          const badgeW = 68;
+          const badgeH = 38;
           const badgeX = portalCenterX - badgeW / 2;
           const badgeY = portalCenterY - badgeH / 2;
 
           // Glowing badge
           ctx.beginPath();
-          ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 10);
+          ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 12);
           ctx.fillStyle = '#ffffff';
           ctx.fill();
           ctx.lineWidth = 2.5;
@@ -601,16 +592,16 @@
           ctx.stroke();
 
           // Value
-          ctx.font = 'bold 18px sans-serif';
+          ctx.font = 'bold 20px sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillStyle = '#0f172a';
           ctx.fillText(p.value.toString(), portalCenterX, portalCenterY);
 
           // Label
-          ctx.font = 'bold 9px sans-serif';
+          ctx.font = 'bold 10px sans-serif';
           ctx.fillStyle = '#64748b';
-          ctx.fillText(idx === 0 ? 'TRÊN' : idx === 1 ? 'GIỮA' : 'DƯỚI', portalCenterX, badgeY - 7);
+          ctx.fillText(idx === 0 ? 'CỔNG TRÊN' : 'CỔNG DƯỚI', portalCenterX, badgeY - 8);
         });
 
         ctx.restore();
