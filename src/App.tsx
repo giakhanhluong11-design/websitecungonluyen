@@ -41,6 +41,7 @@ export default function App() {
     handleUpdateProfile,
     handleResetProgress,
     handleUpdateTargetSchool,
+    handleUpdateProgress,
   } = useProgressStore();
 
   const {
@@ -298,15 +299,8 @@ export default function App() {
 
         {currentTab === 'minigame' && (
           <MinigameView
-            topics={ALL_TOPICS}
-            onNavigateToPractice={(subj, topicId) => {
-              useAppStore.setState({
-                selectedPracticeSubject: subj,
-                selectedPracticeTopicId: topicId,
-                currentTab: 'practice',
-              });
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+            progress={progress}
+            onUpdateProgress={handleUpdateProgress}
           />
         )}
 

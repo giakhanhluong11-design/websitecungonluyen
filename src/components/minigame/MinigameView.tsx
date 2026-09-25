@@ -13,24 +13,31 @@ import {
 } from 'lucide-react';
 import { ALL_MINIGAMES, INITIAL_PEER_LEADERBOARD, LeaderboardItem, MinigameDefinition } from '../../data/minigamesData';
 import { UserProgress, MinigameResult } from '../../types';
-import { saveMinigameResult } from '../../data/userStorage';
+import { saveMinigameResult, getUserProgress } from '../../data/userStorage';
 import { MathyBirdGame } from './MathyBirdGame';
 
 interface MinigameViewProps {
-  progress: UserProgress;
-  onUpdateProgress: (newProgress: UserProgress) => void;
+  progress?: UserProgress;
+  onUpdateProgress?: (newProgress: UserProgress) => void;
 }
 
 export const MinigameView: React.FC<MinigameViewProps> = ({
-  progress,
+  progress: passedProgress,
   onUpdateProgress
 }) => {
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
 
+  // Safe fallback if progress is undefined
+  const progress = passedProgress || getUserProgress();
+  const safeBestScores = progress?.minigameBestScores || {};
+  const userBestScore = safeBestScores['mathy-bird'] || 0;
+
   // Handle saving result
   const handleSaveResult = (result: MinigameResult): { isNewBest: boolean } => {
     const { progress: updatedProgress, isNewBest } = saveMinigameResult(result);
-    onUpdateProgress(updatedProgress);
+    if (onUpdateProgress) {
+      onUpdateProgress(updatedProgress);
+    }
     return { isNewBest };
   };
 
@@ -40,17 +47,16 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
       <MathyBirdGame
         onBackToHub={() => setActiveGameId(null)}
         onSaveResult={handleSaveResult}
-        currentBestScore={progress.minigameBestScores?.['mathy-bird'] || 0}
+        currentBestScore={userBestScore}
       />
     );
   }
 
   // Active game metadata
   const featuredGame = ALL_MINIGAMES.find(g => g.id === 'mathy-bird') || ALL_MINIGAMES[0];
-  const userBestScore = progress.minigameBestScores?.['mathy-bird'] || 0;
 
   // Build merged leaderboard
-  const userResults = progress.minigameResults || [];
+  const userResults = progress?.minigameResults || [];
   const mergedLeaderboard: LeaderboardItem[] = [...INITIAL_PEER_LEADERBOARD];
 
   // If user has a record, inject them into leaderboard
@@ -58,7 +64,7 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
     mergedLeaderboard.push({
       id: 'user-lb-current',
       rank: 0,
-      playerName: progress.profile?.name || 'Bạn',
+      playerName: progress?.profile?.name || 'Bạn',
       subject: 'toan',
       subjectLabel: 'Toán',
       gameTitle: 'Mathy Bird',

@@ -40,6 +40,7 @@ interface ProgressStore {
   handleUpdateProfile: (newProfile: UserProfile) => void;
   handleResetProgress: () => void;
   handleUpdateTargetSchool: (schoolName: string, score: number) => void;
+  handleUpdateProgress: (newProgress: UserProgress) => void;
 }
 
 export const useProgressStore = create<ProgressStore>((set, get) => ({
@@ -107,5 +108,9 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       targetScore: score,
     });
     set({ progress: updated });
+  },
+
+  handleUpdateProgress: (newProgress) => {
+    set({ progress: newProgress });
   },
 }));
