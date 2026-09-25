@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mathy Bird – Flappy Bird & Giải Toán Nhanh</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background: #090d16;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      aspect-ratio: 4 / 3;
+      background: #38bdf8;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 2px solid #1e293b;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* HUD Overlays */
+    .hud {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .badge {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-value {
+      font-size: 24px;
+      font-weight: 900;
+      color: #fbbf24;
+      font-family: monospace;
+    }
+    /* Math HUD Banner Center */
+    #math-banner {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(37, 99, 235, 0.95));
+      backdrop-filter: blur(8px);
+      padding: 8px 24px;
+      border-radius: 9999px;
+      border: 2px solid #818cf8;
+      box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    #math-question {
+      font-size: 26px;
+      font-weight: 900;
+      color: #fde047;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    /* Full Overlay Screen (Start / Game Over) */
+    .screen-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 15, 29, 0.82);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      z-index: 20;
+    }
+    .card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 24px;
+      padding: 32px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    .title {
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .btn {
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      color: #fff;
+      font-weight: 800;
+      font-size: 16px;
+      padding: 14px 28px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(245, 158, 11, 0.4);
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+    .btn-secondary {
+      background: #1e293b;
+      box-shadow: none;
+      font-size: 13px;
+      padding: 10px 20px;
+      margin-top: 10px;
+      color: #cbd5e1;
+    }
+    .btn-secondary:hover {
+      background: #334155;
+    }
+    .score-board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: #1e293b;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
+    .score-item-label {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .score-item-value {
+      font-size: 28px;
+      font-weight: 900;
+      color: #facc15;
+      font-family: monospace;
+      margin-top: 4px;
+    }
+    .reason-text {
+      color: #f87171;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .instructions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      text-align: left;
+      background: #1e293b;
+      padding: 12px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      font-size: 11px;
+    }
+    .instructions span {
+      display: block;
+      color: #f59e0b;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .instructions p {
+      color: #94a3b8;
+    }
+    .sound-toggle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Top Left Score HUD -->
+    <div class="hud">
+      <div class="badge">
+        <span class="badge-label">Điểm:</span>
+        <span id="score-text" class="badge-value">0</span>
+      </div>
+    </div>
+
+    <!-- Center Math HUD -->
+    <div id="math-banner" style="display: none;">
+      <span style="font-size: 12px; color: #c7d2fe; font-weight: 700;">TÍNH:</span>
+      <span id="math-question">15 + 4 = ?</span>
+    </div>
+
+    <!-- Sound Toggle -->
+    <button id="sound-btn" class="sound-toggle">🔊 Âm thanh</button>
+
+    <!-- START SCREEN -->
+    <div id="start-screen" class="screen-overlay">
+      <div class="card">
+        <h1 class="title">Mathy Bird</h1>
+        <p class="subtitle">Flappy Bird kết hợp giải toán siêu tốc. Nhảy đúng cổng đáp án để ghi điểm!</p>
+
+        <div class="instructions">
+          <div>
+            <span>1. Nhảy</span>
+            <p>Space hoặc Click để chim bay lên.</p>
+          </div>
+          <div>
+            <span>2. Tính toán</span>
+            <p>Nhìn phép tính to ở góc trên.</p>
+          </div>
+          <div>
+            <span>3. Chọn cổng</span>
+            <p>Bay vào ô chứa đáp án đúng.</p>
+          </div>
+        </div>
+
+        <button id="start-btn" class="btn">▶ BẮT ĐẦU CHƠI</button>
+      </div>
+    </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div id="gameover-screen" class="screen-overlay" style="display: none;">
+      <div class="card">
+        <h2 style="font-size: 24px; font-weight: 900; margin-bottom: 4px; color: #ef4444;">GAME OVER</h2>
+        <p id="gameover-reason" class="reason-text">Bạn đã bay vào cổng sai!</p>
+
+        <div class="score-board">
+          <div>
+            <div class="score-item-label">Điểm số</div>
+            <div id="final-score" class="score-item-value">0</div>
+          </div>
+          <div>
+            <div class="score-item-label">Kỷ lục</div>
+            <div id="high-score" class="score-item-value">0</div>
+          </div>
+        </div>
+
+        <button id="restart-btn" class="btn">🔄 CHƠI LẠI (SPACE)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------------------------------------
+    // SOUND SYNTHESIZER (Pure Web Audio API)
+    // -----------------------------------------------------------
+    class SoundManager {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playJump() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(640, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.13);
+      }
+      playCorrect() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+          gain.gain.setValueAtTime(0.2, now + idx * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.18);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.05);
+          osc.stop(now + idx * 0.05 + 0.19);
+        });
+      }
+      playCrash() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(70, now + 0.35);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      }
+    }
+
+    // -----------------------------------------------------------
+    // MATH GENERATOR
+    // -----------------------------------------------------------
+    function generateDistractors(correct) {
+      const deltas = [1, -1, 2, -2, 5, -5, 10, -10, 3, -3, 4, -4].sort(() => Math.random() - 0.5);
+      const res = [];
+      for (const d of deltas) {
+        const val = correct + d;
+        if (val >= 0 && val !== correct && !res.includes(val)) {
+          res.push(val);
+          if (res.length === 2) break;
+        }
+      }
+      while (res.length < 2) {
+        const fallback = Math.max(0, correct + (res.length + 1) * (Math.random() > 0.5 ? 2 : -2));
+        if (fallback !== correct && !res.includes(fallback)) res.push(fallback);
+      }
+      return res;
+    }
+
+    function generateMathProblem() {
+      const type = Math.floor(Math.random() * 3);
+      let question = '';
+      let correctAnswer = 0;
+
+      if (type === 0) {
+        // Phép cộng (+), trừ (-) với 1 - 2 chữ số, kết quả >= 0
+        const isAdd = Math.random() > 0.5;
+        if (isAdd) {
+          const a = Math.floor(Math.random() * 60) + 5;
+          const b = Math.floor(Math.random() * 35) + 3;
+          correctAnswer = a + b;
+          question = `${a} + ${b} = ?`;
+        } else {
+          const a = Math.floor(Math.random() * 75) + 20;
+          const b = Math.floor(Math.random() * (a - 5)) + 4;
+          correctAnswer = a - b;
+          question = `${a} - ${b} = ?`;
+        }
+      } else if (type === 1) {
+        // Phép nhân 1 chữ số
+        const a = Math.floor(Math.random() * 8) + 2;
+        const b = Math.floor(Math.random() * 8) + 2;
+        correctAnswer = a * b;
+        question = `${a} × ${b} = ?`;
+      } else {
+        // Phép nhân 2 chữ số có hàng đơn vị 0 hoặc 5
+        const candidates = [10, 15, 20, 25, 30, 35, 40, 50];
+        const a = candidates[Math.floor(Math.random() * candidates.length)];
+        const b = Math.floor(Math.random() * 5) + 2;
+        correctAnswer = a * b;
+        question = `${a} × ${b} = ?`;
+      }
+
+      const [d1, d2] = generateDistractors(correctAnswer);
+      const options = [correctAnswer, d1, d2].sort(() => Math.random() - 0.5);
+      const correctIndex = options.indexOf(correctAnswer);
+
+      return { question, correctAnswer, options, correctIndex };
+    }
+
+    // -----------------------------------------------------------
+    // ENTITY: BIRD
+    // -----------------------------------------------------------
+    class Bird {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = 18;
+        this.vy = 0;
+        this.gravity = 0.38;
+        this.jumpForce = -7.5;
+        this.rotation = 0;
+        this.wingAngle = 0;
+      }
+      jump() {
+        this.vy = this.jumpForce;
+      }
+      update() {
+        this.vy += this.gravity;
+        this.y += this.vy;
+        const targetRot = Math.min(Math.PI / 2.3, Math.max(-Math.PI / 4, this.vy * 0.08));
+        this.rotation += (targetRot - this.rotation) * 0.2;
+        this.wingAngle = this.vy < 0 ? Math.sin(Date.now() * 0.03) * 0.8 : 0.1;
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+
+        // Body gradient
+        const bodyGrad = ctx.createRadialGradient(-4, -4, 2, 0, 0, this.radius);
+        bodyGrad.addColorStop(0, '#fef08a');
+        bodyGrad.addColorStop(0.6, '#facc15');
+        bodyGrad.addColorStop(1, '#eab308');
+
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = bodyGrad;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ca8a04';
+        ctx.stroke();
+
+        // Belly
+        ctx.beginPath();
+        ctx.arc(-2, 3, this.radius * 0.65, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        // Wing
+        ctx.save();
+        ctx.translate(-5, 0);
+        ctx.rotate(this.wingAngle);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.radius * 0.65, this.radius * 0.42, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#d97706';
+        ctx.stroke();
+        ctx.restore();
+
+        // Eye
+        ctx.beginPath();
+        ctx.arc(7, -5, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Pupil
+        ctx.beginPath();
+        ctx.arc(8.5, -5, 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = '#1e293b';
+        ctx.fill();
+
+        // Eye highlight
+        ctx.beginPath();
+        ctx.arc(9.5, -6.5, 1.3, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        // Beak
+        ctx.beginPath();
+        ctx.moveTo(this.radius - 2, -2);
+        ctx.lineTo(this.radius + 12, 1);
+        ctx.lineTo(this.radius - 1, 7);
+        ctx.closePath();
+        ctx.fillStyle = '#f97316';
+        ctx.fill();
+        ctx.strokeStyle = '#c2410c';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.restore();
+      }
+    }
+
+    // -----------------------------------------------------------
+    // ENTITY: OBSTACLE (3 PORTALS WALL)
+    // -----------------------------------------------------------
+    class Obstacle {
+      constructor(x, speed) {
+        this.x = x;
+        this.width = 76;
+        this.speed = speed;
+        this.problem = generateMathProblem();
+        this.scored = false;
+
+        this.portals = [
+          { top: 50, bottom: 165, value: this.problem.options[0], isCorrect: this.problem.correctIndex === 0 },
+          { top: 225, bottom: 340, value: this.problem.options[1], isCorrect: this.problem.correctIndex === 1 },
+          { top: 400, bottom: 515, value: this.problem.options[2], isCorrect: this.problem.correctIndex === 2 }
+        ];
+      }
+      update() {
+        this.x -= this.speed;
+      }
+      draw(ctx, groundY) {
+        ctx.save();
+        // Solid wall segments
+        const wallSegments = [
+          { y: 0, h: 50 },
+          { y: 165, h: 60 },
+          { y: 340, h: 60 },
+          { y: 515, h: groundY - 515 }
+        ];
+
+        for (const seg of wallSegments) {
+          if (seg.h <= 0) continue;
+          const wallGrad = ctx.createLinearGradient(this.x, seg.y, this.x + this.width, seg.y);
+          wallGrad.addColorStop(0, '#334155');
+          wallGrad.addColorStop(0.3, '#475569');
+          wallGrad.addColorStop(0.8, '#334155');
+          wallGrad.addColorStop(1, '#1e293b');
+
+          ctx.fillStyle = wallGrad;
+          ctx.fillRect(this.x, seg.y, this.width, seg.h);
+
+          ctx.strokeStyle = '#64748b';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(this.x, seg.y, this.width, seg.h);
+        }
+
+        // Draw 3 Portals
+        this.portals.forEach((p, idx) => {
+          const portalCenterY = (p.top + p.bottom) / 2;
+          const portalCenterX = this.x + this.width / 2;
+
+          const badgeW = 60;
+          const badgeH = 34;
+          const badgeX = portalCenterX - badgeW / 2;
+          const badgeY = portalCenterY - badgeH / 2;
+
+          // Glowing badge
+          ctx.beginPath();
+          ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 10);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#0284c7';
+          ctx.stroke();
+
+          // Value
+          ctx.font = 'bold 18px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#0f172a';
+          ctx.fillText(p.value.toString(), portalCenterX, portalCenterY);
+
+          // Label
+          ctx.font = 'bold 9px sans-serif';
+          ctx.fillStyle = '#64748b';
+          ctx.fillText(idx === 0 ? 'TRÊN' : idx === 1 ? 'GIỮA' : 'DƯỚI', portalCenterX, badgeY - 7);
+        });
+
+        ctx.restore();
+      }
+    }
+
+    // -----------------------------------------------------------
+    // ENTITY: PARTICLE
+    // -----------------------------------------------------------
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        const angle = Math.random() * Math.PI * 2;
+        const spd = Math.random() * 4 + 1.5;
+        this.vx = Math.cos(angle) * spd;
+        this.vy = Math.sin(angle) * spd;
+        this.size = Math.random() * 4 + 2;
+        this.life = 1;
+        this.decay = Math.random() * 0.03 + 0.02;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life -= this.decay;
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // -----------------------------------------------------------
+    // GAME ENGINE
+    // -----------------------------------------------------------
+    class Game {
+      constructor() {
+        this.canvas = document.getElementById('game-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.sound = new SoundManager();
+
+        this.virtualW = 800;
+        this.virtualH = 600;
+        this.groundY = 530;
+
+        this.bird = new Bird(160, 260);
+        this.obstacles = [];
+        this.particles = [];
+        this.score = 0;
+        this.highScore = parseInt(localStorage.getItem('mathy_bird_high') || '0', 10);
+        this.speed = 2.7;
+        this.state = 'START'; // START, PLAYING, GAMEOVER
+
+        this.initCanvas();
+        this.bindEvents();
+        this.loop();
+      }
+
+      initCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = this.virtualW * dpr;
+        this.canvas.height = this.virtualH * dpr;
+        this.ctx.scale(dpr, dpr);
+      }
+
+      bindEvents() {
+        const flap = () => {
+          if (this.state === 'START') {
+            this.start();
+          } else if (this.state === 'PLAYING') {
+            this.bird.jump();
+            this.sound.playJump();
+            for (let i = 0; i < 3; i++) {
+              this.particles.push(new Particle(this.bird.x - 10, this.bird.y + 8, '#fef08a'));
+            }
+          }
+        };
+
+        window.addEventListener('keydown', (e) => {
+          if (e.code === 'Space' || e.code === 'ArrowUp') {
+            e.preventDefault();
+            if (this.state === 'GAMEOVER') {
+              this.start();
+            } else {
+              flap();
+            }
+          }
+        });
+
+        this.canvas.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          flap();
+        });
+
+        document.getElementById('start-btn').addEventListener('click', () => this.start());
+        document.getElementById('restart-btn').addEventListener('click', () => this.start());
+
+        const soundBtn = document.getElementById('sound-btn');
+        soundBtn.addEventListener('click', () => {
+          this.sound.enabled = !this.sound.enabled;
+          soundBtn.innerText = this.sound.enabled ? '🔊 Âm thanh' : '🔇 Tắt tiếng';
+        });
+      }
+
+      start() {
+        this.bird = new Bird(160, 260);
+        this.obstacles = [new Obstacle(820, 2.7)];
+        this.particles = [];
+        this.score = 0;
+        this.speed = 2.7;
+        this.state = 'PLAYING';
+
+        document.getElementById('score-text').innerText = '0';
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('gameover-screen').style.display = 'none';
+        document.getElementById('math-banner').style.display = 'flex';
+        document.getElementById('math-question').innerText = this.obstacles[0].problem.question;
+
+        this.bird.jump();
+        this.sound.playJump();
+      }
+
+      gameOver(reason) {
+        this.state = 'GAMEOVER';
+        this.sound.playCrash();
+
+        for (let i = 0; i < 16; i++) {
+          this.particles.push(new Particle(this.bird.x, this.bird.y, '#ef4444'));
+        }
+
+        if (this.score > this.highScore) {
+          this.highScore = this.score;
+          localStorage.setItem('mathy_bird_high', this.highScore.toString());
+        }
+
+        document.getElementById('final-score').innerText = this.score.toString();
+        document.getElementById('high-score').innerText = this.highScore.toString();
+        document.getElementById('gameover-reason').innerText = reason;
+        document.getElementById('math-banner').style.display = 'none';
+        document.getElementById('gameover-screen').style.display = 'flex';
+      }
+
+      update() {
+        if (this.state === 'PLAYING') {
+          this.bird.update();
+
+          // Collision with ceiling and ground
+          if (this.bird.y - this.bird.radius <= 0) {
+            this.gameOver('Chạm nóc màn hình!');
+            return;
+          }
+          if (this.bird.y + this.bird.radius >= this.groundY) {
+            this.gameOver('Rơi xuống mặt đất!');
+            return;
+          }
+
+          // Obstacles update & collision
+          for (let i = this.obstacles.length - 1; i >= 0; i--) {
+            const obs = this.obstacles[i];
+            obs.update();
+
+            const bLeft = this.bird.x - this.bird.radius;
+            const bRight = this.bird.x + this.bird.radius;
+            const oLeft = obs.x;
+            const oRight = obs.x + obs.width;
+
+            // Inside obstacle X span
+            if (bRight > oLeft && bLeft < oRight) {
+              let inAnyPortal = false;
+              let isCorrect = false;
+
+              for (const p of obs.portals) {
+                if (this.bird.y - this.bird.radius >= p.top && this.bird.y + this.bird.radius <= p.bottom) {
+                  inAnyPortal = true;
+                  if (p.isCorrect) isCorrect = true;
+                  break;
+                }
+              }
+
+              if (!inAnyPortal) {
+                this.gameOver('Va vào tường chướng ngại vật!');
+                return;
+              } else if (!isCorrect) {
+                this.gameOver('Chọn sai đáp án! Bạn đã bay vào cổng sai.');
+                return;
+              }
+            }
+
+            // Successfully passed obstacle
+            if (!obs.scored && bLeft > oRight) {
+              obs.scored = true;
+              this.score++;
+              document.getElementById('score-text').innerText = this.score.toString();
+              this.sound.playCorrect();
+
+              for (let p = 0; p < 16; p++) {
+                this.particles.push(new Particle(oRight, this.bird.y, '#f59e0b'));
+              }
+
+              // Speed increase every 5 points
+              if (this.score % 5 === 0) {
+                this.speed = Math.min(4.6, this.speed + 0.35);
+              }
+            }
+
+            // Remove off-screen
+            if (obs.x + obs.width < -100) {
+              this.obstacles.splice(i, 1);
+            }
+          }
+
+          // Spawn next obstacle
+          const lastObs = this.obstacles[this.obstacles.length - 1];
+          if (!lastObs || lastObs.x < this.virtualW - 360) {
+            this.obstacles.push(new Obstacle(this.virtualW + 40, this.speed));
+          }
+
+          // Update HUD Question
+          const upcoming = this.obstacles.find(o => o.x + o.width > this.bird.x);
+          if (upcoming) {
+            document.getElementById('math-question').innerText = upcoming.problem.question;
+          }
+        }
+
+        // Particles
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.update();
+          if (p.life <= 0) this.particles.splice(i, 1);
+        }
+      }
+
+      render() {
+        const ctx = this.ctx;
+        const w = this.virtualW;
+        const h = this.virtualH;
+
+        // Sky
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, this.groundY);
+        skyGrad.addColorStop(0, '#38bdf8');
+        skyGrad.addColorStop(0.7, '#bae6fd');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // Obstacles
+        for (const obs of this.obstacles) {
+          obs.draw(ctx, this.groundY);
+        }
+
+        // Bird
+        this.bird.draw(ctx);
+
+        // Particles
+        for (const p of this.particles) {
+          p.draw(ctx);
+        }
+
+        // Ground
+        const groundGrad = ctx.createLinearGradient(0, this.groundY, 0, h);
+        groundGrad.addColorStop(0, '#15803d');
+        groundGrad.addColorStop(0.15, '#22c55e');
+        groundGrad.addColorStop(0.2, '#78350f');
+        groundGrad.addColorStop(1, '#451a03');
+        ctx.fillStyle = groundGrad;
+        ctx.fillRect(0, this.groundY, w, h - this.groundY);
+        ctx.fillStyle = '#4ade80';
+        ctx.fillRect(0, this.groundY, w, 5);
+      }
+
+      loop() {
+        this.update();
+        this.render();
+        requestAnimationFrame(() => this.loop());
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      new Game();
+    });
+  </script>
+</body>
+</html>
