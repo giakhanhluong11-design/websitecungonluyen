@@ -90,7 +90,7 @@ interface CourseLessonModalProps {
   onSelectModule?: (mod: CourseModule) => void;
   onClose: () => void;
   isCompleted: boolean;
-  onToggleComplete: (moduleId: string) => void;
+  onCompleteLesson: (moduleId: string) => void;
   onStartPractice?: (subjectId: string, topicId: string) => void;
 }
 
@@ -107,19 +107,21 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
   onSelectModule,
   onClose,
   isCompleted,
-  onToggleComplete,
+  onCompleteLesson,
   onStartPractice
 }) => {
   const [activeTab, setActiveTab] = useState<'theory' | 'formulas' | 'exercises' | 'mistakes'>('theory');
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [showExplanations, setShowExplanations] = useState<Record<string, boolean>>({});
+  const [hasReadTheory, setHasReadTheory] = useState<boolean>(isCompleted);
 
   // Reset tab when module changes
   useEffect(() => {
     setActiveTab('theory');
     setSelectedAnswers({});
     setShowExplanations({});
-  }, [module?.id]);
+    setHasReadTheory(isCompleted);
+  }, [module?.id, isCompleted]);
 
   // Handle keyboard navigation (Escape = close, ArrowLeft = prev, ArrowRight = next)
   useEffect(() => {
@@ -177,6 +179,11 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
     }
   };
 
+  const exercises = lesson?.exercises || [];
+  const answeredCount = exercises.filter(ex => selectedAnswers[ex.id] !== undefined).length;
+  const allExercisesDone = exercises.length === 0 || answeredCount === exercises.length;
+  const isEligibleToComplete = hasReadTheory && allExercisesDone;
+
   const handleSelectOption = (exerciseId: string, option: string) => {
     setSelectedAnswers(prev => ({ ...prev, [exerciseId]: option }));
   };
@@ -232,7 +239,7 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
           </div>
         </div>
 
-        {/* Right: 2 Nút Tiến/Lùi trên Header + Đánh dấu đã học + Nút Đóng */}
+        {/* Right: 2 Nút Tiến/Lùi trên Header + Trạng thái hoàn thành + Nút Đóng */}
         <div className="flex items-center gap-2 shrink-0">
           {/* 2 Nút Tiến / Lùi nhỏ gọn trên Header */}
           <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-700 rounded-xl p-1 bg-slate-50 dark:bg-slate-800">
@@ -271,28 +278,23 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
             </button>
           </div>
 
-          {/* Mark Complete */}
-          <button
-            id={`btn-toggle-complete-${module.id}`}
-            onClick={() => onToggleComplete(module.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-              isCompleted
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-400 dark:border-emerald-800'
-                : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
-            }`}
-          >
-            {isCompleted ? (
-              <>
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                <span className="hidden sm:inline">Đã hoàn thành</span>
-              </>
-            ) : (
-              <>
-                <Circle className="h-4 w-4 text-slate-400" />
-                <span className="hidden sm:inline">Đánh dấu đã học</span>
-              </>
-            )}
-          </button>
+          {/* Trạng thái / Tiêu chí hoàn thành (Không cho bấm ảo) */}
+          {isCompleted ? (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-400 dark:border-emerald-800 shadow-2xs">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="hidden sm:inline">Đã hoàn thành</span>
+            </div>
+          ) : (
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+              <span className={hasReadTheory ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400"}>
+                {hasReadTheory ? "✓ Lý thuyết" : "○ Lý thuyết"}
+              </span>
+              <span className="text-slate-300 dark:text-slate-600">|</span>
+              <span className={allExercisesDone ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400"}>
+                {allExercisesDone ? `✓ Bài tập (${answeredCount}/${exercises.length})` : `○ Bài tập (${answeredCount}/${exercises.length})`}
+              </span>
+            </div>
+          )}
 
           {/* Practice Action */}
           {onStartPractice && (
@@ -355,6 +357,32 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
                   </div>
                 </div>
               ))}
+
+              {/* Nút xác nhận đã đọc xong lý thuyết */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+                <div className="text-xs sm:text-sm text-indigo-950 dark:text-indigo-200">
+                  <div className="font-bold flex items-center gap-1.5">
+                    <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>Bước 1: Nắm vững lý thuyết chuyên đề</span>
+                  </div>
+                  <p className="mt-0.5 text-slate-600 dark:text-slate-400 text-xs">
+                    Sau khi đọc xong các định nghĩa và quy tắc, hãy bấm xác nhận để chuyển sang bài tập tự luyện.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHasReadTheory(true);
+                    setActiveTab('exercises');
+                    const container = document.getElementById('lesson-content-scroll');
+                    if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer shrink-0 flex items-center gap-1.5 active:scale-95"
+                >
+                  <span>✓ Đã đọc xong lý thuyết → Làm bài tập</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
 
@@ -560,6 +588,70 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
                     Chưa có câu hỏi cho phần này.
                   </div>
                 )}
+
+                {/* Completion Box in Exercises Tab */}
+                {isCompleted ? (
+                  <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 flex items-center justify-between gap-3">
+                    <div className="text-xs text-emerald-900 dark:text-emerald-200 flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span><strong>Bạn đã hoàn thành chuyên đề này!</strong> Toàn bộ bài tập đã được ghi nhận.</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 text-white shadow-lg space-y-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div>
+                        <div className="font-black text-sm sm:text-base flex items-center gap-2">
+                          <Sparkles className="w-5 h-5 text-amber-300" />
+                          <span>Điều kiện hoàn thành chuyên đề</span>
+                        </div>
+                        <div className="text-xs text-indigo-100 mt-1 space-y-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <span>{hasReadTheory ? '✓' : '○'} Đọc hết lý thuyết:</span>
+                            <strong className={hasReadTheory ? 'text-emerald-300 font-bold' : 'text-amber-200'}>
+                              {hasReadTheory ? 'Đã hoàn tất' : 'Chưa xác nhận đọc'}
+                            </strong>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span>{allExercisesDone ? '✓' : '○'} Làm bài tập tự luyện:</span>
+                            <strong className={allExercisesDone ? 'text-emerald-300 font-bold' : 'text-amber-200'}>
+                              {allExercisesDone ? `Đã làm đủ ${exercises.length}/${exercises.length} câu` : `Còn ${exercises.length - answeredCount} câu chưa làm`}
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 w-full sm:w-auto">
+                        {isEligibleToComplete ? (
+                          <button
+                            type="button"
+                            onClick={() => onCompleteLesson(module.id)}
+                            className="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+                          >
+                            <Flame className="w-4 h-4 text-orange-600 fill-orange-600 animate-pulse" />
+                            <span>Xác nhận hoàn thành & Nhận Streak 🔥</span>
+                          </button>
+                        ) : !hasReadTheory ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveTab('theory');
+                              const container = document.getElementById('lesson-content-scroll');
+                              if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs transition-colors cursor-pointer"
+                          >
+                            Quay lại đọc lý thuyết
+                          </button>
+                        ) : (
+                          <div className="text-[11px] text-amber-200 font-semibold bg-black/20 px-3 py-2 rounded-xl text-center">
+                            Trả lời đủ {exercises.length} câu để hoàn tất
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -579,7 +671,7 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
                 <div className="space-y-3">
                   {module.mistakesToAvoid.map((mistake, idx) => (
                     <div 
-                      key={idx}
+                      key={idx} 
                       className="p-4 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 flex items-start gap-3"
                     >
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-200 text-amber-800 dark:bg-amber-900 dark:text-amber-200 font-bold text-xs mt-0.5">
@@ -597,30 +689,39 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
               <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl p-6 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   <h4 className="font-extrabold text-base sm:text-lg">
-                    {isCompleted ? 'Bạn đã hoàn thành bài học này! 🎉' : 'Hoàn tất bài học này'}
+                    {isCompleted ? 'Bạn đã hoàn thành bài học này! 🎉' : isEligibleToComplete ? 'Đã đủ điều kiện hoàn thành bài học! 🔥' : 'Tiến trình hoàn thành bài học'}
                   </h4>
-                  <p className="text-xs sm:text-sm opacity-90">
-                    Đánh dấu đã học để ghi nhận vào thanh tiến độ ôn thi của bạn.
+                  <p className="text-xs sm:text-sm opacity-90 mt-1">
+                    {isCompleted
+                      ? 'Tiến độ chuyên đề đã được lưu vào hệ thống và chuỗi học tập của bạn.'
+                      : isEligibleToComplete
+                      ? 'Bạn đã đọc hết lý thuyết và trả lời đầy đủ các bài tập tự luyện.'
+                      : `Điều kiện: Đọc lý thuyết (${hasReadTheory ? '✓ Xong' : 'Chưa xong'}) và làm bài tập (${answeredCount}/${exercises.length} câu).`}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => onToggleComplete(module.id)}
-                    className="px-4 py-2 rounded-xl bg-white text-emerald-800 hover:bg-emerald-50 font-extrabold text-xs shadow-xs transition-all cursor-pointer"
-                  >
-                    {isCompleted ? 'Bỏ đánh dấu hoàn thành' : 'Đánh dấu đã học xong ✓'}
-                  </button>
+                  {!isCompleted && isEligibleToComplete && (
+                    <button
+                      type="button"
+                      onClick={() => onCompleteLesson(module.id)}
+                      className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
+                    >
+                      <Flame className="w-4 h-4 text-orange-600 fill-orange-600 animate-pulse" />
+                      <span>Hoàn thành & Nhận Streak 🔥</span>
+                    </button>
+                  )}
 
                   {nextModule && (
                     <button
+                      type="button"
                       onClick={() => {
                         if (onSelectModule) {
                           onSelectModule(nextModule);
                           setActiveTab('theory');
                         }
                       }}
-                      className="px-4 py-2 rounded-xl bg-emerald-800/80 hover:bg-emerald-800 text-white font-bold text-xs border border-emerald-400/40 transition-all cursor-pointer"
+                      className="px-4 py-2.5 rounded-xl bg-emerald-800/80 hover:bg-emerald-800 text-white font-bold text-xs border border-emerald-400/40 transition-all cursor-pointer"
                     >
                       Sang bài tiếp theo: {nextModule.code} →
                     </button>

@@ -7,6 +7,8 @@ import {
   getUserProgress,
   syncWithCloud,
   toggleTopicCompleted,
+  completeTopic,
+  TopicCompletionResult,
   savePracticeAttempt,
   saveExamAttempt,
   toggleBookmarkExam,
@@ -20,6 +22,8 @@ import { UserProgress, UserProfile, PracticeAttempt, ExamAttempt } from "../type
 
 interface ProgressStore {
   progress: UserProgress;
+  streakCelebration: { show: boolean; streakDays: number } | null;
+  setStreakCelebration: (data: { show: boolean; streakDays: number } | null) => void;
 
   // Auth
   handleLoginEmail: (
@@ -34,6 +38,7 @@ interface ProgressStore {
 
   // Progress mutations
   handleToggleTopicComplete: (topicId: string) => void;
+  handleCompleteTopic: (topicId: string) => TopicCompletionResult;
   handleSavePractice: (attempt: PracticeAttempt) => void;
   handleSaveExam: (attempt: ExamAttempt) => void;
   handleToggleBookmark: (examId: string) => void;
@@ -45,6 +50,11 @@ interface ProgressStore {
 
 export const useProgressStore = create<ProgressStore>((set, get) => ({
   progress: getUserProgress(),
+  streakCelebration: null,
+
+  setStreakCelebration: (data) => {
+    set({ streakCelebration: data });
+  },
 
   handleLoginEmail: (email, name, extraProfile, rememberLogin) => {
     const updated = loginEmailAccount(email, name, extraProfile, rememberLogin);
@@ -73,6 +83,15 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
   handleToggleTopicComplete: (topicId) => {
     const updated = toggleTopicCompleted(topicId);
     set({ progress: updated });
+  },
+
+  handleCompleteTopic: (topicId) => {
+    const result = completeTopic(topicId);
+    set({ progress: result.updatedProgress });
+    if (result.streakIncreased) {
+      set({ streakCelebration: { show: true, streakDays: result.newStreak } });
+    }
+    return result;
   },
 
   handleSavePractice: (attempt) => {

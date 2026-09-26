@@ -23,6 +23,7 @@ import { Exam } from './types';
 import { useProgressStore } from './store/useProgressStore';
 import { useAppStore } from './store/useAppStore';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { StreakFlameCelebration } from './components/StreakFlameCelebration';
 
 export default function App() {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -30,11 +31,14 @@ export default function App() {
   // ── Stores ──────────────────────────────────────────────────────────────
   const {
     progress,
+    streakCelebration,
+    setStreakCelebration,
     handleLoginEmail,
     handleSyncCloud,
     handleLogout,
     handleLoginGoogle,
     handleToggleTopicComplete,
+    handleCompleteTopic,
     handleSavePractice,
     handleSaveExam,
     handleToggleBookmark,
@@ -262,7 +266,7 @@ export default function App() {
             progress={progress}
             activeSubject={activeSubject}
             setActiveSubject={setActiveSubject}
-            onToggleTopicComplete={handleToggleTopicComplete}
+            onCompleteTopic={handleCompleteTopic}
             onStartPractice={(subj, topId) => {
               useAppStore.setState({
                 selectedPracticeSubject: subj as any,
@@ -403,6 +407,14 @@ export default function App() {
         onClose={closeAuthModal}
         onSuccess={handleLoginSuccess}
       />
+
+      {/* Streak Flame Celebration Modal */}
+      {streakCelebration?.show && (
+        <StreakFlameCelebration
+          streakDays={streakCelebration.streakDays}
+          onClose={() => setStreakCelebration(null)}
+        />
+      )}
 
     </div>
   );

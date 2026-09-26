@@ -131,14 +131,6 @@ export function loadUserProgress(): UserProgress {
       localStorage.removeItem('cung_on_luyen_progress_v2');
     }
 
-    const rememberLogin = isRememberLoginEnabled();
-    const sessionActive = typeof window !== 'undefined' && sessionStorage.getItem('cung_on_luyen_session_active') === 'true';
-
-    // Khi vào web, mặc định tài khoản là Khách trừ khi người dùng đã nhấn Lưu đăng nhập
-    if (!rememberLogin && !sessionActive) {
-      return { ...BLANK_GUEST_PROGRESS };
-    }
-
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       return { ...BLANK_GUEST_PROGRESS };
@@ -433,6 +425,78 @@ export function toggleTopicCompleted(topicId: string): UserProgress {
   };
   saveUserProgress(updated);
   return updated;
+}
+
+export interface TopicCompletionResult {
+  updatedProgress: UserProgress;
+  streakIncreased: boolean;
+  newStreak: number;
+  isAlreadyCompleted: boolean;
+}
+
+export function completeTopic(topicId: string): TopicCompletionResult {
+  const current = loadUserProgress();
+  const isAlreadyCompleted = current.completedTopicIds.includes(topicId);
+  const updatedCompletedIds = isAlreadyCompleted 
+    ? current.completedTopicIds 
+    : [...current.completedTopicIds, topicId];
+
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const y_yyyy = yesterday.getFullYear();
+  const y_mm = String(yesterday.getMonth() + 1).padStart(2, '0');
+  const y_dd = String(yesterday.getDate()).padStart(2, '0');
+  const yesterdayStr = `${y_yyyy}-${y_mm}-${y_dd}`;
+
+  let streakDays = current.streakDays || 0;
+  let streakIncreased = false;
+  let lastActiveDate = current.lastActiveDate;
+
+  // Streak increases max 1 time per day
+  if (lastActiveDate !== todayStr) {
+    if (lastActiveDate === yesterdayStr) {
+      streakDays += 1;
+    } else {
+      streakDays = 1;
+    }
+    lastActiveDate = todayStr;
+    streakIncreased = true;
+  }
+
+  const studyMins = 15; // Average 15 mins for reading theory and doing exercises of a module
+  const dailyStudyTime = { ...(current.dailyStudyTime || {}) };
+  dailyStudyTime[todayStr] = (dailyStudyTime[todayStr] || 0) + studyMins;
+
+  const updated: UserProgress = {
+    ...current,
+    completedTopicIds: updatedCompletedIds,
+    streakDays,
+    lastActiveDate,
+    dailyStudyTime,
+    studyTimeMinutes: (current.studyTimeMinutes || 0) + studyMins,
+  };
+
+  saveUserProgress(updated);
+
+  const uid = getCurrentUserId();
+  if (uid) {
+    saveProgressToFirestore(uid, updated).catch((err) => {
+      console.warn('Sync topic completion to Firestore error:', err);
+    });
+  }
+
+  return {
+    updatedProgress: updated,
+    streakIncreased,
+    newStreak: streakDays,
+    isAlreadyCompleted
+  };
 }
 
 function getUpdatedDailyStats(current: UserProgress, studyMins: number, countAsStreak: boolean): Partial<UserProgress> {

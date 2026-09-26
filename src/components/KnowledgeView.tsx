@@ -26,7 +26,7 @@ interface KnowledgeViewProps {
   progress: UserProgress;
   activeSubject: SubjectId;
   setActiveSubject: (subject: SubjectId) => void;
-  onToggleTopicComplete: (topicId: string) => void;
+  onCompleteTopic: (topicId: string) => void;
   onStartPractice: (subjectId: string, topicId: string) => void;
   initialSelectedTopic?: Topic | null;
 }
@@ -35,7 +35,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
   progress,
   activeSubject,
   setActiveSubject,
-  onToggleTopicComplete,
+  onCompleteTopic,
   onStartPractice
 }) => {
   // Modal states
@@ -254,21 +254,19 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
                 <div className="relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-300">
                   <TopicCardIllustration module={mod} />
                   
-                  {/* Nút đánh dấu hoàn thành nhanh góc trên bên trái */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleTopicComplete(mod.id);
-                    }}
-                    className="absolute top-2.5 left-2.5 p-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 shadow-sm hover:scale-110 transition-transform cursor-pointer"
-                    title={isDone ? 'Đánh dấu chưa hoàn thành' : 'Đánh dấu đã hoàn thành'}
-                  >
+                  {/* Huy hiệu trạng thái học tập thực tế */}
+                  <div className="absolute top-2.5 left-2.5 z-10">
                     {isDone ? (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600/95 text-white text-[10px] font-bold shadow-md backdrop-blur-xs">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-200" />
+                        <span>Đã hoàn thành</span>
+                      </span>
                     ) : (
-                      <Circle className="h-5 w-5 text-slate-300 hover:text-slate-400 dark:text-slate-600" />
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900/70 text-slate-200 text-[10px] font-semibold backdrop-blur-xs shadow-xs">
+                        <span>Cần học & làm bài</span>
+                      </span>
                     )}
-                  </button>
+                  </div>
                 </div>
 
                 {/* 2. Phần nội dung chuyên đề (Theo đúng bức ảnh tham khảo) */}
@@ -358,7 +356,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
         onSelectModule={(mod) => setSelectedModule(mod)}
         onClose={() => setSelectedModule(null)}
         isCompleted={selectedModule ? (progress.completedTopicIds.includes(selectedModule.id) || progress.completedTopicIds.includes(`toan-${selectedModule.code.toLowerCase()}`)) : false}
-        onToggleComplete={(moduleId) => onToggleTopicComplete(moduleId)}
+        onCompleteLesson={(moduleId) => onCompleteTopic(moduleId)}
         onStartPractice={(subjectId, topicId) => {
           setSelectedModule(null);
           onStartPractice(subjectId, topicId);
@@ -370,8 +368,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
         isOpen={isLesson1Open}
         onClose={() => setIsLesson1Open(false)}
         onCompleteLesson={() => {
-          onToggleTopicComplete('toan-t1-can-thuc');
-          onToggleTopicComplete('toan-can-bac-hai');
+          onCompleteTopic('toan-t1-can-thuc');
         }}
       />
     </div>

@@ -265,6 +265,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
         {/* Right side: AI Config + Notifications + Profile Avatar */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Streak Flame Badge */}
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-orange-200/90 dark:border-orange-800/60 bg-gradient-to-r from-orange-50/90 to-amber-50/90 dark:from-orange-950/40 dark:to-amber-950/40 text-orange-700 dark:text-orange-300 text-xs font-black shadow-2xs select-none"
+            title={`Chuỗi học tập liên tục: ${progress.streakDays || 0} ngày. Đọc lý thuyết & làm bài tập chuyên đề để duy trì!`}
+          >
+            <Flame className={`w-4 h-4 ${progress.streakDays > 0 ? 'text-orange-500 fill-orange-500 animate-flame-pulse-glow drop-shadow-xs' : 'text-slate-400'}`} />
+            <span>{progress.streakDays || 0}</span>
+            <span className="hidden sm:inline font-semibold text-[11px] text-orange-600/90 dark:text-orange-400/90">ngày</span>
+          </div>
+
           {/* Gemini AI Config button */}
           {onOpenGeminiConfig && (
             <button

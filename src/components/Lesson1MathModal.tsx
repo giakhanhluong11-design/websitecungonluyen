@@ -698,9 +698,10 @@ export const Lesson1MathModal: React.FC<LessonModalProps> = ({
                       onCompleteLesson();
                       onClose();
                     }}
-                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-extrabold text-white shadow-md cursor-pointer transition-all"
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-xs font-black text-white shadow-md cursor-pointer transition-all flex items-center gap-1.5"
                   >
-                    Đánh dấu đã hoàn thành Bài 1
+                    <Flame className="w-4 h-4 text-white fill-white animate-pulse" />
+                    <span>Xác nhận hoàn thành & Thắp lửa Streak 🔥</span>
                   </button>
                 </div>
               </div>
