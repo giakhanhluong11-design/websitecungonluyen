@@ -27,7 +27,10 @@ import {
   Bookmark,
   Share2,
   Calendar,
-  Layers
+  Layers,
+  RotateCcw,
+  SlidersHorizontal,
+  AlertCircle
 } from 'lucide-react';
 import {
   LineChart,
@@ -72,25 +75,58 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
   onUpdateTargetSchool,
 }) => {
   // ── USER SIMULATION SCORE ────────────────────────────────────────────────
-  // ── BẢNG TÌM TRƯỜNG CÁ NHÂN ────────────────────────────────────────────
-  const [personalScoreInput, setPersonalScoreInput] = useState<string>('24.5');
+  // ── BẢNG TÌM TRƯỜNG CÁ NHÂN (THEO YÊU CẦU NGƯỜI DÙNG) ───────────────────
+  const [personalScoreInput, setPersonalScoreInput] = useState<string>(
+    targetScore ? String(targetScore) : ''
+  );
   const [selectedPersonalDistrict, setSelectedPersonalDistrict] = useState<string>('Tất cả quận/huyện');
-  
-  const parsedPersonalScore = useMemo(() => {
-    const val = parseFloat(personalScoreInput);
-    return isNaN(val) ? null : val;
-  }, [personalScoreInput]);
+  const [scoreTolerance, setScoreTolerance] = useState<number>(1.0);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchedParams, setSearchedParams] = useState<{
+    score: number;
+    district: string;
+    tolerance: number;
+  } | null>(null);
+
+  const handleSearchPersonalSchools = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const cleanStr = personalScoreInput.trim().replace(',', '.');
+    const val = parseFloat(cleanStr);
+    if (isNaN(val)) {
+      setSearchError('Vui lòng nhập điểm số dự kiến của bạn (thang điểm 0 – 30).');
+      return;
+    }
+    if (val < 0 || val > 30) {
+      setSearchError('Điểm số dự kiến phải nằm trong khoảng từ 0 đến 30 điểm.');
+      return;
+    }
+    setSearchError(null);
+    setSearchedParams({
+      score: val,
+      district: selectedPersonalDistrict,
+      tolerance: scoreTolerance,
+    });
+    setHasSearched(true);
+  };
+
+  const handleResetPersonalSearch = () => {
+    setHasSearched(false);
+    setSearchedParams(null);
+    setSearchError(null);
+  };
 
   const suggestedSchools = useMemo(() => {
-    if (parsedPersonalScore === null) return [];
-    return HCM_SCHOOLS_DATA.filter(school => {
-      if (selectedPersonalDistrict !== 'Tất cả quận/huyện' && school.district !== selectedPersonalDistrict) {
+    if (!hasSearched || !searchedParams) return [];
+    const { score, district, tolerance } = searchedParams;
+    return HCM_SCHOOLS_DATA.filter((school) => {
+      if (district !== 'Tất cả quận/huyện' && school.district !== district) {
         return false;
       }
       const score2025 = school.scores['2025'];
-      return Math.abs(score2025 - parsedPersonalScore) <= 1.0;
-    }).sort((a, b) => Math.abs(a.scores['2025'] - parsedPersonalScore) - Math.abs(b.scores['2025'] - parsedPersonalScore));
-  }, [parsedPersonalScore, selectedPersonalDistrict]);
+      return Math.abs(score2025 - score) <= tolerance;
+    }).sort((a, b) => Math.abs(a.scores['2025'] - score) - Math.abs(b.scores['2025'] - score));
+  }, [hasSearched, searchedParams]);
   
   const handleSetNV1WithCheck = (school: HCMSchool, userScore: number | null) => {
     const schoolScore = school.scores['2025'];
@@ -393,36 +429,61 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
         </div>
       )}
 
-            {/* ── BẢNG TÌM TRƯỜNG PHÙ HỢP CÁ NHÂN ───────────────────────────────── */}
-      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50 to-indigo-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/80 p-5 sm:p-7 shadow-xl space-y-4 relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* ── BẢNG TÌM TRƯỜNG PHÙ HỢP CÁ NHÂN (THEO FORM TIÊU CHÍ) ───────────────── */}
+      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50 to-indigo-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/80 p-5 sm:p-7 shadow-xl space-y-5 relative overflow-hidden">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-4">
           <div>
             <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Target className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               TÌM TRƯỜNG PHÙ HỢP VỚI ĐIỂM DỰ KIẾN
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Nhập điểm của bạn để tìm các trường có mức điểm chuẩn chênh lệch tối đa 1 điểm.
+              Nhập điểm thi dự kiến, địa chỉ khu vực và khoảng độ lệch điểm mong muốn để lọc các trường THPT phù hợp.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 p-2 rounded-2xl border border-slate-200 dark:border-slate-700">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">Điểm của bạn:</span>
-              <input
-                type="number"
-                step="0.25"
-                min="0"
-                max="30"
-                value={personalScoreInput}
-                onChange={(e) => setPersonalScoreInput(e.target.value)}
-                className="w-16 h-8 text-center text-xs font-mono font-black text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500"
-                placeholder="24.5"
-              />
-            </div>
+          {hasSearched && (
+            <button
+              onClick={handleResetPersonalSearch}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer self-start sm:self-auto shadow-xs"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Đặt lại bộ lọc
+            </button>
+          )}
+        </div>
+
+        {/* ── FORM ĐIỀN TIÊU CHÍ TÌM KIẾM ── */}
+        <form onSubmit={handleSearchPersonalSchools} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 bg-white/80 dark:bg-slate-900/70 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 backdrop-blur-xs shadow-xs">
+          {/* Tiêu chí 1: Điểm số */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-indigo-500" />
+              Điểm số dự kiến:
+            </label>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={personalScoreInput}
+              onChange={(e) => {
+                setPersonalScoreInput(e.target.value);
+                if (searchError) setSearchError(null);
+              }}
+              className="w-full h-11 px-3.5 text-sm font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 shadow-xs"
+              placeholder="VD: 24.5 (thang 30)"
+            />
+          </div>
+
+          {/* Tiêu chí 2: Địa chỉ */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+              Địa chỉ / Khu vực:
+            </label>
             <select
               value={selectedPersonalDistrict}
               onChange={(e) => setSelectedPersonalDistrict(e.target.value)}
-              className="h-12 px-3 py-2 text-xs rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 font-medium"
+              className="w-full h-11 px-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 font-medium shadow-xs"
             >
               {HCM_DISTRICTS.map((d) => (
                 <option key={d} value={d}>
@@ -431,58 +492,165 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
               ))}
             </select>
           </div>
-        </div>
 
-        {parsedPersonalScore !== null && (
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-bold">
-                <tr>
-                  <th className="py-2.5 px-3">TÊN TRƯỜNG</th>
-                  <th className="py-2.5 px-3">QUẬN/HUYỆN</th>
-                  <th className="py-2.5 px-3 text-center">ĐIỂM CHUẨN (2025)</th>
-                  <th className="py-2.5 px-3 text-center">ĐỘ LỆCH</th>
-                  <th className="py-2.5 px-3 text-right">HÀNH ĐỘNG</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-850 bg-white dark:bg-slate-900">
-                {suggestedSchools.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-6 text-center text-slate-500">
-                      Không tìm thấy trường nào phù hợp trong khoảng điểm {parsedPersonalScore - 1}đ - {parsedPersonalScore + 1}đ.
-                    </td>
-                  </tr>
-                ) : (
-                  suggestedSchools.map((school) => {
-                    const diff = parsedPersonalScore - school.scores['2025'];
-                    return (
-                      <tr key={`sugg-${school.id}`} className="hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors">
-                        <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">{school.name}</td>
-                        <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">{school.district}</td>
-                        <td className="py-2.5 px-3 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                          {school.scores['2025'].toFixed(2)}
-                        </td>
-                        <td className="py-2.5 px-3 text-center font-mono">
-                          <span className={`px-2 py-0.5 rounded-full font-bold ${
-                            diff >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300'
-                          }`}>
-                            {diff > 0 ? '+' : ''}{diff.toFixed(2)}đ
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 text-right">
-                          <button
-                            onClick={() => handleSetNV1WithCheck(school, parsedPersonalScore)}
-                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold shadow-xs transition-colors cursor-pointer"
-                          >
-                            Đặt làm NV1
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+          {/* Tiêu chí 3: Độ lệch điểm */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
+              Độ lệch điểm:
+            </label>
+            <select
+              value={scoreTolerance}
+              onChange={(e) => setScoreTolerance(parseFloat(e.target.value))}
+              className="w-full h-11 px-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 font-medium shadow-xs"
+            >
+              <option value="0.5">± 0.50 điểm (Chênh lệch sát)</option>
+              <option value="1.0">± 1.00 điểm (Khuyên dùng)</option>
+              <option value="1.5">± 1.50 điểm (Lệch vừa phải)</option>
+              <option value="2.0">± 2.00 điểm (Mở rộng khoảng điểm)</option>
+              <option value="2.5">± 2.50 điểm (Khoảng an toàn)</option>
+              <option value="3.0">± 3.00 điểm (Khoảng rộng)</option>
+            </select>
+          </div>
+
+          {/* Nút Tìm kiếm */}
+          <div className="flex flex-col justify-end">
+            <button
+              type="submit"
+              className="h-11 w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white text-xs sm:text-sm font-bold rounded-xl shadow-md hover:shadow-indigo-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
+            >
+              <Search className="w-4 h-4" />
+              Tìm trường phù hợp
+            </button>
+          </div>
+        </form>
+
+        {/* Thông báo lỗi nếu chưa nhập điểm đúng chuẩn */}
+        {searchError && (
+          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-semibold animate-in fade-in duration-200">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{searchError}</span>
+          </div>
+        )}
+
+        {/* ── TRẠNG THÁI 1: CHƯA BẤM TÌM (KHÔNG ĐỀ XUẤT SẴN) ── */}
+        {!hasSearched ? (
+          <div className="text-center py-10 px-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-3 shadow-inner">
+              <Target className="w-6 h-6" />
+            </div>
+            <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200 mb-1">
+              Chưa có danh sách trường đề xuất
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+              Hãy điền <span className="font-semibold text-slate-700 dark:text-slate-300">điểm số</span>, chọn <span className="font-semibold text-slate-700 dark:text-slate-300">địa chỉ</span> và <span className="font-semibold text-slate-700 dark:text-slate-300">độ lệch điểm</span> ở form trên, sau đó nhấn nút <strong className="text-indigo-600 dark:text-indigo-400 font-semibold">"Tìm trường phù hợp"</strong> để hệ thống hiển thị danh sách trường chính xác nhất.
+            </p>
+          </div>
+        ) : (
+          /* ── TRẠNG THÁI 2: ĐÃ BẤM TÌM KIẾM ── */
+          <div className="space-y-3 animate-in fade-in duration-300">
+            {searchedParams && (
+              <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/60 text-xs">
+                <div className="flex flex-wrap items-center gap-2 text-slate-700 dark:text-slate-300">
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                    Kết quả tìm kiếm:
+                  </span>
+                  <span>Tìm thấy <strong className="text-slate-900 dark:text-white font-mono font-bold">{suggestedSchools.length}</strong> trường</span>
+                  <span className="text-slate-300 dark:text-slate-600">•</span>
+                  <span>Điểm dự kiến: <strong className="text-indigo-600 dark:text-indigo-400 font-mono font-bold">{searchedParams.score.toFixed(2)}</strong></span>
+                  <span className="text-slate-300 dark:text-slate-600">•</span>
+                  <span>Địa chỉ: <strong className="text-slate-900 dark:text-white font-semibold">{searchedParams.district}</strong></span>
+                  <span className="text-slate-300 dark:text-slate-600">•</span>
+                  <span>Khoảng điểm: <strong className="font-mono text-slate-900 dark:text-white">{(searchedParams.score - searchedParams.tolerance).toFixed(2)} – {(searchedParams.score + searchedParams.tolerance).toFixed(2)}</strong> (±{searchedParams.tolerance.toFixed(2)}đ)</span>
+                </div>
+              </div>
+            )}
+
+            {suggestedSchools.length === 0 ? (
+              <div className="text-center py-10 px-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Không tìm thấy trường nào phù hợp trong khoảng điểm {(searchedParams!.score - searchedParams!.tolerance).toFixed(2)}đ – {(searchedParams!.score + searchedParams!.tolerance).toFixed(2)}đ {searchedParams!.district !== 'Tất cả quận/huyện' ? `tại ${searchedParams!.district}` : ''}.
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                  Bạn có thể tăng độ lệch điểm để mở rộng danh sách hoặc chuyển sang tìm kiếm tại toàn bộ quận/huyện.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                  <button
+                    onClick={() => {
+                      const newTol = Number((searchedParams!.tolerance + 1).toFixed(1));
+                      setScoreTolerance(newTol);
+                      setSearchedParams({ ...searchedParams!, tolerance: newTol });
+                    }}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
+                  >
+                    Mở rộng độ lệch lên ±{(searchedParams!.tolerance + 1).toFixed(1)}đ
+                  </button>
+                  {searchedParams!.district !== 'Tất cả quận/huyện' && (
+                    <button
+                      onClick={() => {
+                        setSelectedPersonalDistrict('Tất cả quận/huyện');
+                        setSearchedParams({ ...searchedParams!, district: 'Tất cả quận/huyện' });
+                      }}
+                      className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+                    >
+                      Tìm tất cả quận/huyện
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-bold">
+                    <tr>
+                      <th className="py-2.5 px-3">TÊN TRƯỜNG</th>
+                      <th className="py-2.5 px-3">ĐỊA CHỈ (QUẬN/HUYỆN)</th>
+                      <th className="py-2.5 px-3 text-center">ĐIỂM CHUẨN (2025)</th>
+                      <th className="py-2.5 px-3 text-center">ĐỘ LỆCH</th>
+                      <th className="py-2.5 px-3 text-right">HÀNH ĐỘNG</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-850 bg-white dark:bg-slate-900">
+                    {suggestedSchools.map((school) => {
+                      const diff = searchedParams!.score - school.scores['2025'];
+                      return (
+                        <tr key={`sugg-${school.id}`} className="hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors">
+                          <td className="py-2.5 px-3">
+                            <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                              <span className="font-mono text-[10px] text-indigo-500 font-bold">[{getSchoolTicker(school)}]</span>
+                              <span>{school.name}</span>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">{school.district}</td>
+                          <td className="py-2.5 px-3 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                            {school.scores['2025'].toFixed(2)}
+                          </td>
+                          <td className="py-2.5 px-3 text-center font-mono">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-bold text-[11px] ${
+                              diff > 0
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300'
+                                : diff < 0
+                                ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300'
+                                : 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300'
+                            }`}>
+                              {diff > 0 ? `+${diff.toFixed(2)}đ (Dư)` : diff < 0 ? `${diff.toFixed(2)}đ (Thiếu)` : '0.00đ (Khớp)'}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-right">
+                            <button
+                              onClick={() => handleSetNV1WithCheck(school, searchedParams!.score)}
+                              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold shadow-xs transition-colors cursor-pointer"
+                            >
+                              Đặt làm NV1
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>
