@@ -13,9 +13,7 @@ import {
   Info,
   Search,
   Filter,
-  Check,
-  User,
-  PenTool
+  Check
 } from 'lucide-react';
 import { SubjectId, Topic, UserProgress } from '../types';
 import { COURSE_MODULES_DATA, CourseModule } from '../data/curriculumData';
@@ -281,23 +279,11 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
                       <BookOpen className="w-5 h-5 text-amber-700 dark:text-amber-400" />
                     </div>
 
-                    {/* Tên chuyên đề in hoa đậm & thông tin người phụ trách / nội dung */}
+                    {/* Tên chuyên đề in hoa đậm */}
                     <div className="min-w-0 flex-1">
                       <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
                         BÀI {lessonNumber}: {mod.title}
                       </h3>
-
-                      {/* Thông tin phụ: Người phụ trách & Số nội dung */}
-                      <div className="mt-2 space-y-1">
-                        <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-                          <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="font-medium truncate">Nguyễn Thị Huyền</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-                          <PenTool className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="font-medium">{mod.subtopics.length} nội dung</span>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
