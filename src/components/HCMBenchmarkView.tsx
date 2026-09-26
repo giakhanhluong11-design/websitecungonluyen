@@ -123,14 +123,21 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [selectedYear, setSelectedYear] = useState<HCMYear>('2025');
 
-  // ── TOP 10 PINNED CHART STATE ────────────────────────────────────────────
+  // ── MULTI-SCHOOL CHART STATE ────────────────────────────────────────────
   const top10Schools = useMemo(() => getTop10Schools(selectedYear), [selectedYear]);
   
-  // Active toggles for top 10 lines (default all active)
-  const [activeTop10Ids, setActiveTop10Ids] = useState<Record<string, boolean>>({});
+  const [activeSchoolIds, setActiveSchoolIds] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    top10Schools.slice(0, 3).forEach(s => { initial[s.id] = true; });
+    return initial;
+  });
 
-  const toggleTop10School = (schoolId: string) => {
-    setActiveTop10Ids((prev) => {
+  const activeSchools = useMemo(() => {
+    return HCM_SCHOOLS_DATA.filter(s => activeSchoolIds[s.id]);
+  }, [activeSchoolIds]);
+
+  const toggleSchoolInChart = (schoolId: string) => {
+    setActiveSchoolIds((prev) => {
       if (prev[schoolId]) {
         const next = { ...prev };
         delete next[schoolId];
@@ -146,34 +153,34 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
     });
   };
 
-  const selectOnlyTop10School = (schoolId: string) => {
-    const next: Record<string, boolean> = {};
-    top10Schools.forEach((s) => {
-      next[s.id] = s.id === schoolId;
-    });
-    setActiveTop10Ids(next);
+  const clearAllChartSchools = () => {
+    setActiveSchoolIds({});
   };
 
-  const resetAllTop10Toggles = () => {
-    const next: Record<string, boolean> = {};
-    top10Schools.forEach((s) => {
-      next[s.id] = true;
-    });
-    setActiveTop10Ids(next);
-  };
-
-  // Top 10 Multi-line Data across 2022 - 2025
-  const top10ChartData = useMemo(() => {
+  const multiSchoolChartData = useMemo(() => {
     return YEARS.map((year) => {
       const row: Record<string, any> = { year: `Năm ${year}` };
-      top10Schools.forEach((school) => {
+      activeSchools.forEach((school) => {
         row[school.id] = school.scores[year];
         row[`${school.id}_ticker`] = getSchoolTicker(school);
         row[`${school.id}_name`] = school.shortName;
       });
       return row;
     });
-  }, [top10Schools]);
+  }, [activeSchools]);
+
+  const [chartSearchTerm, setChartSearchTerm] = useState('');
+  const [showChartSuggestions, setShowChartSuggestions] = useState(false);
+  
+  const chartSuggestions = useMemo(() => {
+    if (!chartSearchTerm.trim()) return [];
+    const term = chartSearchTerm.toLowerCase();
+    return HCM_SCHOOLS_DATA.filter(s => 
+      s.name.toLowerCase().includes(term) || 
+      getSchoolTicker(s).toLowerCase().includes(term) ||
+      s.shortName.toLowerCase().includes(term)
+    ).slice(0, 5);
+  }, [chartSearchTerm]);
 
   // ── SELECTED SCHOOL FOR SINGLE TECHNICAL CHART ───────────────────────────
   // Default to Nguyễn Thượng Hiền (nch) or the user's target school
@@ -485,98 +492,9 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5 pb-5 border-b border-slate-200 dark:border-slate-800/80">
-          <div>
-            <div className="flex items-center gap-3">
-              <span className="flex h-3 w-3 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
-              </span>
-              <span className="text-[11px] font-mono tracking-widest uppercase font-black px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">
-                HỆ THỐNG PHÂN TÍCH ĐIỂM CHUẨN TS10 • TP. HỒ CHÍ MINH
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white mt-2 flex items-center gap-2">
-              <Activity className="w-7 h-7 text-indigo-400" />
-              <span>Biểu Đồ Phân Tích Điểm Chuẩn Tuyển Sinh 10</span>
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl leading-relaxed">
-              Bảng đồ thị đường biến động điểm chuẩn THPT TP.HCM theo thời gian thực (2022–2025). Tra cứu mã trường, phù hợp nguyện vọng và phân tích biên độ điểm chuẩn.
-            </p>
-          </div>
-
-          {/* Market Indices Box */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <div className="bg-white/90 dark:bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3 px-4 min-w-[140px] shadow-inner">
-              <div className="text-[10px] text-slate-400 font-mono font-semibold uppercase">TRUNG BÌNH ĐIỂM CHUẨN</div>
-              <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-white font-mono flex items-center gap-1.5 mt-0.5">
-                <span>{marketStats.avg}</span>
-                <span className="text-xs font-bold text-emerald-400 flex items-center">
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                  +0.35 (+1.7%)
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-white/90 dark:bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3 px-4 shadow-inner">
-              <div className="text-[10px] text-slate-400 font-mono font-semibold uppercase">THỐNG KÊ BIẾN ĐỘNG</div>
-              <div className="flex items-center gap-3 mt-1 text-xs font-mono font-bold">
-                <span className="text-emerald-400 flex items-center gap-0.5">
-                  ▲ {marketStats.gainers} Tăng
-                </span>
-                <span className="text-rose-400 flex items-center gap-0.5">
-                  ▼ {marketStats.losers} Giảm
-                </span>
-                <span className="text-amber-400">
-                  ▬ {marketStats.unch} Đứng
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Live Ticker Tape Bar */}
-        <div className="mt-4 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-          <span className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1 bg-white/90 dark:bg-slate-100/90 dark:bg-slate-50 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800">
-            <Sparkles className="w-3 h-3 text-amber-400" />
-            MÃ TRƯỜNG NỔI BẬT
-          </span>
-          <div className="flex items-center gap-2 shrink-0">
-            {top10Schools.map((s, idx) => {
-              const diff = getScoreDiff(s);
-              const isSelected = selectedSchool.id === s.id;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => setSelectedSchool(s)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
-                    isSelected
-                      ? 'bg-indigo-600 text-white border-indigo-400 shadow-md scale-105'
-                      : 'bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-slate-700 hover:bg-slate-850'
-                  }`}
-                >
-                  <span className="font-black text-indigo-400">#{idx + 1} {getSchoolTicker(s)}</span>
-                  <span className="font-bold">{s.scores['2025'].toFixed(2)}</span>
-                  <span
-                    className={`text-[11px] font-bold flex items-center ${
-                      diff.diff > 0
-                        ? 'text-emerald-400'
-                        : diff.diff < 0
-                        ? 'text-rose-400'
-                        : 'text-amber-400'
-                    }`}
-                  >
-                    {diff.diff > 0 ? `▲+${diff.diff}` : diff.diff < 0 ? `▼${diff.diff}` : '▬ 0.0'}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        
-        {/* ── MERGED: BẢNG ĐỒ THỊ ĐƯỜNG CỦA TOP 10 TRƯỜNG Ở TP.HCM ── */}
-        <div className="mt-8 pt-6 border-t border-slate-200/60 dark:border-slate-700/60 space-y-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+        {/* ── BẢNG ĐỒ THỊ ĐƯỜNG SO SÁNH CÁC TRƯỜNG ── */}
+        <div className="relative z-10 space-y-5">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
           <div>
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-md">
@@ -584,83 +502,104 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
               </div>
               <div>
                 <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                  <span>BẢNG ĐỒ THỊ ĐƯỜNG TOP 10 TRƯỜNG THPT TP.HCM</span>
+                  <span>BIỂU ĐỒ SO SÁNH ĐIỂM CHUẨN</span>
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800">
-                    TOP 10 TRƯỜNG ĐIỂM CAO
+                    ĐA TRƯỜNG
                   </span>
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Biến động điểm chuẩn 4 năm (2022 – 2025). Nhấp vào mã trường bên dưới để ẩn/hiện hoặc tô sáng từng đường.
+                  Biến động điểm chuẩn 4 năm (2022 – 2025). Tìm kiếm và chọn tối đa 5 trường để so sánh.
                 </p>
               </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={resetAllTop10Toggles}
-              className="text-xs px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              Hiện tất cả (10)
-            </button>
-            <div className="text-xs px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-50 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 font-mono">
-              Khoảng điểm: <span className="text-slate-900 dark:text-white font-bold">22.50 – 27.50</span>
+          
+          <div className="w-full md:w-80 shrink-0 relative">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-slate-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Tìm kiếm mã hoặc tên trường..."
+                value={chartSearchTerm}
+                onChange={(e) => {
+                  setChartSearchTerm(e.target.value);
+                  setShowChartSuggestions(true);
+                }}
+                onFocus={() => setShowChartSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowChartSuggestions(false), 200)}
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+              />
             </div>
+            {showChartSuggestions && chartSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                {chartSuggestions.map((school) => (
+                  <button
+                    key={school.id}
+                    onClick={() => {
+                      toggleSchoolInChart(school.id);
+                      setChartSearchTerm('');
+                      setShowChartSuggestions(false);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-indigo-500">[{getSchoolTicker(school)}]</span>
+                      <span className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-[150px]">{school.name}</span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-slate-500">{school.scores['2025'].toFixed(2)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Top 10 Toggle Chips / Legend */}
-        <div className="flex flex-wrap items-center gap-2">
-          {top10Schools.map((school, idx) => {
-            const color = CHART_COLORS[idx % CHART_COLORS.length];
-            const isActive = activeTop10Ids[school.id];
-            const ticker = getSchoolTicker(school);
-            const isCurrentSelected = selectedSchool.id === school.id;
-
-            return (
-              <div
-                key={school.id}
-                className="flex items-center rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 text-xs font-mono transition-all"
-              >
-                <button
-                  onClick={() => toggleTop10School(school.id)}
-                  title="Bật/tắt hiển thị đường này"
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 cursor-pointer transition-all ${
-                    isActive
-                      ? 'bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                      : 'bg-slate-50 dark:bg-slate-950 text-slate-400 dark:text-slate-600 line-through opacity-50'
-                  }`}
+        {/* Selected Schools Chips */}
+        {activeSchools.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            {activeSchools.map((school, idx) => {
+              const color = CHART_COLORS[idx % CHART_COLORS.length];
+              const ticker = getSchoolTicker(school);
+              
+              return (
+                <div
+                  key={school.id}
+                  className="flex items-center rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 text-xs font-mono bg-white dark:bg-slate-900 shadow-sm"
                 >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: color }}
-                  />
-                  <span className="font-bold">[{ticker}]</span>
-                  <span className="hidden sm:inline text-slate-300">{school.shortName}</span>
-                  <span className="font-bold text-slate-400">({school.scores['2025'].toFixed(2)})</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedSchool(school);
-                    selectOnlyTop10School(school.id);
-                  }}
-                  title="Chỉ soi mã này"
-                  className={`px-2 py-1.5 text-[10px] border-l border-slate-200 dark:border-slate-800 hover:bg-indigo-600 hover:text-white transition-colors cursor-pointer ${
-                    isCurrentSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400'
-                  }`}
-                >
-                  Soi
-                </button>
-              </div>
-            );
-          })}
-        </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 border-r border-slate-200 dark:border-slate-700">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: color }}
+                    />
+                    <span className="font-bold">[{ticker}]</span>
+                    <span className="hidden sm:inline text-slate-600 dark:text-slate-300">{school.shortName}</span>
+                  </div>
+                  <button
+                    onClick={() => toggleSchoolInChart(school.id)}
+                    title="Xoá khỏi biểu đồ"
+                    className="px-2.5 py-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              );
+            })}
+            <button
+              onClick={clearAllChartSchools}
+              className="text-xs px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer ml-auto"
+            >
+              Xoá tất cả
+            </button>
+          </div>
+        )}
 
-        {/* Recharts Top 10 Multi-Line Chart */}
+        {/* Recharts Multi-Line Chart */}
         <div className="h-[360px] sm:h-[420px] w-full pt-2">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={top10ChartData}
+              data={multiSchoolChartData}
               margin={{ top: 20, right: 30, left: 0, bottom: 10 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -682,11 +621,11 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                       <div className="bg-slate-50 dark:bg-slate-900/95 border border-slate-700 p-4 rounded-2xl shadow-2xl text-xs font-mono max-w-xs backdrop-blur-md">
                         <div className="font-bold text-white border-b border-slate-200 dark:border-slate-800 pb-2 mb-2 flex items-center justify-between">
                           <span className="text-indigo-400">{label}</span>
-                          <span className="text-[10px] text-slate-400">TOP 10 THPT TP.HCM</span>
+                          <span className="text-[10px] text-slate-400">SO SÁNH ĐIỂM CHUẨN</span>
                         </div>
                         <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                           {payload.map((p: any) => {
-                            const school = top10Schools.find((s) => s.id === p.dataKey);
+                            const school = activeSchools.find((s) => s.id === p.dataKey);
                             const ticker = school ? getSchoolTicker(school) : p.dataKey;
                             const name = school ? school.shortName : p.dataKey;
                             return (
@@ -737,9 +676,8 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                 />
               )}
 
-              {/* Top 10 Lines */}
-              {top10Schools.map((school, idx) => {
-                if (!activeTop10Ids[school.id]) return null;
+              {/* Lines */}
+              {activeSchools.map((school, idx) => {
                 const color = CHART_COLORS[idx % CHART_COLORS.length];
                 const isSelected = selectedSchool.id === school.id;
                 return (
