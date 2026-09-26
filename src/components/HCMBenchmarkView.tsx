@@ -72,6 +72,40 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
   onUpdateTargetSchool,
 }) => {
   // ── USER SIMULATION SCORE ────────────────────────────────────────────────
+  // ── BẢNG TÌM TRƯỜNG CÁ NHÂN ────────────────────────────────────────────
+  const [personalScoreInput, setPersonalScoreInput] = useState<string>('24.5');
+  const [selectedPersonalDistrict, setSelectedPersonalDistrict] = useState<string>('Tất cả quận/huyện');
+  
+  const parsedPersonalScore = useMemo(() => {
+    const val = parseFloat(personalScoreInput);
+    return isNaN(val) ? null : val;
+  }, [personalScoreInput]);
+
+  const suggestedSchools = useMemo(() => {
+    if (parsedPersonalScore === null) return [];
+    return HCM_SCHOOLS_DATA.filter(school => {
+      if (selectedPersonalDistrict !== 'Tất cả quận/huyện' && school.district !== selectedPersonalDistrict) {
+        return false;
+      }
+      const score2025 = school.scores['2025'];
+      return Math.abs(score2025 - parsedPersonalScore) <= 1.0;
+    }).sort((a, b) => Math.abs(a.scores['2025'] - parsedPersonalScore) - Math.abs(b.scores['2025'] - parsedPersonalScore));
+  }, [parsedPersonalScore, selectedPersonalDistrict]);
+  
+  const handleSetNV1WithCheck = (school: HCMSchool, userScore: number | null) => {
+    const schoolScore = school.scores['2025'];
+    if (userScore !== null) {
+      const gap = schoolScore - userScore; // If school > user + 1.5
+      const reverseGap = userScore - schoolScore; // If user > school + 3
+      if (gap > 1.5 || reverseGap > 3) {
+        if (!window.confirm("Điểm quá cao hoặc quá thấp so với mục tiêu, bạn có chắc muốn đặt làm nguyện vọng 1?")) {
+          return;
+        }
+      }
+    }
+    handleSetTarget(school);
+  };
+  
   const [userScoreInput, setUserScoreInput] = useState<string>(
     targetScore ? String(targetScore) : '24.5'
   );
@@ -93,19 +127,23 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
   const top10Schools = useMemo(() => getTop10Schools(selectedYear), [selectedYear]);
   
   // Active toggles for top 10 lines (default all active)
-  const [activeTop10Ids, setActiveTop10Ids] = useState<Record<string, boolean>>(() => {
-    const initial: Record<string, boolean> = {};
-    top10Schools.forEach((s) => {
-      initial[s.id] = true;
-    });
-    return initial;
-  });
+  const [activeTop10Ids, setActiveTop10Ids] = useState<Record<string, boolean>>({});
 
   const toggleTop10School = (schoolId: string) => {
-    setActiveTop10Ids((prev) => ({
-      ...prev,
-      [schoolId]: !prev[schoolId],
-    }));
+    setActiveTop10Ids((prev) => {
+      if (prev[schoolId]) {
+        const next = { ...prev };
+        delete next[schoolId];
+        return next;
+      } else {
+        const activeCount = Object.keys(prev).filter(k => prev[k]).length;
+        if (activeCount >= 5) {
+          alert('Chỉ được chọn tối đa 5 trường để so sánh trên biểu đồ.');
+          return prev;
+        }
+        return { ...prev, [schoolId]: true };
+      }
+    });
   };
 
   const selectOnlyTop10School = (schoolId: string) => {
@@ -180,28 +218,28 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
     let matchStatus: { label: string; badgeClass: string; desc: string; icon: any };
     if (gap >= 1.0) {
       matchStatus = {
-        label: 'KHỚP LỆNH AN TOÀN',
+        label: 'MỨC ĐỘ AN TOÀN CAO',
         badgeClass: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-        desc: `Điểm của bạn cao hơn điểm chuẩn NV1 +${gap.toFixed(2)} đ. Xác suất khớp lệnh cực cao.`,
+        desc: `Điểm của bạn cao hơn điểm chuẩn NV1 +${gap.toFixed(2)} đ. Xác suất phù hợp cực cao.`,
         icon: CheckCircle2,
       };
     } else if (gap >= 0) {
       matchStatus = {
-        label: 'KHỚP LỆNH VỪA SỨC',
+        label: 'MỨC ĐỘ VỪA SỨC',
         badgeClass: 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30',
         desc: `Điểm của bạn cao hơn điểm chuẩn NV1 +${gap.toFixed(2)} đ. Rất lý tưởng làm NV1/NV2.`,
         icon: Target,
       };
     } else if (gap >= -1.0) {
       matchStatus = {
-        label: 'CẠNH TRANH SÁT SÀN',
+        label: 'MỨC ĐỘ CẠNH TRANH CAO',
         badgeClass: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
         desc: `Còn thiếu ${(Math.abs(gap)).toFixed(2)} đ để chạm điểm sàn NV1. Cân nhắc thêm NV2 an toàn.`,
         icon: Zap,
       };
     } else {
       matchStatus = {
-        label: 'LỆNH THỬ THÁCH CAO',
+        label: 'MỨC ĐỘ THỬ THÁCH RẤT CAO',
         badgeClass: 'bg-rose-500/20 text-rose-400 border border-rose-500/30',
         desc: `Điểm sàn cao hơn ${(Math.abs(gap)).toFixed(2)} đ. Cần bứt phá thêm bài thi thử.`,
         icon: TrendingUp,
@@ -348,12 +386,106 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
         </div>
       )}
 
+            {/* ── BẢNG TÌM TRƯỜNG PHÙ HỢP CÁ NHÂN ───────────────────────────────── */}
+      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-7 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <Target className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              TÌM TRƯỜNG PHÙ HỢP VỚI ĐIỂM DỰ KIẾN
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Nhập điểm của bạn để tìm các trường có mức điểm chuẩn chênh lệch tối đa 1 điểm.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 p-2 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">Điểm của bạn:</span>
+              <input
+                type="number"
+                step="0.25"
+                min="0"
+                max="30"
+                value={personalScoreInput}
+                onChange={(e) => setPersonalScoreInput(e.target.value)}
+                className="w-16 h-8 text-center text-xs font-mono font-black text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500"
+                placeholder="24.5"
+              />
+            </div>
+            <select
+              value={selectedPersonalDistrict}
+              onChange={(e) => setSelectedPersonalDistrict(e.target.value)}
+              className="h-12 px-3 py-2 text-xs rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 font-medium"
+            >
+              {HCM_DISTRICTS.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {parsedPersonalScore !== null && (
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-bold">
+                <tr>
+                  <th className="py-2.5 px-3">TÊN TRƯỜNG</th>
+                  <th className="py-2.5 px-3">QUẬN/HUYỆN</th>
+                  <th className="py-2.5 px-3 text-center">ĐIỂM CHUẨN (2025)</th>
+                  <th className="py-2.5 px-3 text-center">ĐỘ LỆCH</th>
+                  <th className="py-2.5 px-3 text-right">HÀNH ĐỘNG</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-850 bg-white dark:bg-slate-900">
+                {suggestedSchools.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-slate-500">
+                      Không tìm thấy trường nào phù hợp trong khoảng điểm {parsedPersonalScore - 1}đ - {parsedPersonalScore + 1}đ.
+                    </td>
+                  </tr>
+                ) : (
+                  suggestedSchools.map((school) => {
+                    const diff = parsedPersonalScore - school.scores['2025'];
+                    return (
+                      <tr key={`sugg-${school.id}`} className="hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors">
+                        <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">{school.name}</td>
+                        <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">{school.district}</td>
+                        <td className="py-2.5 px-3 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                          {school.scores['2025'].toFixed(2)}
+                        </td>
+                        <td className="py-2.5 px-3 text-center font-mono">
+                          <span className={`px-2 py-0.5 rounded-full font-bold ${
+                            diff >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300'
+                          }`}>
+                            {diff > 0 ? '+' : ''}{diff.toFixed(2)}đ
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            onClick={() => handleSetNV1WithCheck(school, parsedPersonalScore)}
+                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold shadow-xs transition-colors cursor-pointer"
+                          >
+                            Đặt làm NV1
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* ── MARKET HEADER & LIVE TICKER TAPE (TRADING FLOOR STYLE) ─────────── */}
-      <div className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/80 p-5 sm:p-7 shadow-2xl text-slate-100 overflow-hidden relative">
+      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50 to-indigo-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/80 p-5 sm:p-7 shadow-2xl text-slate-900 dark:text-slate-100 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5 pb-5 border-b border-slate-800/80">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5 pb-5 border-b border-slate-200 dark:border-slate-800/80">
           <div>
             <div className="flex items-center gap-3">
               <span className="flex h-3 w-3 relative">
@@ -361,23 +493,23 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
               </span>
               <span className="text-[11px] font-mono tracking-widest uppercase font-black px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">
-                SÀN GIAO DỊCH ĐIỂM CHUẨN TS10 • TP. HỒ CHÍ MINH
+                HỆ THỐNG PHÂN TÍCH ĐIỂM CHUẨN TS10 • TP. HỒ CHÍ MINH
               </span>
             </div>
-            <h1 className="text-xl sm:text-3xl font-black tracking-tight text-white mt-2 flex items-center gap-2">
+            <h1 className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white mt-2 flex items-center gap-2">
               <Activity className="w-7 h-7 text-indigo-400" />
-              <span>Sàn Chứng Khoán Điểm Chuẩn Tuyển Sinh 10</span>
+              <span>Biểu Đồ Phân Tích Điểm Chuẩn Tuyển Sinh 10</span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl leading-relaxed">
-              Bảng đồ thị đường biến động điểm chuẩn THPT TP.HCM theo thời gian thực (2022–2025). Soi mã trường, khớp lệnh nguyện vọng và phân tích biên độ điểm chuẩn.
+              Bảng đồ thị đường biến động điểm chuẩn THPT TP.HCM theo thời gian thực (2022–2025). Tra cứu mã trường, phù hợp nguyện vọng và phân tích biên độ điểm chuẩn.
             </p>
           </div>
 
           {/* Market Indices Box */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-3 px-4 min-w-[140px] shadow-inner">
-              <div className="text-[10px] text-slate-400 font-mono font-semibold uppercase">CHỈ SỐ VN-TS10 INDEX</div>
-              <div className="text-lg sm:text-xl font-black text-white font-mono flex items-center gap-1.5 mt-0.5">
+            <div className="bg-white/90 dark:bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3 px-4 min-w-[140px] shadow-inner">
+              <div className="text-[10px] text-slate-400 font-mono font-semibold uppercase">TRUNG BÌNH ĐIỂM CHUẨN</div>
+              <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-white font-mono flex items-center gap-1.5 mt-0.5">
                 <span>{marketStats.avg}</span>
                 <span className="text-xs font-bold text-emerald-400 flex items-center">
                   <ArrowUpRight className="w-3.5 h-3.5" />
@@ -386,7 +518,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
               </div>
             </div>
 
-            <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-3 px-4 shadow-inner">
+            <div className="bg-white/90 dark:bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3 px-4 shadow-inner">
               <div className="text-[10px] text-slate-400 font-mono font-semibold uppercase">THỐNG KÊ BIẾN ĐỘNG</div>
               <div className="flex items-center gap-3 mt-1 text-xs font-mono font-bold">
                 <span className="text-emerald-400 flex items-center gap-0.5">
@@ -405,9 +537,9 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
 
         {/* Live Ticker Tape Bar */}
         <div className="mt-4 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-          <span className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800">
+          <span className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1 bg-white/90 dark:bg-slate-100/90 dark:bg-slate-50 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800">
             <Sparkles className="w-3 h-3 text-amber-400" />
-            TICKER TOP
+            MÃ TRƯỜNG NỔI BẬT
           </span>
           <div className="flex items-center gap-2 shrink-0">
             {top10Schools.map((s, idx) => {
@@ -420,7 +552,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
                     isSelected
                       ? 'bg-indigo-600 text-white border-indigo-400 shadow-md scale-105'
-                      : 'bg-slate-900/80 text-slate-200 border-slate-800 hover:border-slate-700 hover:bg-slate-850'
+                      : 'bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-slate-700 hover:bg-slate-850'
                   }`}
                 >
                   <span className="font-black text-indigo-400">#{idx + 1} {getSchoolTicker(s)}</span>
@@ -444,18 +576,18 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
       </div>
 
       {/* ── 1. GHIM TRÊN ĐẦU: BẢNG ĐỒ THỊ ĐƯỜNG CỦA TOP 10 TRƯỜNG Ở TP.HCM ── */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-950 p-5 sm:p-7 shadow-2xl space-y-5 text-slate-100 relative">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-7 shadow-2xl space-y-5 text-slate-900 dark:text-slate-100 relative">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
           <div>
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-md">
                 <LineChartIcon className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base sm:text-xl font-black text-white tracking-tight flex items-center gap-2">
+                <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                   <span>BẢNG ĐỒ THỊ ĐƯỜNG TOP 10 TRƯỜNG THPT TP.HCM</span>
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800">
-                    PINNED TOP 10 INDEX
+                    TOP 10 TRƯỜNG ĐIỂM CAO
                   </span>
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
@@ -468,12 +600,12 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={resetAllTop10Toggles}
-              className="text-xs px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              className="text-xs px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               Hiện tất cả (10)
             </button>
-            <div className="text-xs px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 font-mono">
-              Khoảng điểm: <span className="text-white font-bold">22.50 – 27.50</span>
+            <div className="text-xs px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-50 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 font-mono">
+              Khoảng điểm: <span className="text-slate-900 dark:text-white font-bold">22.50 – 27.50</span>
             </div>
           </div>
         </div>
@@ -489,15 +621,15 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
             return (
               <div
                 key={school.id}
-                className="flex items-center rounded-xl overflow-hidden border border-slate-800 text-xs font-mono transition-all"
+                className="flex items-center rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 text-xs font-mono transition-all"
               >
                 <button
                   onClick={() => toggleTop10School(school.id)}
                   title="Bật/tắt hiển thị đường này"
                   className={`flex items-center gap-1.5 px-2.5 py-1.5 cursor-pointer transition-all ${
                     isActive
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-950 text-slate-600 line-through opacity-50'
+                      ? 'bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                      : 'bg-slate-50 dark:bg-slate-950 text-slate-400 dark:text-slate-600 line-through opacity-50'
                   }`}
                 >
                   <span
@@ -514,8 +646,8 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                     selectOnlyTop10School(school.id);
                   }}
                   title="Chỉ soi mã này"
-                  className={`px-2 py-1.5 text-[10px] border-l border-slate-800 hover:bg-indigo-600 hover:text-white transition-colors cursor-pointer ${
-                    isCurrentSelected ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'
+                  className={`px-2 py-1.5 text-[10px] border-l border-slate-200 dark:border-slate-800 hover:bg-indigo-600 hover:text-white transition-colors cursor-pointer ${
+                    isCurrentSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400'
                   }`}
                 >
                   Soi
@@ -548,8 +680,8 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                 content={({ active, payload, label }) => {
                   if (active && payload && payload.length) {
                     return (
-                      <div className="bg-slate-900/95 border border-slate-700 p-4 rounded-2xl shadow-2xl text-xs font-mono max-w-xs backdrop-blur-md">
-                        <div className="font-bold text-white border-b border-slate-800 pb-2 mb-2 flex items-center justify-between">
+                      <div className="bg-slate-50 dark:bg-slate-900/95 border border-slate-700 p-4 rounded-2xl shadow-2xl text-xs font-mono max-w-xs backdrop-blur-md">
+                        <div className="font-bold text-white border-b border-slate-200 dark:border-slate-800 pb-2 mb-2 flex items-center justify-between">
                           <span className="text-indigo-400">{label}</span>
                           <span className="text-[10px] text-slate-400">TOP 10 THPT TP.HCM</span>
                         </div>
@@ -568,7 +700,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                                     className="w-2 h-2 rounded-full shrink-0"
                                     style={{ backgroundColor: p.stroke }}
                                   />
-                                  <span className="font-bold text-slate-200">[{ticker}]</span>
+                                  <span className="font-bold text-slate-800 dark:text-slate-200">[{ticker}]</span>
                                   <span className="text-slate-400 truncate text-[11px]">{name}</span>
                                 </div>
                                 <span className="font-black text-white">{Number(p.value).toFixed(2)}đ</span>
@@ -577,7 +709,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                           })}
                         </div>
                         {parsedUserScore !== null && (
-                          <div className="mt-2.5 pt-2 border-t border-slate-800 flex items-center justify-between text-amber-300 font-bold text-[11px]">
+                          <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-amber-300 font-bold text-[11px]">
                             <span>Điểm dự kiến của bạn:</span>
                             <span>{parsedUserScore.toFixed(2)}đ</span>
                           </div>
@@ -633,12 +765,12 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
       {/* ── 2. PHÍA DƯỚI: BẢNG CHỌN TỪNG TRƯỜNG & BIỂU ĐỒ ĐƯỜNG LÊN XUỐNG QUA CÁC NĂM ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ── CỘT TRÁI (7 COLS): BẢNG ĐIỆN TỬ CHỌN MÃ TRƯỜNG (STOCK TICKER BOARD) ── */}
-        <div className="lg:col-span-7 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-xl space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="lg:col-span-7 rounded-3xl border border-slate-200 dark:border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-50 dark:bg-slate-900 p-5 sm:p-6 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-200 dark:border-slate-800">
             <div>
               <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                <span>BẢNG ĐIỆN TỬ NIÊM YẾT MÃ TRƯỜNG</span>
+                <span>BẢNG ĐIỂM CHUẨN MÃ TRƯỜNG</span>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold">
                   {filteredSchools.length} Mã
                 </span>
@@ -659,7 +791,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                 max="30"
                 value={userScoreInput}
                 onChange={(e) => setUserScoreInput(e.target.value)}
-                className="w-16 h-8 text-center text-xs font-mono font-black text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none"
+                className="w-16 h-8 text-center text-xs font-mono font-black text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none"
                 placeholder="24.5"
               />
               <span className="text-xs font-bold text-slate-500">đ</span>
@@ -695,7 +827,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               <input
                 type="text"
-                placeholder="Tìm mã CK hoặc tên trường..."
+                placeholder="Tìm mã trường hoặc tên trường..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-600"
@@ -723,17 +855,17 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
               <option value="benchmark_asc">Điểm sàn 2025: Thấp nhất</option>
               <option value="diff_desc">Biến động: Tăng nhiều nhất</option>
               <option value="diff_asc">Biến động: Giảm nhiều nhất</option>
-              <option value="ticker">Mã CK: A - Z</option>
+              <option value="ticker">Mã trường: A - Z</option>
               <option value="name">Tên trường: A - Z</option>
             </select>
           </div>
 
           {/* Stock Ticker Board Table */}
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-200 dark:border-slate-800">
             <table className="w-full text-left text-xs font-mono">
-              <thead className="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-bold">
+              <thead className="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-200 dark:border-slate-800 font-bold">
                 <tr>
-                  <th className="py-2.5 px-3">MÃ CK</th>
+                  <th className="py-2.5 px-3">MÃ TRƯỜNG</th>
                   <th className="py-2.5 px-3">TRƯỜNG THPT</th>
                   <th className="py-2.5 px-2 text-right">NV1 (2025)</th>
                   <th className="py-2.5 px-2 text-right hidden sm:table-cell">NV2</th>
@@ -741,9 +873,10 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                   <th className="py-2.5 px-2 text-center">BIẾN ĐỘNG</th>
                   <th className="py-2.5 px-3 text-center">SO VỚI BẠN</th>
                   <th className="py-2.5 px-2 text-center">SOI</th>
+                  <th className="py-2.5 px-3 text-right">CHỌN</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-850 bg-white dark:bg-slate-900">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-850 bg-white dark:bg-slate-50 dark:bg-slate-900">
                 {filteredSchools.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-8 text-center text-slate-400">
@@ -839,9 +972,20 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                                 ? 'bg-indigo-600 text-white'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white'
                             }`}
-                            title="Soi đồ thị kỹ thuật"
+                            title="Xem biểu đồ phân tích"
                           >
                             <LineChartIcon className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSetNV1WithCheck(school, parsedUserScore);
+                            }}
+                            className="px-2.5 py-1 text-[10px] sm:text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+                          >
+                            Đặt NV1
                           </button>
                         </td>
                       </tr>
@@ -854,29 +998,29 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
         </div>
 
         {/* ── CỘT PHẢI (5 COLS): BIỂU ĐỒ ĐƯỜNG LÊN XUỐNG QUA CÁC NĂM CỦA TRƯỜNG ĐANG CHỌN ── */}
-        <div className="lg:col-span-5 rounded-3xl border border-slate-800 bg-slate-950 p-5 sm:p-6 shadow-2xl text-slate-100 space-y-5 sticky top-6">
+        <div className="lg:col-span-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-950 p-5 sm:p-6 shadow-2xl text-slate-900 dark:text-slate-100 space-y-5 sticky top-6">
           {/* Header Card of Selected School */}
-          <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-800">
+          <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-black px-2.5 py-1 rounded-xl bg-indigo-600 text-white font-mono shadow-md">
+                <span className="text-sm font-black px-2.5 py-1 rounded-xl bg-indigo-600 text-slate-900 dark:text-white font-mono shadow-md">
                   [{getSchoolTicker(selectedSchool)}]
                 </span>
                 <span className="text-xs text-slate-400 font-sans">
                   {selectedSchool.district}
                 </span>
               </div>
-              <h3 className="text-base sm:text-lg font-black text-white mt-1.5 leading-snug">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1.5 leading-snug">
                 {selectedSchool.name}
               </h3>
               <p className="text-[11px] text-slate-400 font-sans mt-0.5">
-                Chỉ tiêu dự kiến: <span className="text-white font-bold">{selectedSchool.quota || 675} học sinh</span>
+                Chỉ tiêu dự kiến: <span className="text-slate-900 dark:text-white font-bold">{selectedSchool.quota || 675} học sinh</span>
               </p>
             </div>
 
             <div className="text-right shrink-0">
               <div className="text-[10px] text-slate-400 font-mono font-semibold uppercase">ĐIỂM NV1 2025</div>
-              <div className="text-2xl font-black text-white font-mono">
+              <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
                 {selectedSchool.scores['2025'].toFixed(2)}
               </div>
               <div
@@ -904,7 +1048,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
             <div className="flex items-center justify-between text-xs mb-2 font-mono">
               <span className="text-slate-400 font-bold flex items-center gap-1.5">
                 <Activity className="w-3.5 h-3.5 text-indigo-400" />
-                BIỂU ĐỒ KỸ THUẬT NV1 - NV2 - NV3 (2022–2025)
+                BIỂU ĐỒ ĐIỂM CHUẨN NV1 - NV2 - NV3 (2022–2025)
               </span>
               <div className="flex items-center gap-2 text-[10px]">
                 <span className="flex items-center gap-1 text-indigo-400">
@@ -941,8 +1085,8 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                     content={({ active, payload, label }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="bg-slate-900/95 border border-slate-700 p-3 rounded-xl shadow-xl text-xs font-mono backdrop-blur-md">
-                            <div className="font-bold text-white border-b border-slate-800 pb-1 mb-1.5 text-indigo-400">
+                          <div className="bg-slate-50 dark:bg-slate-900/95 border border-slate-700 p-3 rounded-xl shadow-xl text-xs font-mono backdrop-blur-md">
+                            <div className="font-bold text-white border-b border-slate-200 dark:border-slate-800 pb-1 mb-1.5 text-indigo-400">
                               {label}
                             </div>
                             <div className="space-y-1">
@@ -1014,24 +1158,24 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
 
           {/* Technical Stats Summary Box */}
           <div className="grid grid-cols-3 gap-2.5 font-mono text-center">
-            <div className="p-2.5 rounded-2xl bg-slate-900 border border-slate-800">
-              <div className="text-[10px] text-slate-400 font-semibold uppercase">ĐỈNH CAO (ATH)</div>
+            <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <div className="text-[10px] text-slate-400 font-semibold uppercase">ĐIỂM CAO NHẤT</div>
               <div className="text-sm font-black text-emerald-400 mt-0.5">
                 {singleSchoolStats.maxScore.toFixed(2)}đ
               </div>
               <div className="text-[10px] text-slate-500">Năm {singleSchoolStats.maxYear}</div>
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-slate-900 border border-slate-800">
-              <div className="text-[10px] text-slate-400 font-semibold uppercase">ĐÁY THẤP (ATL)</div>
+            <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <div className="text-[10px] text-slate-400 font-semibold uppercase">ĐIỂM THẤP NHẤT</div>
               <div className="text-sm font-black text-rose-400 mt-0.5">
                 {singleSchoolStats.minScore.toFixed(2)}đ
               </div>
               <div className="text-[10px] text-slate-500">Năm {singleSchoolStats.minYear}</div>
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-slate-900 border border-slate-800">
-              <div className="text-[10px] text-slate-400 font-semibold uppercase">BIÊN ĐỘ (SPREAD)</div>
+            <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <div className="text-[10px] text-slate-400 font-semibold uppercase">BIÊN ĐỘ ĐIỂM</div>
               <div className="text-sm font-black text-amber-400 mt-0.5">
                 {singleSchoolStats.spread.toFixed(2)}đ
               </div>
@@ -1040,16 +1184,16 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
           </div>
 
           {/* Match Status & Prediction */}
-          <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">
-                PHÂN TÍCH KHỚP LỆNH DỰ KIẾN
+                PHÂN TÍCH MỨC ĐỘ PHÙ HỢP
               </span>
               <span className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full ${singleSchoolStats.matchStatus.badgeClass}`}>
                 {singleSchoolStats.matchStatus.label}
               </span>
             </div>
-            <p className="text-xs text-slate-300 font-sans leading-relaxed">
+            <p className="text-xs text-slate-700 dark:text-slate-300 font-sans leading-relaxed">
               {singleSchoolStats.matchStatus.desc}
             </p>
           </div>
@@ -1059,11 +1203,11 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
             <button
               type="button"
               id="set-target-school-btn"
-              onClick={() => handleSetTarget(selectedSchool)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm shadow-lg transition-all hover:scale-[1.01] cursor-pointer"
+              onClick={() => handleSetNV1WithCheck(selectedSchool, parsedUserScore)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 dark:text-white font-bold text-xs sm:text-sm shadow-lg transition-all hover:scale-[1.01] cursor-pointer"
             >
               <Target className="w-4 h-4" />
-              <span>Khớp Lệnh: Đặt làm Nguyện vọng 1</span>
+              <span>Đặt làm Nguyện vọng 1</span>
             </button>
             <p className="text-[11px] text-slate-400 text-center font-sans">
               Nhấn nút trên để ghim trường này vào kế hoạch học tập của bạn trên trang chủ.

@@ -10,7 +10,7 @@ export type HCMCluster =
 
 export interface HCMSchool {
   id: string;
-  ticker?: string; // Mã chứng khoán/giao dịch (VD: LHP, NTH, GDI...)
+  ticker?: string; // Mã trường/giao dịch (VD: LHP, NTH, GDI...)
   name: string;
   shortName: string;
   district: string;
