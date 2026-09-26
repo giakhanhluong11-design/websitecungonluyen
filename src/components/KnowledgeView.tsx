@@ -20,6 +20,7 @@ import { COURSE_MODULES_DATA, CourseModule } from '../data/curriculumData';
 import { CourseLessonModal } from './CourseLessonModal';
 import { Lesson1MathModal } from './Lesson1MathModal';
 import { TopicCardIllustration } from './TopicCardIllustration';
+import { TopicFlashcard } from './TopicFlashcard';
 
 interface KnowledgeViewProps {
   topics: Topic[];
@@ -96,7 +97,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
               <span>Chương trình GDPT 2018 • Bộ sách Kết nối tri thức</span>
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Mỗi bài học gồm: Lý thuyết trọng tâm • Công thức & Ghi nhớ • Bài tập tự luyện
+              Thẻ học Flashcard 3D: Mặt trước là Lý thuyết trọng tâm • Mặt sau là Bài tập vận dụng tương tác
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
@@ -235,84 +236,47 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
         </div>
       </div>
 
-      {/* Grid of Course Lessons: Gọn gàng theo mẫu ảnh, gồm Chuyên đề + Ảnh minh hoạ + Tiến độ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredModules.map((mod) => {
-          const isDone = progress.completedTopicIds.includes(mod.id) || progress.completedTopicIds.includes(`toan-${mod.code.toLowerCase()}`);
-          const lessonNumber = mod.code.replace(/^[A-Z]+/, '');
-          const percent = isDone ? 100 : 0;
+      {/* Grid of Course Flashcards: Mặt trước là Lý thuyết trọng tâm, Mặt sau là Bài tập vận dụng tương tác */}
+      {filteredModules.length === 0 ? (
+        <div className="flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-center space-y-3">
+          <BookOpen className="w-12 h-12 text-slate-400" />
+          <div className="space-y-1">
+            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+              Không tìm thấy chuyên đề phù hợp
+            </h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm">
+              Bạn có thể xoá từ khoá tìm kiếm hoặc đặt lại bộ lọc để xem danh sách toàn bộ thẻ Flashcard.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSearchQuery('');
+              setFilterPriority('all');
+              setFilterStatus('all');
+            }}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-xs"
+          >
+            Đặt lại bộ lọc
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredModules.map((mod) => {
+            const isDone = progress.completedTopicIds.includes(mod.id) || progress.completedTopicIds.includes(`toan-${mod.code.toLowerCase()}`);
 
-          return (
-            <div
-              key={mod.id}
-              id={`lesson-card-${mod.id}`}
-              onClick={() => setSelectedModule(mod)}
-              className="group relative flex flex-col justify-between rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs hover:shadow-xl hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300 cursor-pointer"
-            >
-              <div>
-                {/* 1. Ảnh minh hoạ chuyên đề */}
-                <div className="relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-300">
-                  <TopicCardIllustration module={mod} />
-                  
-                  {/* Nút đánh dấu hoàn thành nhanh góc trên bên trái */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleTopicComplete(mod.id);
-                    }}
-                    className="absolute top-2.5 left-2.5 p-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 shadow-sm hover:scale-110 transition-transform cursor-pointer"
-                    title={isDone ? 'Đánh dấu chưa hoàn thành' : 'Đánh dấu đã hoàn thành'}
-                  >
-                    {isDone ? (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-slate-300 hover:text-slate-400 dark:text-slate-600" />
-                    )}
-                  </button>
-                </div>
-
-                {/* 2. Phần nội dung chuyên đề (Theo đúng bức ảnh tham khảo) */}
-                <div className="p-4 sm:p-5 space-y-3">
-                  <div className="flex items-start gap-3">
-                    {/* Icon cuốn sách viền vàng/hổ phách giống ảnh mẫu */}
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-950/80 dark:to-amber-900/40 border border-amber-300 dark:border-amber-700/80 flex items-center justify-center shrink-0 shadow-xs">
-                      <BookOpen className="w-5 h-5 text-amber-700 dark:text-amber-400" />
-                    </div>
-
-                    {/* Tên chuyên đề in hoa đậm */}
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
-                        BÀI {lessonNumber}: {mod.title}
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Thanh tiến độ học tập (Dữ liệu thật của người dùng) */}
-              <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-1 space-y-1.5 border-t border-slate-100 dark:border-slate-800/80">
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className={percent === 100 ? "text-emerald-600 dark:text-emerald-400" : percent > 0 ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400 dark:text-slate-500"}>
-                    Tiến độ: {percent}%
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      percent === 100
-                        ? 'bg-emerald-500'
-                        : percent > 0
-                        ? 'bg-indigo-500'
-                        : 'bg-transparent'
-                    }`}
-                    style={{ width: `${percent}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            return (
+              <TopicFlashcard
+                key={mod.id}
+                module={mod}
+                isCompleted={isDone}
+                onToggleComplete={(moduleId) => onToggleTopicComplete(moduleId)}
+                onOpenLessonModal={(moduleToOpen) => setSelectedModule(moduleToOpen)}
+              />
+            );
+          })}
+        </div>
+      )}
 
       {/* Hệ thống kiến thức trọng tâm cần nắm chắc */}
       <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 dark:from-indigo-950/40 dark:via-slate-900 dark:to-blue-950/40 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
