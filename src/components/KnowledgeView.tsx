@@ -13,12 +13,15 @@ import {
   Info,
   Search,
   Filter,
-  Check
+  Check,
+  User,
+  PenTool
 } from 'lucide-react';
 import { SubjectId, Topic, UserProgress } from '../types';
 import { COURSE_MODULES_DATA, CourseModule } from '../data/curriculumData';
 import { CourseLessonModal } from './CourseLessonModal';
 import { Lesson1MathModal } from './Lesson1MathModal';
+import { TopicCardIllustration } from './TopicCardIllustration';
 
 interface KnowledgeViewProps {
   topics: Topic[];
@@ -234,106 +237,91 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
         </div>
       </div>
 
-      {/* Grid of Course Lessons: Mỗi card là một bài học bấm vào để mở Lý thuyết + Công thức + Bài tập */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Grid of Course Lessons: Gọn gàng theo mẫu ảnh, gồm Chuyên đề + Ảnh minh hoạ + Tiến độ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredModules.map((mod) => {
           const isDone = progress.completedTopicIds.includes(mod.id) || progress.completedTopicIds.includes(`toan-${mod.code.toLowerCase()}`);
+          const lessonNumber = mod.code.replace(/^[A-Z]+/, '');
+          const percent = isDone ? 100 : 0;
 
           return (
             <div
               key={mod.id}
               id={`lesson-card-${mod.id}`}
               onClick={() => setSelectedModule(mod)}
-              className="group relative flex flex-col justify-between rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs hover:shadow-md hover:border-indigo-400 dark:hover:border-indigo-500 transition-all cursor-pointer"
+              className="group relative flex flex-col justify-between rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs hover:shadow-xl hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300 cursor-pointer"
             >
               <div>
-                {/* Header tags: Code, Chapter, Priority */}
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`flex h-7 w-7 items-center justify-center rounded-xl text-xs font-black shadow-xs ${
-                      mod.subjectId === 'toan'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
-                        : mod.subjectId === 'van'
-                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                        : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                    }`}>
-                      {mod.code}
-                    </span>
-                    <span className="text-[11px] text-slate-400 font-medium truncate max-w-[160px]">
-                      {mod.chapter}
-                    </span>
-                  </div>
-
-                  {/* Complete status */}
+                {/* 1. Ảnh minh hoạ chuyên đề */}
+                <div className="relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-300">
+                  <TopicCardIllustration module={mod} />
+                  
+                  {/* Nút đánh dấu hoàn thành nhanh góc trên bên trái */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onToggleTopicComplete(mod.id);
                     }}
-                    className="cursor-pointer"
-                    title={isDone ? 'Đánh dấu chưa học' : 'Đánh dấu đã học'}
+                    className="absolute top-2.5 left-2.5 p-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 shadow-sm hover:scale-110 transition-transform cursor-pointer"
+                    title={isDone ? 'Đánh dấu chưa hoàn thành' : 'Đánh dấu đã hoàn thành'}
                   >
                     {isDone ? (
                       <CheckCircle2 className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
                     ) : (
-                      <Circle className="h-5 w-5 text-slate-300 hover:text-slate-400 dark:text-slate-700" />
+                      <Circle className="h-5 w-5 text-slate-300 hover:text-slate-400 dark:text-slate-600" />
                     )}
                   </button>
                 </div>
 
-                {/* Priority Badges */}
-                <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    mod.examPriority === 'rat-quan-trong'
-                      ? 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border border-red-200 dark:border-red-900'
-                      : 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-900'
-                  }`}>
-                    {mod.examPriority === 'rat-quan-trong' ? '🔴 Trọng tâm thi vào 10' : '🟠 Quan trọng'}
-                  </span>
-                </div>
-
-                {/* Title & Description */}
-                <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug">
-                  {mod.title}
-                </h3>
-                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                  {mod.description}
-                </p>
-
-                {/* Core subtopics checklist preview */}
-                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-1">
-                  {mod.subtopics.slice(0, 3).map((st, i) => (
-                    <div key={i} className="flex items-start gap-1.5 text-xs text-slate-600 dark:text-slate-400">
-                      <span className="text-indigo-500 font-bold">•</span>
-                      <span className="line-clamp-1">{st}</span>
+                {/* 2. Phần nội dung chuyên đề (Theo đúng bức ảnh tham khảo) */}
+                <div className="p-4 sm:p-5 space-y-3">
+                  <div className="flex items-start gap-3">
+                    {/* Icon cuốn sách viền vàng/hổ phách giống ảnh mẫu */}
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-950/80 dark:to-amber-900/40 border border-amber-300 dark:border-amber-700/80 flex items-center justify-center shrink-0 shadow-xs">
+                      <BookOpen className="w-5 h-5 text-amber-700 dark:text-amber-400" />
                     </div>
-                  ))}
-                  {mod.subtopics.length > 3 && (
-                    <div className="text-[10px] text-slate-400 italic">
-                      + {mod.subtopics.length - 3} nội dung chi tiết...
+
+                    {/* Tên chuyên đề in hoa đậm & thông tin người phụ trách / nội dung */}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                        BÀI {lessonNumber}: {mod.title}
+                      </h3>
+
+                      {/* Thông tin phụ: Người phụ trách & Số nội dung */}
+                      <div className="mt-2 space-y-1">
+                        <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+                          <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="font-medium truncate">Nguyễn Thị Huyền</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+                          <PenTool className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="font-medium">{mod.subtopics.length} nội dung</span>
+                        </div>
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
 
-              {/* Bottom footer: Click to open Lesson with Theory, Formulas, and Exercises */}
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-                <span className="text-[11px] text-slate-400">
-                  Lý thuyết • Công thức • Bài tập
-                </span>
-
-                <button
-                  id={`btn-learn-lesson-${mod.id}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedModule(mod);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs cursor-pointer active:scale-95 transition-all"
-                >
-                  <BookOpen className="h-3.5 w-3.5" />
-                  <span>Học bài</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
+              {/* 3. Thanh tiến độ học tập (Dữ liệu thật của người dùng) */}
+              <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-1 space-y-1.5 border-t border-slate-100 dark:border-slate-800/80">
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className={percent === 100 ? "text-emerald-600 dark:text-emerald-400" : percent > 0 ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400 dark:text-slate-500"}>
+                    Tiến độ: {percent}%
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      percent === 100
+                        ? 'bg-emerald-500'
+                        : percent > 0
+                        ? 'bg-indigo-500'
+                        : 'bg-transparent'
+                    }`}
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
               </div>
             </div>
           );
