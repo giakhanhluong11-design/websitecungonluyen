@@ -387,7 +387,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
       )}
 
             {/* ── BẢNG TÌM TRƯỜNG PHÙ HỢP CÁ NHÂN ───────────────────────────────── */}
-      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-7 shadow-xl space-y-4">
+      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50 to-indigo-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/80 p-5 sm:p-7 shadow-xl space-y-4 relative overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -573,10 +573,9 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
             })}
           </div>
         </div>
-      </div>
-
-      {/* ── 1. GHIM TRÊN ĐẦU: BẢNG ĐỒ THỊ ĐƯỜNG CỦA TOP 10 TRƯỜNG Ở TP.HCM ── */}
-      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-7 shadow-2xl space-y-5 text-slate-900 dark:text-slate-100 relative">
+        
+        {/* ── MERGED: BẢNG ĐỒ THỊ ĐƯỜNG CỦA TOP 10 TRƯỜNG Ở TP.HCM ── */}
+        <div className="mt-8 pt-6 border-t border-slate-200/60 dark:border-slate-700/60 space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
           <div>
             <div className="flex items-center gap-2">
@@ -761,11 +760,12 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
           </ResponsiveContainer>
         </div>
       </div>
+      </div>
 
       {/* ── 2. PHÍA DƯỚI: BẢNG CHỌN TỪNG TRƯỜNG & BIỂU ĐỒ ĐƯỜNG LÊN XUỐNG QUA CÁC NĂM ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ── CỘT TRÁI (7 COLS): BẢNG ĐIỆN TỬ CHỌN MÃ TRƯỜNG (STOCK TICKER BOARD) ── */}
-        <div className="lg:col-span-7 rounded-3xl border border-slate-200 dark:border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-50 dark:bg-slate-900 p-5 sm:p-6 shadow-xl space-y-4">
+        <div className="lg:col-span-7 rounded-3xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50 to-indigo-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/80 p-5 sm:p-6 shadow-xl space-y-4 relative overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-200 dark:border-slate-800">
             <div>
               <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -998,7 +998,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
         </div>
 
         {/* ── CỘT PHẢI (5 COLS): BIỂU ĐỒ ĐƯỜNG LÊN XUỐNG QUA CÁC NĂM CỦA TRƯỜNG ĐANG CHỌN ── */}
-        <div className="lg:col-span-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-950 p-5 sm:p-6 shadow-2xl text-slate-900 dark:text-slate-100 space-y-5 sticky top-6">
+        <div className="lg:col-span-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50 to-indigo-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/80 p-5 sm:p-6 shadow-2xl text-slate-900 dark:text-slate-100 space-y-5 sticky top-6 relative overflow-hidden">
           {/* Header Card of Selected School */}
           <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
             <div>
