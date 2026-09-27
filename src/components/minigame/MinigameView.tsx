@@ -15,6 +15,7 @@ import { ALL_MINIGAMES, INITIAL_PEER_LEADERBOARD, LeaderboardItem, MinigameDefin
 import { UserProgress, MinigameResult } from '../../types';
 import { saveMinigameResult, getUserProgress } from '../../data/userStorage';
 import { MathyBirdGame } from './MathyBirdGame';
+import { LiteratureGame } from './LiteratureGame';
 
 interface MinigameViewProps {
   progress?: UserProgress;
@@ -52,8 +53,15 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
     );
   }
 
-  // Active game metadata
-  const featuredGame = ALL_MINIGAMES.find(g => g.id === 'mathy-bird') || ALL_MINIGAMES[0];
+  if (activeGameId === 'ai-la-nha-van') {
+    return (
+      <LiteratureGame
+        onBack={() => setActiveGameId(null)}
+        onSaveResult={handleSaveResult}
+      />
+    );
+  }
+
 
   // Build user's real personal leaderboard from minigameResults
   const userResults = progress?.minigameResults || [];
@@ -108,72 +116,6 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
         </div>
       </div>
 
-      {/* FEATURED BANNER HERO CARD: MATHY BIRD */}
-      {featuredGame && (
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 p-1 shadow-xl shadow-orange-500/10">
-          <div className="relative bg-white dark:bg-slate-900 rounded-[22px] p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 overflow-hidden">
-            {/* Background decorative circles */}
-            <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-gradient-to-br from-amber-400/20 to-rose-400/20 blur-2xl pointer-events-none" />
-
-            <div className="space-y-4 max-w-2xl relative z-10">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-black px-3 py-1 rounded-full bg-rose-500 text-white tracking-wide uppercase shadow-sm">
-                  Tựa game tâm điểm
-                </span>
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
-                  Toán học 9 • Phản xạ nhanh
-                </span>
-                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                  Độ khó: Thử thách
-                </span>
-              </div>
-
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  {featuredGame.title}
-                </h2>
-                <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                  {featuredGame.description}
-                </p>
-              </div>
-
-              {/* Feature bullet tags */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs text-slate-600 dark:text-slate-400">
-                {featuredGame.features?.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                    <span>{f}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Personal stats badge */}
-              <div className="flex items-center gap-4 pt-2 text-xs">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 font-medium">
-                  <Trophy className="w-4 h-4 text-amber-500" />
-                  <span>Kỷ lục của bạn: <strong className="text-slate-900 dark:text-white font-mono text-sm">{userBestScore} điểm</strong></span>
-                </div>
-              </div>
-            </div>
-
-            {/* Play Button CTA */}
-            <div className="lg:shrink-0 relative z-10 flex flex-col gap-3 sm:flex-row lg:flex-col items-center">
-              <button
-                type="button"
-                onClick={() => setActiveGameId(featuredGame.id)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 py-4 px-8 min-h-[56px] rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-black text-sm sm:text-base tracking-wide transition-all shadow-xl shadow-orange-500/25 cursor-pointer hover:scale-105 active:scale-95"
-              >
-                <Play className="h-5 w-5 fill-white" />
-                <span>CHƠI NGAY</span>
-              </button>
-
-              <span className="text-[11px] text-slate-400 font-medium">
-                Hỗ trợ phím Space, chuột và cảm ứng
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* CATALOG / GAME LIST (READY FOR FUTURE EXPANSIONS) */}
       <section className="space-y-4">

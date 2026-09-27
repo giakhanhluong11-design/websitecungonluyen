@@ -151,7 +151,7 @@ export interface MinigameResult {
   id: string;
   player: string;
   subject: SubjectId;
-  gameType: 'flashcard' | 'matching' | 'mathy-bird' | 'arcade';
+  gameType: 'flashcard' | 'matching' | 'mathy-bird' | 'arcade' | 'quiz';
   gameId: string;
   gameTitle: string;
   score: number;

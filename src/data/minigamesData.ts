@@ -36,17 +36,17 @@ export const ALL_MINIGAMES: MinigameDefinition[] = [
     bannerGradient: 'from-amber-500 via-orange-500 to-rose-500'
   },
   {
-    id: 'van-arena-10',
-    title: 'Đấu Trường Văn Học Lớp 10',
-    shortTitle: 'Đấu Trường Văn Học',
+    id: 'ai-la-nha-van',
+    title: 'Ai là nhà văn? - Đấu Trí Văn Học',
+    shortTitle: 'Ai là nhà văn?',
     subject: 'van',
-    gameType: 'arcade',
-    status: 'coming_soon',
-    badge: 'Sắp ra mắt',
+    gameType: 'quiz',
+    status: 'active',
+    badge: 'Mới ra mắt',
     difficulty: 'Trung bình',
-    description: 'Chinh phục các câu đố văn học, tác phẩm trọng tâm, biện pháp nghệ thuật và câu thơ kinh điển bằng cơ chế chém chữ siêu tốc.',
-    tags: ['Ngữ văn 9', 'Tác phẩm', 'Nghệ thuật'],
-    features: ['Bộ câu hỏi theo chương trình GDPT mới', 'Cơ chế vượt ải phong cách arcade'],
+    description: 'Chinh phục các câu đố văn học, tác phẩm, tác giả, ca dao tục ngữ bằng trí tuệ nhân tạo Gemini. 10 câu hỏi ngẫu nhiên mỗi lần chơi!',
+    tags: ['Ngữ văn 9', 'Tác giả', 'Ca dao', 'AI Sinh đề'],
+    features: ['10 câu hỏi trắc nghiệm', '15 giây/câu', 'Nội dung vô hạn từ AI Gemini'],
     bannerGradient: 'from-purple-500 via-pink-500 to-rose-400'
   },
   {

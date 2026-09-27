@@ -295,5 +295,54 @@ Return strictly JSON matching:
     return res.json({ success: false, message: "Fallback to local generator" });
   }
 });
+router.post("/literature-minigame", async (req, res) => {
+  try {
+    const ai = getAiClient();
+    if (!ai) {
+      return res.status(500).json({ success: false, error: "Chưa cấu hình AI" });
+    }
+
+    const { count = 10 } = req.body;
+    const randomSeed = Date.now().toString(36) + Math.random().toString(36);
+
+    const prompt = `You are an expert Literature teacher in Vietnam (for 9th-grade students preparing for the 10th-grade high school entrance exam).
+Generate a set of exactly ${count} multiple-choice questions for a mini-game called "Ai là nhà văn?".
+Seed: ${randomSeed} (Use this to ensure COMPLETELY UNIQUE and HIGHLY RANDOM questions every time).
+Topic: 9th-grade literature (authors, literary works, ca dao, tục ngữ, fill-in-the-blank, literary devices).
+Each question must have 4 options: A, B, C, D and exactly one correct answer.
+Keep the questions engaging, diverse, and suitable for 15 seconds of thinking.
+
+Return strictly JSON matching this structure:
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Câu ca dao sau đây còn thiếu từ gì: 'Công cha như núi Thái Sơn / Nghĩa mẹ như nước ... chảy ra'?",
+      "options": ["A. trong nguồn", "B. ngoài biển", "C. sông Đà", "D. suối Tiên"],
+      "correctAnswer": "A",
+      "explanation": "Câu ca dao gốc là 'Công cha như núi Thái Sơn / Nghĩa mẹ như nước trong nguồn chảy ra'."
+    }
+    // ... exactly ${count} questions
+  ]
+}`;
+
+    const text = await generateContentWithFallback(ai, {
+      primaryModel: "gemini-2.5-flash",
+      contents: prompt,
+      config: { responseMimeType: "application/json", temperature: 0.9 },
+    });
+
+    if (text) {
+      const parsed = JSON.parse(text);
+      if (parsed && Array.isArray(parsed.questions)) {
+        return res.json({ success: true, questions: parsed.questions });
+      }
+    }
+    return res.status(500).json({ success: false, error: "AI failed to generate valid JSON" });
+  } catch (error: any) {
+    console.warn("Lỗi sinh câu hỏi minigame Văn:", error?.message || error);
+    return res.status(500).json({ success: false, error: error?.message });
+  }
+});
 
 export default router;
