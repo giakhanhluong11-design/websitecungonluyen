@@ -87,28 +87,13 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Toggle Learned */}
-            <button
-              id="toggle-topic-learned-btn"
-              onClick={() => onToggleComplete(topic.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                isCompleted
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
-              }`}
-            >
-              {isCompleted ? (
-                <>
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>Đã học</span>
-                </>
-              ) : (
-                <>
-                  <Circle className="h-4 w-4 text-slate-400" />
-                  <span>Đánh dấu đã học</span>
-                </>
-              )}
-            </button>
+            {/* Completion Status Badge (Read only) */}
+            {isCompleted && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Đã hoàn thành</span>
+              </div>
+            )}
 
             {/* Close */}
             <button
@@ -309,7 +294,7 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
         <div className="flex items-center justify-between p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850/60">
           <div className="text-xs text-slate-500 dark:text-slate-400">
             Trạng thái: <strong className={isCompleted ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'}>
-              {isCompleted ? 'Đã hoàn thành lý thuyết' : 'Chưa đánh dấu đã học'}
+              {isCompleted ? 'Đã hoàn thành' : 'Chưa hoàn thành'}
             </strong>
           </div>
 

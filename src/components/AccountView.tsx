@@ -696,7 +696,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
               Khởi động lại dữ liệu
             </h3>
             <p className="text-xs text-rose-700/80 dark:text-rose-300/80 leading-relaxed">
-              Xóa toàn bộ lịch sử làm bài, các chuyên đề đã đánh dấu đã học và đưa tiến trình về 0 để ôn tập lại từ đầu.
+              Xóa toàn bộ lịch sử làm bài, các chuyên đề đã hoàn thành và đưa tiến trình về 0 để ôn tập lại từ đầu.
             </p>
 
             {showResetConfirm ? (
