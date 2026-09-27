@@ -427,6 +427,31 @@ export function toggleTopicCompleted(topicId: string): UserProgress {
   return updated;
 }
 
+export function updateTopicProgress(topicId: string, percent: number): UserProgress {
+  const current = loadUserProgress();
+  const topicProgress = { ...(current.topicProgress || {}) };
+  topicProgress[topicId] = Math.max(percent, topicProgress[topicId] || 0);
+  
+  if (topicProgress[topicId] === 100 && !current.completedTopicIds.includes(topicId)) {
+    return completeTopic(topicId).updatedProgress; // Also marks it complete
+  }
+
+  const updated = {
+    ...current,
+    topicProgress
+  };
+  saveUserProgress(updated);
+
+  const uid = getCurrentUserId();
+  if (uid) {
+    saveProgressToFirestore(uid, updated).catch((err) => {
+      console.warn('Sync topic progress error:', err);
+    });
+  }
+
+  return updated;
+}
+
 export interface TopicCompletionResult {
   updatedProgress: UserProgress;
   streakIncreased: boolean;

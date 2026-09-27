@@ -24,6 +24,7 @@ import { CourseModule } from '../data/curriculumData';
 import { CURRICULUM_LESSONS } from '../data/curriculumLessonsData';
 import { ENGLISH_GRAMMAR_RULES } from '../data/englishGrammarData';
 import { EnglishGrammarCard } from './EnglishGrammarCard';
+import { useProgressStore } from '../store/useProgressStore';
 
 interface TheorySectionItem {
   id: string;
@@ -113,15 +114,28 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
   const [activeTab, setActiveTab] = useState<'theory' | 'formulas' | 'exercises' | 'mistakes'>('theory');
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [showExplanations, setShowExplanations] = useState<Record<string, boolean>>({});
-  const [hasReadTheory, setHasReadTheory] = useState<boolean>(isCompleted);
+  const [viewedTabs, setViewedTabs] = useState<Set<string>>(new Set(['theory']));
+
+  const handleUpdateTopicProgress = useProgressStore((state) => state.handleUpdateTopicProgress);
 
   // Reset tab when module changes
   useEffect(() => {
     setActiveTab('theory');
     setSelectedAnswers({});
     setShowExplanations({});
-    setHasReadTheory(isCompleted);
+    setViewedTabs(isCompleted ? new Set(['theory', 'formulas', 'exercises', 'mistakes']) : new Set(['theory']));
   }, [module?.id, isCompleted]);
+
+  // Update viewed tabs and progress
+  useEffect(() => {
+    if (!module || isCompleted) return;
+    
+    setViewedTabs(prev => {
+      const next = new Set(prev);
+      next.add(activeTab);
+      return next;
+    });
+  }, [activeTab, module?.id, isCompleted]);
 
   // Handle keyboard navigation (Escape = close, ArrowLeft = prev, ArrowRight = next)
   useEffect(() => {
@@ -181,8 +195,22 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
 
   const exercises = lesson?.exercises || [];
   const answeredCount = exercises.filter(ex => selectedAnswers[ex.id] !== undefined).length;
-  const allExercisesDone = exercises.length === 0 || answeredCount === exercises.length;
-  const isEligibleToComplete = hasReadTheory && allExercisesDone;
+  
+  // Progress calculation
+  const infoTabs = ['theory', 'formulas', 'mistakes'];
+  const viewedInfoTabsCount = infoTabs.filter(tab => viewedTabs.has(tab)).length;
+  const theoryProgress = (viewedInfoTabsCount / infoTabs.length) * 100;
+  const exercisesProgress = exercises.length > 0 ? (answeredCount / exercises.length) * 100 : 100;
+  const currentProgress = isCompleted ? 100 : Math.round((theoryProgress + exercisesProgress) / 2);
+  const isEligibleToComplete = currentProgress === 100;
+  const hasReadTheory = theoryProgress === 100;
+  const allExercisesDone = exercisesProgress === 100;
+
+  useEffect(() => {
+    if (module?.id && currentProgress > 0) {
+      handleUpdateTopicProgress(module.id, currentProgress);
+    }
+  }, [currentProgress, module?.id, handleUpdateTopicProgress]);
 
   const handleSelectOption = (exerciseId: string, option: string) => {
     setSelectedAnswers(prev => ({ ...prev, [exerciseId]: option }));
@@ -286,12 +314,8 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
             </div>
           ) : (
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-              <span className={hasReadTheory ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400"}>
-                {hasReadTheory ? "✓ Lý thuyết" : "○ Lý thuyết"}
-              </span>
-              <span className="text-slate-300 dark:text-slate-600">|</span>
-              <span className={allExercisesDone ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400"}>
-                {allExercisesDone ? `✓ Bài tập (${answeredCount}/${exercises.length})` : `○ Bài tập (${answeredCount}/${exercises.length})`}
+              <span className={currentProgress > 0 ? "text-indigo-600 dark:text-indigo-400 font-bold" : "text-slate-400"}>
+                Tiến độ bài học: {currentProgress}%
               </span>
             </div>
           )}
@@ -357,32 +381,6 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
                   </div>
                 </div>
               ))}
-
-              {/* Nút xác nhận đã đọc xong lý thuyết */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
-                <div className="text-xs sm:text-sm text-indigo-950 dark:text-indigo-200">
-                  <div className="font-bold flex items-center gap-1.5">
-                    <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                    <span>Bước 1: Nắm vững lý thuyết chuyên đề</span>
-                  </div>
-                  <p className="mt-0.5 text-slate-600 dark:text-slate-400 text-xs">
-                    Sau khi đọc xong các định nghĩa và quy tắc, hãy bấm xác nhận để chuyển sang bài tập tự luyện.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setHasReadTheory(true);
-                    setActiveTab('exercises');
-                    const container = document.getElementById('lesson-content-scroll');
-                    if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer shrink-0 flex items-center gap-1.5 active:scale-95"
-                >
-                  <span>✓ Đã đọc xong lý thuyết → Làm bài tập</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
             </div>
           )}
 
@@ -695,8 +693,8 @@ export const CourseLessonModal: React.FC<CourseLessonModalProps> = ({
                     {isCompleted
                       ? 'Tiến độ chuyên đề đã được lưu vào hệ thống và chuỗi học tập của bạn.'
                       : isEligibleToComplete
-                      ? 'Bạn đã đọc hết lý thuyết và trả lời đầy đủ các bài tập tự luyện.'
-                      : `Điều kiện: Đọc lý thuyết (${hasReadTheory ? '✓ Xong' : 'Chưa xong'}) và làm bài tập (${answeredCount}/${exercises.length} câu).`}
+                      ? 'Bạn đã xem hết các mục lý thuyết và làm đầy đủ các bài tập tự luyện.'
+                      : `Điều kiện: Xem hết các mục lý thuyết và trả lời toàn bộ bài tập (Tiến độ: ${currentProgress}%).`}
                   </p>
                 </div>
 

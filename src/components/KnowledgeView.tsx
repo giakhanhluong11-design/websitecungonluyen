@@ -240,7 +240,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
         {filteredModules.map((mod) => {
           const isDone = progress.completedTopicIds.includes(mod.id) || progress.completedTopicIds.includes(`toan-${mod.code.toLowerCase()}`);
           const lessonNumber = mod.code.replace(/^[A-Z]+/, '');
-          const percent = isDone ? 100 : 0;
+          const percent = isDone ? 100 : (progress.topicProgress?.[mod.id] || 0);
 
           return (
             <div

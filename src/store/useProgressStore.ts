@@ -9,6 +9,7 @@ import {
   toggleTopicCompleted,
   completeTopic,
   TopicCompletionResult,
+  updateTopicProgress,
   savePracticeAttempt,
   saveExamAttempt,
   toggleBookmarkExam,
@@ -46,6 +47,7 @@ interface ProgressStore {
   handleResetProgress: () => void;
   handleUpdateTargetSchool: (schoolName: string, score: number) => void;
   handleUpdateProgress: (newProgress: UserProgress) => void;
+  handleUpdateTopicProgress: (topicId: string, percent: number) => void;
 }
 
 export const useProgressStore = create<ProgressStore>((set, get) => ({
@@ -131,5 +133,18 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
 
   handleUpdateProgress: (newProgress) => {
     set({ progress: newProgress });
+  },
+
+  handleUpdateTopicProgress: (topicId, percent) => {
+    const updated = updateTopicProgress(topicId, percent);
+    set({ progress: updated });
+    // Nếu đạt 100% thì trigger animation hoàn thành
+    if (percent === 100 && !get().progress.completedTopicIds.includes(topicId)) {
+      const result = completeTopic(topicId);
+      set({ progress: result.updatedProgress });
+      if (result.streakIncreased) {
+        set({ streakCelebration: { show: true, streakDays: result.newStreak } });
+      }
+    }
   },
 }));

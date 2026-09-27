@@ -174,4 +174,5 @@ export interface UserProgress {
   dailyStudyTime?: Record<string, number>; // Maps YYYY-MM-DD to minutes
   minigameResults?: MinigameResult[];
   minigameBestScores?: Record<string, number>;
+  topicProgress?: Record<string, number>;
 }
