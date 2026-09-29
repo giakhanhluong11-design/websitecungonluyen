@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   MessageSquare, Heart, Share2, Send, Image as ImageIcon, 
-  MoreHorizontal, Users, Hash, Flame, Sparkles 
+  MoreHorizontal, Users, Hash, Flame, Sparkles, Trash2 
 } from 'lucide-react';
 import { useProgressStore } from '../store/useProgressStore';
 import { useAppStore } from '../store/useAppStore';
@@ -11,7 +11,9 @@ import {
   subscribeToPosts, 
   toggleLikePost, 
   addComment, 
-  subscribeToComments 
+  subscribeToComments,
+  deletePost,
+  deleteComment
 } from '../services/communityService';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -81,8 +83,28 @@ const PostItem: React.FC<PostItemProps> = ({ post, currentUserId }) => {
     }
   };
 
+  const handleDeletePost = async () => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
+      try {
+        await deletePost(post.id);
+      } catch (err) {
+        console.error("Lỗi khi xoá bài:", err);
+      }
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa bình luận này?")) {
+      try {
+        await deleteComment(post.id, commentId);
+      } catch (err) {
+        console.error("Lỗi khi xoá bình luận:", err);
+      }
+    }
+  };
+
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 mb-6 shadow-sm">
+    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 mb-6 shadow-sm relative group">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -100,9 +122,16 @@ const PostItem: React.FC<PostItemProps> = ({ post, currentUserId }) => {
             </p>
           </div>
         </div>
-        <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          {progress.profile.isAdmin && (
+            <button onClick={handleDeletePost} className="text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-colors" title="Xoá bài viết (Quyền Admin)">
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
+          <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+            <MoreHorizontal className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Content */}
@@ -162,7 +191,14 @@ const PostItem: React.FC<PostItemProps> = ({ post, currentUserId }) => {
                       {c.createdAt ? formatDistanceToNow(new Date(c.createdAt), { addSuffix: true, locale: vi }) : ''}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">{c.content}</p>
+                  <div className="flex items-start justify-between gap-4">
+                    <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">{c.content}</p>
+                    {progress.profile.isAdmin && (
+                      <button onClick={() => handleDeleteComment(c.id)} className="text-rose-400 hover:text-rose-600 p-1 shrink-0" title="Xoá bình luận">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

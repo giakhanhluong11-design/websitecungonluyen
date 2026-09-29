@@ -324,7 +324,8 @@ export function loginEmailAccount(
         name: displayName?.trim() || existingVault.profile.name || email.split('@')[0],
         isAuthenticated: true,
         authProvider: 'email',
-        loginAt: new Date().toISOString()
+        loginAt: new Date().toISOString(),
+        isAdmin: email.trim().toLowerCase() === 'tester@gmail.com'
       }
     };
   } else {
@@ -333,6 +334,7 @@ export function loginEmailAccount(
       name: displayName?.trim() || email.split('@')[0],
       avatar: '🎓',
       email: email.trim(),
+      isAdmin: email.trim().toLowerCase() === 'tester@gmail.com',
       isAuthenticated: true,
       authProvider: 'email',
       loginAt: new Date().toISOString(),

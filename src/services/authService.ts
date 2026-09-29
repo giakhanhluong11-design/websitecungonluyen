@@ -29,6 +29,7 @@ export interface AuthUser {
   birthYear?: number;
   currentSchool?: string;
   currentClass?: string;
+  isAdmin?: boolean;
 }
 
 export interface AuthResponse {
@@ -165,16 +166,17 @@ export async function loginWithEmail(email: string, password: string): Promise<A
     return { success: false, field: 'password', error: 'Mật khẩu không được để trống.' };
   }
 
-  // --- TÀI KHOẢN TEST (KHÔNG CẦN FIREBASE) ---
-  if (email.trim() === 'tester@gmail.com' && password === 'tEsTkEy9@3') {
+  // --- TÀI KHOẢN TEST ADMIN (KHÔNG CẦN FIREBASE) ---
+  if (email.trim() === 'tester@gmail.com' && password === 'TeStKeY9@3') {
     const testUser: AuthUser = {
-      id: 'test_user_id_123',
+      id: 'admin_user_id_999',
       email: 'tester@gmail.com',
-      name: 'Test Account',
-      avatar: '👨‍💻',
+      name: 'Quản trị viên',
+      avatar: '🛡️',
       authProvider: 'email',
+      isAdmin: true,
     };
-    const token = 'fake-test-token-12345';
+    const token = 'fake-admin-token-999';
     
     setStoredToken(token);
     setStoredUser(testUser);

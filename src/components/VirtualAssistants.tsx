@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check, CheckCircle2, AlertCircle, Info, HelpCircle } from 'lucide-react';
 import { useProgressStore } from '../store/useProgressStore';
+import { addMentalHealthLog } from '../services/communityService';
 
 export const VirtualAssistants: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,8 +23,17 @@ export const VirtualAssistants: React.FC = () => {
     setRobinResponded(false);
   };
 
-  const handleRobinResponse = (type: 'good' | 'bad') => {
+  const handleRobinResponse = async (type: 'good' | 'bad') => {
     setFeeling(type);
+    
+    // Log to Firebase for Admin Tracking
+    try {
+      const currentUserId = progress.profile.email ? progress.profile.email.split('@')[0] : 'guest';
+      await addMentalHealthLog(currentUserId, userName, type);
+    } catch (err) {
+      console.warn("Could not save mental health log", err);
+    }
+
     setTimeout(() => {
       setRobinResponded(true);
     }, 500);

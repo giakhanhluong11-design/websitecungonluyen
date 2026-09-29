@@ -124,6 +124,7 @@ export interface UserProfile {
   name: string;
   avatar: string;
   email: string;
+  isAdmin?: boolean;
   isAuthenticated?: boolean;
   authProvider?: 'email' | 'google' | 'guest';
   loginAt?: string;

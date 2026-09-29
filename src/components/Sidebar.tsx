@@ -13,7 +13,8 @@ import {
   ChevronRight, 
   User,
   Users,
-  X
+  X,
+  ShieldCheck
 } from 'lucide-react';
 import { UserProgress } from '../types';
 
@@ -71,6 +72,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'benchmarks', label: 'Điểm chuẩn THPT', icon: BarChart3 },
     { id: 'community', label: 'Chuyện chúng mình', icon: Users },
   ];
+
+  if (progress.profile.isAdmin) {
+    navTienIch.push({ id: 'admin', label: 'Admin Dashboard', icon: ShieldCheck });
+  }
 
   const sidebarContent = (
     <div className="flex flex-col h-full justify-between select-none">

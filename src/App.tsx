@@ -10,6 +10,7 @@ import { AccountView } from './components/AccountView';
 import { HCMBenchmarkView } from './components/HCMBenchmarkView';
 import { MinigameView } from './components/minigame/MinigameView';
 import { CommunityView } from './components/CommunityView';
+import { AdminDashboardView } from './components/AdminDashboardView';
 import { ExamRunnerModal } from './components/ExamRunnerModal';
 import { ExamPreviewModal } from './components/ExamPreviewModal';
 import { GoogleAuthModal } from './components/GoogleAuthModal';
@@ -319,6 +320,10 @@ export default function App() {
 
         {currentTab === 'community' && (
           <CommunityView />
+        )}
+
+        {currentTab === 'admin' && (
+          <AdminDashboardView />
         )}
 
         {currentTab === 'account' && (
