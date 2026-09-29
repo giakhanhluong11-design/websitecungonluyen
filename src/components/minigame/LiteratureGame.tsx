@@ -15,6 +15,20 @@ interface Question {
   explanation: string;
 }
 
+// Câu hỏi dự phòng khi server AI không khả dụng (Netlify static deploy)
+const FALLBACK_QUESTIONS: Question[] = [
+  { id: 'f1', question: 'Tác phẩm "Truyện Kiều" được viết bằng thể thơ nào?', options: ['Thất ngôn tứ tuyệt', 'Lục bát', 'Song thất lục bát', 'Ngũ ngôn'], correctAnswer: 'Lục bát', explanation: 'Truyện Kiều được Nguyễn Du viết bằng thể thơ lục bát với 3254 câu.' },
+  { id: 'f2', question: 'Tác giả của bài thơ "Đây thôn Vĩ Dạ" là ai?', options: ['Xuân Diệu', 'Hàn Mặc Tử', 'Huy Cận', 'Chế Lan Viên'], correctAnswer: 'Hàn Mặc Tử', explanation: 'Đây thôn Vĩ Dạ là bài thơ nổi tiếng của Hàn Mặc Tử, viết năm 1938.' },
+  { id: 'f3', question: '"Vợ nhặt" là tác phẩm của nhà văn nào?', options: ['Nam Cao', 'Kim Lân', 'Ngô Tất Tố', 'Nguyên Hồng'], correctAnswer: 'Kim Lân', explanation: 'Vợ nhặt là truyện ngắn xuất sắc của Kim Lân, viết về nạn đói năm 1945.' },
+  { id: 'f4', question: 'Nhân vật Chí Phèo trong tác phẩm cùng tên của Nam Cao thuộc tầng lớp nào?', options: ['Địa chủ', 'Trí thức', 'Nông dân lưu manh hóa', 'Công nhân'], correctAnswer: 'Nông dân lưu manh hóa', explanation: 'Chí Phèo xuất thân là nông dân, bị nhà tù thực dân biến thành kẻ lưu manh.' },
+  { id: 'f5', question: 'Bài thơ "Tây Tiến" được viết bởi tác giả nào?', options: ['Tố Hữu', 'Quang Dũng', 'Chính Hữu', 'Nguyễn Đình Thi'], correctAnswer: 'Quang Dũng', explanation: 'Tây Tiến là bài thơ của Quang Dũng viết năm 1948, ca ngợi đoàn quân Tây Tiến.' },
+  { id: 'f6', question: '"Số đỏ" là tác phẩm của nhà văn nào?', options: ['Vũ Trọng Phụng', 'Nguyễn Công Hoan', 'Nam Cao', 'Tô Hoài'], correctAnswer: 'Vũ Trọng Phụng', explanation: 'Số đỏ là tiểu thuyết trào phúng nổi tiếng của Vũ Trọng Phụng.' },
+  { id: 'f7', question: 'Nhân vật Mị trong "Vợ chồng A Phủ" của Tô Hoài thuộc dân tộc nào?', options: ['Kinh', 'Tày', 'H\'Mông', 'Thái'], correctAnswer: 'H\'Mông', explanation: 'Mị là cô gái người H\'Mông bị bắt làm con dâu gạt nợ cho nhà Pá Tra.' },
+  { id: 'f8', question: 'Truyện ngắn "Chiếc thuyền ngoài xa" được viết bởi nhà văn nào?', options: ['Nguyễn Minh Châu', 'Nguyễn Khải', 'Ma Văn Kháng', 'Lê Lựu'], correctAnswer: 'Nguyễn Minh Châu', explanation: 'Chiếc thuyền ngoài xa là tác phẩm của Nguyễn Minh Châu, viết năm 1983.' },
+  { id: 'f9', question: '"Đất nước" trong trường ca "Mặt đường khát vọng" là của tác giả nào?', options: ['Huy Cận', 'Xuân Quỳnh', 'Nguyễn Khoa Điềm', 'Phạm Tiến Duật'], correctAnswer: 'Nguyễn Khoa Điềm', explanation: 'Đoạn trích Đất nước thuộc chương V của trường ca Mặt đường khát vọng - Nguyễn Khoa Điềm.' },
+  { id: 'f10', question: 'Thể loại của "Ai đã đặt tên cho dòng sông?" (Hoàng Phủ Ngọc Tường) là gì?', options: ['Tiểu thuyết', 'Bút ký', 'Truyện ngắn', 'Tùy bút'], correctAnswer: 'Bút ký', explanation: 'Ai đã đặt tên cho dòng sông là bút ký xuất sắc của Hoàng Phủ Ngọc Tường viết năm 1981.' },
+];
+
 export const LiteratureGame: React.FC<LiteratureGameProps> = ({ onBack, onSaveResult }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,14 +54,20 @@ export const LiteratureGame: React.FC<LiteratureGameProps> = ({ onBack, onSaveRe
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ count: 10 }),
       });
+      // Nếu server API không tồn tại (Netlify static deploy), dùng câu hỏi dự phòng
+      if (!res.ok) {
+        setQuestions(FALLBACK_QUESTIONS);
+        return;
+      }
       const data = await res.json();
       if (data.success && data.questions) {
         setQuestions(data.questions);
       } else {
-        setError(data.error || 'Lỗi khi tải câu hỏi từ AI');
+        setQuestions(FALLBACK_QUESTIONS);
       }
-    } catch (err: any) {
-      setError(err.message || 'Không thể kết nối đến máy chủ AI');
+    } catch (_err) {
+      // Khi không có server, dùng câu hỏi offline
+      setQuestions(FALLBACK_QUESTIONS);
     } finally {
       setLoading(false);
     }
