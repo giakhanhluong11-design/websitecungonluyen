@@ -322,7 +322,7 @@ export default function App() {
           <CommunityView />
         )}
 
-        {currentTab === 'admin' && (
+        {currentTab === 'admin' && progress.profile.isAdmin && (
           <AdminDashboardView />
         )}
 

@@ -22,6 +22,7 @@ import {
 import { UserProgress, Topic, Exam } from '../types';
 import { ALL_TOPICS } from '../data/topicsData';
 import { ALL_EXAMS } from '../data/examsData';
+import { UserAvatar } from './UserAvatar';
 
 const APP_FEATURES = [
   { id: 'home', title: 'Trang chủ', desc: 'Màn hình chính', icon: Home },
@@ -178,7 +179,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-20 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-20 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-[#2463EB] dark:bg-[#041A63] backdrop-blur-md transition-colors">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 gap-4">
         {/* Left side: Hamburger Toggle + Search Bar */}
         <div className="flex items-center gap-3 flex-1 max-w-xl">
@@ -208,7 +209,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 if (searchQuery.trim()) setShowSearchResults(true);
               }}
               placeholder="Tìm kiếm chuyên đề, đề thi, tác phẩm..."
-              className="w-full pl-9 pr-8 py-2 text-sm rounded-xl bg-slate-100/90 dark:bg-slate-800/90 border border-transparent focus:border-indigo-400 dark:focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-850 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-all outline-none"
+              className="w-full pl-9 pr-8 py-2 text-sm rounded-xl bg-white dark:bg-slate-800/90 border border-transparent focus:border-indigo-400 dark:focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-850 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-all outline-none"
             />
             {searchQuery && (
               <button
@@ -413,11 +414,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             title={`Hồ sơ: ${progress.profile.name || 'Học sinh'}`}
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
           >
-            {progress.profile.avatar ? (
-              <span className="text-xl leading-none">{progress.profile.avatar}</span>
-            ) : (
-              <User className="h-5 w-5" />
-            )}
+            <UserAvatar avatar={progress.profile.avatar} className="w-10 h-10" />
           </button>
         </div>
       </div>

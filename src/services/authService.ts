@@ -99,7 +99,7 @@ function firebaseUserToAuthUser(user: User, provider: 'email' | 'google' = 'emai
     id: user.uid,
     email: user.email || '',
     name: user.displayName || user.email?.split('@')[0] || 'Học sinh',
-    avatar: '🎓',
+    avatar: '/avatars/default.svg',
     authProvider: provider,
     photoURL: user.photoURL || undefined,
   };

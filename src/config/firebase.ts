@@ -5,7 +5,8 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  // Dùng env var khi deploy (Netlify), dùng key thật khi local dev
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDj8Kz2kV-CpFoFOjRx-mI4n7hpUi9Wk5M",
   authDomain: "nckh9a3.firebaseapp.com",
   projectId: "nckh9a3",
   storageBucket: "nckh9a3.firebasestorage.app",

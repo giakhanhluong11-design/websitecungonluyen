@@ -18,6 +18,7 @@ import {
   Flame
 } from 'lucide-react';
 import { UserProgress } from '../types';
+import { UserAvatar } from './UserAvatar';
 
 interface HomeDashboardWidgetsProps {
   progress: UserProgress;
@@ -179,8 +180,8 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
         
         {/* Card 1: Progress charts (Circular Donut Chart) */}
-        <div className="rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-xs border border-slate-200/90 dark:border-slate-800/80 p-5 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
+        <div className="rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-xs border border-slate-200/90 dark:border-slate-800/80 p-5 shadow-2xs transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 flex flex-col justify-between group">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-2">
             <span>Tỉ lệ làm đúng (5 bài gần nhất)</span>
           </div>
 
@@ -235,8 +236,8 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
         </div>
 
         {/* Card 2: Progress (Weekly Bar Chart) */}
-        <div className="rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-xs border border-slate-200/90 dark:border-slate-800/80 p-5 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
+        <div className="rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-xs border border-slate-200/90 dark:border-slate-800/80 p-5 shadow-2xs transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 flex flex-col justify-between group">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-2">
             <span>Chuỗi ngày học liên tục</span>
           </div>
 
@@ -264,8 +265,8 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
           </div>
         </div>
 
-        <div className="rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-xs border border-slate-200/90 dark:border-slate-800/80 p-5 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
+        <div className="rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-xs border border-slate-200/90 dark:border-slate-800/80 p-5 shadow-2xs transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 flex flex-col justify-between group">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-2">
             <span>Thời lượng học tuần này (Giờ)</span>
           </div>
 
@@ -299,22 +300,29 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
       {/* Community Banner */}
       <div 
         onClick={() => onNavigate('community')}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 p-6 sm:p-8 cursor-pointer hover:shadow-lg transition-all group"
+        className="relative overflow-hidden rounded-2xl cursor-pointer hover:shadow-lg transition-all group min-h-[160px] sm:min-h-[220px] bg-[#FFF9E6] dark:bg-[#FFF9E6]/90"
       >
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 group-hover:rotate-12 duration-500">
-          <Users className="w-32 h-32 text-white" />
-        </div>
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-              <Users className="w-6 h-6" />
-              Chuyện chúng mình
-            </h2>
-            <p className="text-indigo-100 mt-1 max-w-xl text-sm sm:text-base">
-              Nơi giao lưu, chia sẻ kinh nghiệm ôn luyện và hỏi đáp. Cùng kết nối với cộng đồng học sinh ngay!
-            </p>
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-right bg-no-repeat transition-transform duration-700 group-hover:scale-105"
+          style={{ 
+            backgroundImage: `url('/images/chuyen-chung-minh-banner.png')`,
+            backgroundSize: 'auto 100%'
+          }}
+        />
+        
+        {/* Content container (Left Side Decorations & Button) */}
+        <div className="absolute inset-0 p-4 sm:p-8 flex flex-col items-start justify-center gap-3 sm:gap-4 z-10 w-[45%] sm:w-[50%]">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/70 backdrop-blur-md rounded-full text-[10px] sm:text-xs font-bold text-pink-500 shadow-sm border border-white/50">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Kết nối & Chia sẻ</span>
           </div>
-          <button className="whitespace-nowrap px-5 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl text-white font-bold transition-colors flex items-center gap-2">
+          
+          <p className="text-slate-800 dark:text-slate-900 font-extrabold text-sm sm:text-base md:text-lg leading-tight drop-shadow-sm max-w-[200px] sm:max-w-[280px]">
+            Cùng nhau thảo luận, giải đáp thắc mắc và kết bạn mới ngay!
+          </p>
+          
+          <button className="whitespace-nowrap px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-pink-400 to-indigo-400 hover:from-pink-500 hover:to-indigo-500 rounded-xl text-white font-black transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-lg hover:shadow-pink-400/30">
             <span>Tham gia ngay</span>
             <ArrowUpRight className="w-4 h-4" />
           </button>
@@ -325,9 +333,9 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         
         {/* Wave / Area Chart */}
-        <div className="lg:col-span-2 rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-xs border border-slate-200/90 dark:border-slate-800/80 p-5 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between">
+        <div className="lg:col-span-2 rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-xs border border-slate-200/90 dark:border-slate-800/80 p-5 shadow-2xs transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 flex flex-col justify-between group">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Biểu đồ tiến độ & điểm số thực tế</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Biểu đồ tiến độ & điểm số thực tế</span>
             
             {/* Functional Toggle Tab */}
             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-semibold">
@@ -451,8 +459,8 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
         </div>
 
         {/* Recent Activity List Card (Matching right card in mockup) */}
-        <div className="rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-xs border border-slate-200/90 dark:border-slate-800/80 p-5 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3">
+        <div className="rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-xs border border-slate-200/90 dark:border-slate-800/80 p-5 shadow-2xs transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 flex flex-col justify-between group">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-3">
             <span>Hoạt động gần đây</span>
             {recentActivities.length > 0 && (
               <button 
@@ -483,13 +491,7 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
                   className="flex items-center justify-between gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-slate-700 flex items-center justify-center text-indigo-700 dark:text-indigo-300 shrink-0 font-bold text-xs">
-                      {progress.profile.avatar ? (
-                        <span>{progress.profile.avatar}</span>
-                      ) : (
-                        <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                      )}
-                    </div>
+                    <UserAvatar avatar={progress.profile.avatar} className="w-8 h-8 shrink-0" />
 
                     <div className="min-w-0">
                       <div className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">

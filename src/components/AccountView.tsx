@@ -26,6 +26,7 @@ import {
 import { UserProfile, UserProgress, Exam } from '../types';
 import { HCM_SCHOOLS } from '../data/examsData';
 import { isRememberLoginEnabled, setRememberLoginEnabled } from '../data/userStorage';
+import { UserAvatar } from './UserAvatar';
 
 // Official 4-color Google G Icon
 export const GoogleIcon: React.FC<{ className?: string }> = ({ className = "h-4 w-4" }) => (
@@ -49,7 +50,19 @@ export const GoogleIcon: React.FC<{ className?: string }> = ({ className = "h-4 
   </svg>
 );
 
-const AVATAR_OPTIONS = ['🎓', '🎒', '📚', '🏆', '⭐', '🚀', '💡', '🦁', '🐯', '🦉', '🎯', '✨'];
+const AVATAR_OPTIONS = [
+  '/avatars/default.svg',
+  '/avatars/avatar_1.jpg',
+  '/avatars/avatar_2.jpg',
+  '/avatars/avatar_3.jpg',
+  '/avatars/avatar_4.jpg',
+  '/avatars/avatar_5.jpg',
+  '/avatars/avatar_6.jpg',
+  '/avatars/avatar_7.jpg',
+  '/avatars/avatar_8.jpg',
+  '/avatars/avatar_9.jpg',
+  '/avatars/avatar_10.jpg'
+];
 
 interface AccountViewProps {
   progress: UserProgress;
@@ -83,7 +96,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
   onStartExam
 }) => {
   const [name, setName] = useState(progress.profile.name || '');
-  const [avatar, setAvatar] = useState(progress.profile.avatar || '🎓');
+  const [avatar, setAvatar] = useState(progress.profile.avatar || '/avatars/default.svg');
   const [email, setEmail] = useState(progress.profile.email || '');
   const [currentSchool, setCurrentSchool] = useState(progress.profile.currentSchool || '');
   const [currentClass, setCurrentClass] = useState(progress.profile.currentClass || '');
@@ -218,9 +231,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-indigo-100 dark:border-indigo-950/70 bg-gradient-to-r from-indigo-50/60 via-sky-50/40 to-slate-50 dark:from-indigo-950/30 dark:via-slate-900 dark:to-slate-900 p-4">
               <div className="flex items-center gap-3.5">
                 <div className="relative">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-900 text-2xl shadow-xs">
-                    {progress.profile.avatar || '🎓'}
-                  </div>
+                  <UserAvatar avatar={progress.profile.avatar} className="h-12 w-12 border border-indigo-200 dark:border-indigo-900 shadow-xs rounded-2xl" />
                   <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white dark:bg-slate-900 shadow border border-slate-200 dark:border-slate-700">
                     {progress.profile.isGoogleLinked ? (
                       <GoogleIcon className="h-3 w-3" />
@@ -404,14 +415,14 @@ export const AccountView: React.FC<AccountViewProps> = ({
                     key={item}
                     type="button"
                     onClick={() => setAvatar(item)}
-                    className={`h-10 w-10 rounded-xl flex items-center justify-center text-xl transition-all cursor-pointer ${
+                    className={`h-12 w-12 rounded-full flex items-center justify-center transition-all cursor-pointer overflow-hidden ${
                       avatar === item
-                        ? 'bg-indigo-600 text-white ring-2 ring-indigo-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md scale-110'
-                        : 'bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 hover:scale-105'
+                        ? 'ring-4 ring-indigo-600 dark:ring-indigo-400 ring-offset-2 dark:ring-offset-slate-900 shadow-lg scale-110'
+                        : 'hover:ring-2 ring-slate-300 dark:ring-slate-600 hover:scale-105'
                     }`}
-                    title={`Chọn biểu tượng ${item}`}
+                    title="Chọn hình đại diện"
                   >
-                    {item}
+                    <img src={item} alt="Avatar option" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

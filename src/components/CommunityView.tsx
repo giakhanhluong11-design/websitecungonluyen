@@ -72,7 +72,7 @@ const PostItem: React.FC<PostItemProps> = ({ post, currentUserId }) => {
       await addComment(post.id, {
         userId: currentUserId,
         userName: progress.profile.name || 'Người dùng ẩn danh',
-        userAvatar: progress.profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUserId}`,
+        userAvatar: progress.profile.avatar || `/avatars/default.svg`,
         content: newComment.trim()
       });
       setNewComment('');
@@ -211,7 +211,7 @@ const PostItem: React.FC<PostItemProps> = ({ post, currentUserId }) => {
           
           <form onSubmit={handleAddComment} className="flex gap-3 items-end">
             <img 
-              src={progress.profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUserId || 'guest'}`} 
+              src={progress.profile.avatar || `/avatars/default.svg`} 
               alt="You" 
               className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 shrink-0 mb-1"
             />
@@ -285,7 +285,7 @@ export const CommunityView: React.FC = () => {
       await createPost({
         userId: currentUserId,
         userName: progress.profile.name || 'Người dùng',
-        userAvatar: progress.profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUserId}`,
+        userAvatar: progress.profile.avatar || `/avatars/default.svg`,
         content: newPostContent.trim(),
         likesCount: 0,
         commentsCount: 0,
@@ -342,7 +342,7 @@ export const CommunityView: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 mb-8 shadow-sm">
         <div className="flex gap-3 sm:gap-4">
           <img 
-            src={progress.profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUserId || 'guest'}`} 
+            src={progress.profile.avatar || `/avatars/default.svg`} 
             alt="You" 
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 shrink-0"
           />

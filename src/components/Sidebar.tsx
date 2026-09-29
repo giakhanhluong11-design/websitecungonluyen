@@ -17,6 +17,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { UserProgress } from '../types';
+import { UserAvatar } from './UserAvatar';
 
 interface SidebarProps {
   currentTab: string;
@@ -101,12 +102,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <div className="flex items-center gap-3 min-w-0">
             {/* Avatar circle */}
-            <div className="relative h-11 w-11 shrink-0 rounded-full overflow-hidden bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-950 dark:to-slate-800 border-2 border-indigo-200/80 dark:border-indigo-700 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold shadow-xs">
-              {progress.profile.avatar ? (
-                <span className="text-xl leading-none">{progress.profile.avatar}</span>
-              ) : (
-                <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              )}
+            <div className="relative shrink-0">
+              <UserAvatar avatar={progress.profile.avatar} className="w-11 h-11" />
               {/* Online pulse dot */}
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-850 rounded-full" />
             </div>
@@ -141,8 +138,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => handleNav(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
                     isActive
-                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-2xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
+                      ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-semibold shadow-2xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                   }`}
                 >
                   <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400'}`} />
@@ -168,8 +165,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => handleNav(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
                     isActive
-                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-2xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
+                      ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-semibold shadow-2xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                   }`}
                 >
                   <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400'}`} />
@@ -244,7 +241,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       {/* Desktop Sticky Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 xl:w-72 h-screen sticky top-0 border-r border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-30 p-4 shrink-0 transition-colors">
+      <aside className="hidden lg:flex flex-col w-64 xl:w-72 h-screen sticky top-0 border-r border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl z-30 p-4 shrink-0 transition-colors">
         {sidebarContent}
       </aside>
 

@@ -15,6 +15,7 @@ import {
   BarChart3,
   Gamepad2
 } from 'lucide-react';
+import { UserAvatar } from './UserAvatar';
 import { UserProgress } from '../types';
 import { GoogleIcon } from './AccountView';
 
@@ -131,13 +132,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
               aria-label="Truy cập hồ sơ học sinh"
             >
-              {progress.profile.avatar ? (
-                <span className="text-xl leading-none select-none group-hover:scale-110 transition-transform">
-                  {progress.profile.avatar}
-                </span>
-              ) : (
-                <User className="h-5 w-5 group-hover:scale-110 transition-transform" />
-              )}
+              <UserAvatar avatar={progress.profile.avatar} className="w-8 h-8 group-hover:scale-110 transition-transform" />
               {/* Active / Google status dot */}
               {progress.profile.isGoogleLinked ? (
                 <span 
@@ -237,7 +232,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 title={`Tài khoản: ${progress.profile.name || progress.profile.email}`}
                 className="flex items-center gap-1.5 h-9 pl-2 pr-2.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors shadow-2xs cursor-pointer active:scale-95 text-xs font-bold"
               >
-                <span className="text-sm leading-none">{progress.profile.avatar || '🎓'}</span>
+                <UserAvatar avatar={progress.profile.avatar} className="w-5 h-5 sm:w-6 sm:h-6" />
                 <span className="hidden sm:inline max-w-[90px] truncate text-xs">
                   {progress.profile.name?.split(' ').pop() || progress.profile.email.split('@')[0]}
                 </span>
@@ -317,9 +312,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:border-indigo-300 dark:hover:border-indigo-600 transition-all cursor-pointer group"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-base">
-                {progress.profile.avatar || <User className="h-4 w-4 text-slate-500 dark:text-slate-400" />}
-              </span>
+              <UserAvatar avatar={progress.profile.avatar} className="w-9 h-9" />
               <div className="min-w-0">
                 <p className="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                   {progress.profile.name || 'Sĩ tử lớp 9'}
@@ -405,7 +398,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="pt-2 space-y-2 border-t border-slate-200 dark:border-slate-800">
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="text-base">{progress.profile.avatar || '🎓'}</span>
+                  <UserAvatar avatar={progress.profile.avatar} className="w-8 h-8 shrink-0" />
                   <div className="min-w-0">
                     <p className="font-bold text-slate-800 dark:text-slate-200 text-xs truncate">
                       {progress.profile.name || progress.profile.email}

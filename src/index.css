@@ -1,7 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  --color-slate-850: #131d33;
+  /* ============================================
+   * VIBRANT THEME PALETTE
+   * Giữ nguyên text (400-700) để không bị lỗi màu
+   * Chỉ tuỳ biến màu Nền và màu Chữ chính (50-200, 800-950)
+   * ============================================ */
+  --color-slate-50:  #EEF2FF;  /* Nền App Light / Text Dark */
+  --color-slate-100: #E0E7FF;  /* Card BG Light */
+  --color-slate-200: #C7D2FE;  /* Viền nhẹ Light */
+  
+  --color-slate-800: #1C1A36;  /* Text Light / Border Dark */
+  --color-slate-850: #1C1A36;  /* Hover Card Dark */
+  --color-slate-900: #121126;  /* Tiêu đề Light / Card Dark */
+  --color-slate-950: #0A0914;  /* Đậm nhất - Nền App Dark */
 }
 
 @custom-variant dark (&:is(.dark, .dark *));
@@ -13,35 +25,13 @@
     overflow-wrap: break-word;
     -webkit-hyphens: none;
     hyphens: none;
-    background-color: #f1f5f9; /* Giảm độ sáng chói (dùng slate-100 thay vì slate-50) */
-    color: #0f172a;
-  }
-
-  :root {
-    /* Tăng độ tương phản cho các đường viền/giao nhau và giảm chói cho nền sáng */
-    --color-slate-50: #f6f8fa; /* Giảm chói màu trắng nhất */
-    --color-slate-100: #edf1f5; /* Nền phụ hơi xám mát */
-    --color-slate-200: #d3dce6; /* Làm viền đậm hơn (tương phản rõ rệt hơn so với #e2e8f0 mặc định) */
-    --color-slate-300: #bac6d6;
+    background-color: var(--color-slate-50);
+    color: var(--color-slate-900);
   }
 
   html.dark, body.dark {
-    /* Mảng màu mới cho nền: tối màu xanh tím (indigo/violet dark) sáng hơn, bớt u ám */
-    background-color: #0d1126;
-    color: #f8fafc;
-  }
-
-  /* Redefine slate palette in dark mode to have vibrant bluish-purple hues */
-  .dark {
-    --color-slate-950: #0d1128; /* Nền chính: Deep vibrant indigo */
-    --color-slate-900: #161c40; /* Card chính: Lighter indigo */
-    --color-slate-850: #1e2652; /* Hover/Border: Vivid */
-    --color-slate-800: #28326b; /* Lighter borders */
-    --color-slate-700: #3b4991; /* Accent / Selected */
-    --color-slate-600: #5163ba; /* Strong accents */
-    --color-slate-500: #7184d4; /* Vibrant muted text */
-    --color-slate-400: #93a5e8; /* Soft bright text */
-    --color-slate-300: #bac8f5; /* Bright text */
+    background-color: var(--color-slate-950);
+    color: var(--color-slate-50);
   }
 
   h1, h2, h3, h4, h5, h6 {

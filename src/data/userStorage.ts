@@ -40,7 +40,7 @@ export function setRememberLoginEnabled(enabled: boolean): void {
 export const INITIAL_USER_PROGRESS: UserProgress = {
   profile: {
     name: '',
-    avatar: '🎓',
+    avatar: '/avatars/default.svg',
     email: '',
     isGoogleLinked: false,
     targetSchool: '',
@@ -255,7 +255,7 @@ export function loginGoogleAccount(email: string, displayName?: string, remember
     // User mới đăng nhập Google lần đầu — profile trắng
     const profile: UserProfile = {
       name: displayName?.trim() || email.split('@')[0],
-      avatar: '🎓',
+      avatar: '/avatars/default.svg',
       email: email.trim(),
       isAuthenticated: true,
       authProvider: 'google',
@@ -332,7 +332,7 @@ export function loginEmailAccount(
     // User mới — tạo profile trắng với thông tin từ đăng ký
     const profile: UserProfile = {
       name: displayName?.trim() || email.split('@')[0],
-      avatar: '🎓',
+      avatar: '/avatars/default.svg',
       email: email.trim(),
       isAdmin: email.trim().toLowerCase() === 'tester@gmail.com',
       isAuthenticated: true,
