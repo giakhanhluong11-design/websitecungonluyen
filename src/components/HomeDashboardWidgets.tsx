@@ -11,6 +11,7 @@ import {
   Calculator, 
   Languages, 
   User, 
+  Users,
   CheckCircle2,
   ArrowUpRight,
   BarChart2,
@@ -293,6 +294,31 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
           </div>
         </div>
 
+      </div>
+
+      {/* Community Banner */}
+      <div 
+        onClick={() => onNavigate('community')}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 p-6 sm:p-8 cursor-pointer hover:shadow-lg transition-all group"
+      >
+        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 group-hover:rotate-12 duration-500">
+          <Users className="w-32 h-32 text-white" />
+        </div>
+        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+              <Users className="w-6 h-6" />
+              Chuyện chúng mình
+            </h2>
+            <p className="text-indigo-100 mt-1 max-w-xl text-sm sm:text-base">
+              Nơi giao lưu, chia sẻ kinh nghiệm ôn luyện và hỏi đáp. Cùng kết nối với cộng đồng học sinh ngay!
+            </p>
+          </div>
+          <button className="whitespace-nowrap px-5 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl text-white font-bold transition-colors flex items-center gap-2">
+            <span>Tham gia ngay</span>
+            <ArrowUpRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Row 2: Real Wave / Area Chart (Left) + Real Recent Activity List (Right) */}

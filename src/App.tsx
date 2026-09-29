@@ -9,6 +9,7 @@ import { ExamLibraryView } from './components/ExamLibraryView';
 import { AccountView } from './components/AccountView';
 import { HCMBenchmarkView } from './components/HCMBenchmarkView';
 import { MinigameView } from './components/minigame/MinigameView';
+import { CommunityView } from './components/CommunityView';
 import { ExamRunnerModal } from './components/ExamRunnerModal';
 import { ExamPreviewModal } from './components/ExamPreviewModal';
 import { GoogleAuthModal } from './components/GoogleAuthModal';
@@ -24,6 +25,7 @@ import { useProgressStore } from './store/useProgressStore';
 import { useAppStore } from './store/useAppStore';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { StreakFlameCelebration } from './components/StreakFlameCelebration';
+import { VirtualAssistants } from './components/VirtualAssistants';
 
 export default function App() {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -315,6 +317,10 @@ export default function App() {
           />
         )}
 
+        {currentTab === 'community' && (
+          <CommunityView />
+        )}
+
         {currentTab === 'account' && (
           <AccountView
             progress={progress}
@@ -415,6 +421,9 @@ export default function App() {
           onClose={() => setStreakCelebration(null)}
         />
       )}
+
+      {/* Trợ lý ảo lơ lửng ở góc dưới phải */}
+      <VirtualAssistants />
 
     </div>
   );

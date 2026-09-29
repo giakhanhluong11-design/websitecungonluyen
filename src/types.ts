@@ -176,3 +176,29 @@ export interface UserProgress {
   minigameBestScores?: Record<string, number>;
   topicProgress?: Record<string, number>;
 }
+
+// ==========================================
+// COMMUNITY (Chuyện chúng mình)
+// ==========================================
+
+export interface CommunityPost {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  content: string;
+  createdAt: string; // ISO string
+  likesCount: number;
+  commentsCount: number;
+  likedBy: string[]; // array of userIds
+}
+
+export interface CommunityComment {
+  id: string;
+  postId: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  content: string;
+  createdAt: string; // ISO string
+}

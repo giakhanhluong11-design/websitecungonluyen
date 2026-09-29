@@ -12,6 +12,7 @@ import {
   LogOut, 
   ChevronRight, 
   User,
+  Users,
   X
 } from 'lucide-react';
 import { UserProgress } from '../types';
@@ -68,6 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navTienIch = [
     { id: 'minigame', label: 'Minigame', icon: Gamepad2 },
     { id: 'benchmarks', label: 'Điểm chuẩn THPT', icon: BarChart3 },
+    { id: 'community', label: 'Chuyện chúng mình', icon: Users },
   ];
 
   const sidebarContent = (
