@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useProgressStore } from '../store/useProgressStore';
 import { 
   BarChart, Users, HeartPulse, Activity, ShieldCheck, UserX,
-  Smile, Frown, Calendar, Clock
+  Smile, Frown, Calendar, Clock, Info
 } from 'lucide-react';
 import { 
   subscribeToMentalHealthLogs, 
