@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  X, 
-  CheckCircle2, 
-  Circle, 
-  BookOpen, 
-  Zap, 
-  Code2, 
-  HelpCircle, 
-  Play, 
-  ChevronDown, 
-  ChevronUp, 
+import {
+  X,
+  CheckCircle2,
+  Circle,
+  BookOpen,
+  Zap,
+  Code2,
+  HelpCircle,
+  Play,
+  ChevronDown,
+  ChevronUp,
   Lightbulb,
   Award
 } from 'lucide-react';
@@ -53,7 +53,7 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div 
+      <div
         id="topic-detail-modal-container"
         className="relative flex flex-col w-full max-w-4xl max-h-[92vh] rounded-2xl bg-white shadow-xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden"
       >
@@ -61,13 +61,12 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
         <div className="flex items-start justify-between p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850/60">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-                topic.subjectId === 'toan'
+              <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${topic.subjectId === 'toan'
                   ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60'
                   : topic.subjectId === 'van'
-                  ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/60'
-                  : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60'
-              }`}>
+                    ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/60'
+                    : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60'
+                }`}>
                 {topic.subjectId === 'toan' ? 'Toán học' : topic.subjectId === 'van' ? 'Ngữ văn' : 'Tiếng Anh'} • {topic.categoryLabel}
               </span>
 
@@ -110,11 +109,10 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
         <div className="flex border-b border-slate-200 dark:border-slate-800 px-5 bg-slate-50/50 dark:bg-slate-900 gap-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('theory')}
-            className={`flex items-center gap-2 py-3 px-3 border-b-2 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'theory'
+            className={`flex items-center gap-2 py-3 px-3 border-b-2 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'theory'
                 ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
+              }`}
           >
             <BookOpen className="h-4 w-4" />
             Tóm tắt lý thuyết
@@ -122,11 +120,10 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
 
           <button
             onClick={() => setActiveTab('formulas')}
-            className={`flex items-center gap-2 py-3 px-3 border-b-2 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'formulas'
+            className={`flex items-center gap-2 py-3 px-3 border-b-2 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'formulas'
                 ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
+              }`}
           >
             <Zap className="h-4 w-4" />
             Công thức & Quy tắc ({topic.keyFormulas.length})
@@ -134,11 +131,10 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
 
           <button
             onClick={() => setActiveTab('examples')}
-            className={`flex items-center gap-2 py-3 px-3 border-b-2 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'examples'
+            className={`flex items-center gap-2 py-3 px-3 border-b-2 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'examples'
                 ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
+              }`}
           >
             <Code2 className="h-4 w-4" />
             Ví dụ minh họa ({topic.examples.length})
@@ -146,11 +142,10 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
 
           <button
             onClick={() => setActiveTab('exercises')}
-            className={`flex items-center gap-2 py-3 px-3 border-b-2 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'exercises'
+            className={`flex items-center gap-2 py-3 px-3 border-b-2 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'exercises'
                 ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
+              }`}
           >
             <HelpCircle className="h-4 w-4" />
             Bài tập tự luyện ({topic.exercises.length})
@@ -209,7 +204,7 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {topic.keyFormulas.map((formula, index) => (
-                      <div 
+                      <div
                         key={index}
                         className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-850 flex items-center gap-3 font-mono text-xs font-semibold text-slate-800 dark:text-slate-200"
                       >
@@ -229,7 +224,7 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
           {activeTab === 'examples' && (
             <div className="space-y-4">
               {topic.examples.map((example, idx) => (
-                <div 
+                <div
                   key={idx}
                   className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 p-4 space-y-3"
                 >
@@ -333,13 +328,12 @@ function renderExerciseList(
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
-          levelLabel === 'Cơ bản'
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${levelLabel === 'Cơ bản'
             ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60'
             : levelLabel === 'Vận dụng'
-            ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/60'
-            : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60'
-        }`}>
+              ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/60'
+              : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60'
+          }`}>
           {levelLabel}
         </span>
         <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -354,7 +348,7 @@ function renderExerciseList(
           const isCorrect = userSelected === ex.correctAnswer;
 
           return (
-            <div 
+            <div
               key={ex.id}
               className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 p-4 space-y-3 shadow-2xs"
             >

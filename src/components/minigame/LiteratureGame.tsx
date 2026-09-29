@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Trophy, AlertCircle, ArrowLeft, RefreshCw, CheckCircle2, XCircle, Flame, Clock, BrainCircuit } from 'lucide-react';
+import { Trophy, AlertCircle, ArrowLeft, RefreshCw, CheckCircle2, XCircle, Flame, Clock, BrainCircuit, X } from 'lucide-react';
 import { MinigameResult } from '../../types';
 
 interface LiteratureGameProps {
@@ -88,7 +88,6 @@ export const LiteratureGame: React.FC<LiteratureGameProps> = ({ onBack, onSaveRe
   const handleSelectOption = (optionRaw: string) => {
     if (gameState !== 'playing') return;
     
-    // optionRaw is like "A. trong nguồn"
     const optionLetter = optionRaw.split('.')[0].trim();
     setSelectedOption(optionLetter);
     setGameState('revealing');
@@ -103,7 +102,7 @@ export const LiteratureGame: React.FC<LiteratureGameProps> = ({ onBack, onSaveRe
       setCurrentCombo(0);
     }
 
-    setTimeout(() => nextQuestion(), 3000);
+    setTimeout(() => nextQuestion(), 4000);
   };
 
   const nextQuestion = () => {
@@ -119,9 +118,7 @@ export const LiteratureGame: React.FC<LiteratureGameProps> = ({ onBack, onSaveRe
 
   const endGame = () => {
     setGameState('gameover');
-    
     const finalScore = score * 10;
-    
     const result: MinigameResult = {
       id: Date.now().toString(),
       player: 'Anonymous',
@@ -136,112 +133,159 @@ export const LiteratureGame: React.FC<LiteratureGameProps> = ({ onBack, onSaveRe
       timeSeconds: 0,
       createdAt: new Date().toISOString()
     };
-    
     onSaveResult(result);
   };
 
+  // Helper cho hình đa giác (Hexagon-like) để tạo kiểu viền vát góc giống Ai là triệu phú
+  const hexagonClipPath = 'polygon(20px 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 20px 100%, 0 50%)';
+
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh]">
-        <BrainCircuit className="w-16 h-16 text-indigo-500 animate-pulse mb-4" />
-        <h2 className="text-xl font-bold text-slate-700 dark:text-slate-300">Gemini AI đang sáng tác câu hỏi...</h2>
-        <p className="text-sm text-slate-500 mt-2">Mỗi lần chơi là 10 câu hỏi hoàn toàn mới</p>
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center bg-[#130724] rounded-3xl text-white">
+        <BrainCircuit className="w-16 h-16 text-purple-500 animate-pulse mb-4" />
+        <h2 className="text-xl font-bold">Đang kết nối trường quay...</h2>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-center max-w-md mx-auto">
+      <div className="w-full h-[80vh] flex flex-col items-center justify-center bg-[#130724] rounded-3xl text-white text-center p-8">
         <AlertCircle className="w-16 h-16 text-rose-500 mb-4" />
-        <h2 className="text-xl font-bold text-slate-700 dark:text-slate-300 mb-2">Lỗi kết nối AI</h2>
-        <p className="text-slate-600 dark:text-slate-400 mb-6">{error}</p>
-        <button onClick={onBack} className="px-6 py-2 bg-slate-200 dark:bg-slate-800 rounded-xl font-semibold">Quay lại</button>
+        <h2 className="text-xl font-bold mb-2">Lỗi kết nối</h2>
+        <p className="text-slate-400 mb-6">{error}</p>
+        <button onClick={onBack} className="px-6 py-2 bg-purple-900/50 hover:bg-purple-800 rounded-xl font-semibold border border-purple-500/30">Quay lại</button>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-4 sm:p-6 w-full animate-in fade-in">
-      {/* Header */}
-      <header className="flex items-center justify-between mb-8">
-        <button
-          onClick={onBack}
-          className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
+    <div className="w-full min-h-[80vh] rounded-3xl overflow-hidden relative font-sans animate-in fade-in bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900 via-[#1e053d] to-black shadow-2xl border border-purple-900/50">
+      
+      {/* Background Decorative Grid/Lines like the show */}
+      <div className="absolute inset-0 pointer-events-none opacity-20" 
+           style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+
+      {/* Top Navigation Bar */}
+      <div className="absolute top-0 inset-x-0 p-4 flex justify-between items-center z-20">
+        <button onClick={onBack} className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-white border border-white/10 transition-colors cursor-pointer">
+          <X className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 font-bold text-sm border border-indigo-100 dark:border-indigo-900/50">
-            <Trophy className="w-4 h-4" />
-            <span>Score: {score * 10}</span>
-          </div>
-          {currentCombo > 1 && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 font-bold text-sm border border-orange-100 dark:border-orange-900/50 animate-bounce">
-              <Flame className="w-4 h-4" />
-              <span>Combo x{currentCombo}</span>
-            </div>
-          )}
+        <div className="text-white/60 font-bold tracking-widest text-sm uppercase">
+          {gameState === 'intro' ? 'GameVui' : 'Trường quay'}
         </div>
-      </header>
+        <div className="w-10 h-10" /> {/* Spacer for centering */}
+      </div>
 
       {gameState === 'intro' && (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center shadow-lg">
-          <BrainCircuit className="w-20 h-20 text-purple-500 mx-auto mb-6" />
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-4">Ai Là Nhà Văn?</h1>
-          <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-lg mx-auto">
-            10 câu đố văn học, tác giả, tác phẩm, ca dao tục ngữ được AI sinh ngẫu nhiên.
-            Bạn có 15 giây cho mỗi câu. Vượt qua 10 câu để chứng minh đẳng cấp!
+        <div className="relative z-10 w-full h-full min-h-[80vh] flex flex-col items-center justify-center p-6 mt-6">
+          {/* Logo */}
+          <div className="w-48 h-48 sm:w-64 sm:h-64 rounded-full flex flex-col items-center justify-center mb-10 shadow-[0_0_50px_rgba(161,134,65,0.4)] overflow-hidden">
+            <img src="/ai-la-nha-van-logo.jpg" alt="Ai Là Nhà Văn Logo" className="w-full h-full object-cover" />
+          </div>
+
+          <h1 className="sr-only">AI LÀ NHÀ VĂN</h1>
+          <p className="text-purple-200 font-medium mb-12 uppercase tracking-[0.2em] text-xs md:text-sm">
+            Thử tài văn học (H5)
           </p>
-          <button
-            onClick={startGame}
-            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl font-black text-lg transition-transform hover:scale-105 active:scale-95 shadow-xl shadow-indigo-500/25"
-          >
-            BẮT ĐẦU CHƠI
-          </button>
+
+          <div className="flex flex-col gap-4 w-full max-w-xs">
+            <button
+              onClick={startGame}
+              className="py-3 px-6 bg-gradient-to-b from-purple-700 to-purple-950 hover:from-purple-600 hover:to-purple-900 border border-purple-500 text-[#ebd288] font-bold rounded-full transition-all shadow-[0_0_20px_rgba(168,85,247,0.4)] uppercase tracking-wider cursor-pointer"
+            >
+              Bắt đầu
+            </button>
+            <button
+              onClick={onBack}
+              className="py-3 px-6 bg-[#180528] hover:bg-[#2a0e44] border border-white/10 text-white/70 font-bold rounded-full transition-all uppercase tracking-wider cursor-pointer"
+            >
+              Giới thiệu
+            </button>
+          </div>
+          
+          <p className="text-white/40 text-[10px] mt-12">
+            Ưu tiên chơi ở màn hình lớn để trải nghiệm như ở trường quay.
+          </p>
         </div>
       )}
 
       {(gameState === 'playing' || gameState === 'revealing') && questions.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-lg relative overflow-hidden">
-          {/* Progress & Timer */}
-          <div className="flex items-center justify-between mb-8">
-            <span className="text-sm font-bold text-slate-500">Câu hỏi {currentIndex + 1}/10</span>
-            <div className="flex items-center gap-2">
-              <Clock className={`w-5 h-5 \${timeLeft <= 5 ? 'text-rose-500 animate-pulse' : 'text-slate-400'}`} />
-              <span className={`font-mono text-xl font-bold \${timeLeft <= 5 ? 'text-rose-500' : 'text-slate-700 dark:text-slate-300'}`}>
-                00:{timeLeft.toString().padStart(2, '0')}
-              </span>
+        <div className="relative z-10 w-full h-full min-h-[80vh] flex flex-col p-4 sm:p-8 mt-12 sm:mt-4">
+          
+          {/* Game Top Info */}
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4 sm:mb-auto">
+            {/* Left: Question Num & Timer */}
+            <div className="flex items-center gap-4">
+              <div className="px-4 py-1.5 rounded-full bg-purple-900/50 border border-purple-500/50 text-white font-bold text-xs sm:text-sm tracking-widest">
+                CÂU {currentIndex + 1}/10
+              </div>
+              <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center font-black text-xl bg-black/40 \${timeLeft <= 5 ? 'text-rose-500 border-rose-500 animate-pulse' : 'text-[#ebd288] border-[#ebd288]'}`}>
+                {timeLeft}
+              </div>
+            </div>
+
+            {/* Right: Topic */}
+            <div className="px-4 py-1.5 rounded-full bg-purple-900/50 border border-purple-500/50 text-white font-bold text-xs sm:text-sm tracking-widest uppercase flex items-center gap-2">
+              Chủ đề: Văn Học
             </div>
           </div>
 
-          {/* Progress bar */}
-          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full absolute top-0 left-0">
-            <div 
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000 ease-linear"
-              style={{ width: `\${((15 - timeLeft) / 15) * 100}%` }}
-            />
+          {/* Logo top left background (decorative) */}
+          <div className="absolute top-24 left-8 opacity-40 pointer-events-none hidden lg:flex flex-col items-center">
+            <div className="w-24 h-24 rounded-full shadow-2xl shadow-[#a18641]/20 overflow-hidden">
+              <img src="/ai-la-nha-van-logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+            </div>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-8 leading-relaxed">
-            {questions[currentIndex].question}
-          </h2>
+          {/* Question Box */}
+          <div className="w-full max-w-4xl mx-auto mb-6 sm:mb-12 mt-4 sm:mt-auto relative">
+            <div 
+              className="w-full min-h-[80px] bg-gradient-to-b from-purple-800 to-[#2a0e44] border-y-2 border-purple-400 flex items-center justify-center p-6 sm:p-10 text-center shadow-[0_0_30px_rgba(168,85,247,0.3)]"
+              style={{ clipPath: hexagonClipPath }}
+            >
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white leading-relaxed drop-shadow-md px-4 sm:px-10">
+                {questions[currentIndex].question}
+              </h2>
+            </div>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Answers Grid */}
+          <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 mb-4">
             {questions[currentIndex].options.map((option, idx) => {
               const optionLetter = option.split('.')[0].trim();
+              const optionText = option.substring(option.indexOf('.') + 1).trim();
               const isCorrectAnswer = optionLetter === questions[currentIndex].correctAnswer;
               
-              let buttonStyle = "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 text-slate-700 dark:text-slate-200";
+              // Base style
+              let bgGradient = "from-[#290d45] to-[#110520]";
+              let borderColor = "border-purple-500";
+              let textColor = "text-white";
+              let letterColor = "text-[#ebd288]";
               
               if (gameState === 'revealing') {
                 if (isCorrectAnswer) {
-                  buttonStyle = "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20";
+                  // Correct -> Green
+                  bgGradient = "from-[#15803d] to-[#14532d] animate-pulse";
+                  borderColor = "border-[#4ade80]";
+                  letterColor = "text-white";
                 } else if (selectedOption === optionLetter) {
-                  buttonStyle = "bg-rose-50 dark:bg-rose-900/30 border-rose-500 text-rose-700 dark:text-rose-300";
+                  // Wrong picked -> Orange
+                  bgGradient = "from-[#b45309] to-[#78350f]";
+                  borderColor = "border-[#f59e0b]";
+                  letterColor = "text-white";
                 } else {
-                  buttonStyle = "opacity-50 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800";
+                  // Dim others
+                  bgGradient = "from-[#130520] to-black";
+                  borderColor = "border-purple-900";
+                  textColor = "text-white/30";
+                  letterColor = "text-white/30";
                 }
+              } else if (selectedOption === optionLetter && gameState === 'playing') {
+                // Picked but waiting for reveal (mocking suspense)
+                bgGradient = "from-[#b45309] to-[#78350f]";
+                borderColor = "border-[#f59e0b]";
+                letterColor = "text-white";
               }
 
               return (
@@ -249,59 +293,61 @@ export const LiteratureGame: React.FC<LiteratureGameProps> = ({ onBack, onSaveRe
                   key={idx}
                   disabled={gameState !== 'playing'}
                   onClick={() => handleSelectOption(option)}
-                  className={`p-4 rounded-2xl border-2 text-left font-medium transition-all \${buttonStyle}`}
+                  className={`cursor-pointer w-full group relative flex items-center min-h-[50px] sm:min-h-[60px] bg-gradient-to-b \${bgGradient} border-y-2 \${borderColor} px-6 sm:px-10 transition-all hover:brightness-125 disabled:cursor-default`}
+                  style={{ clipPath: hexagonClipPath }}
                 >
-                  {option}
+                  <div className={`absolute left-8 sm:left-12 font-bold text-lg sm:text-xl drop-shadow-md \${letterColor}`}>
+                    {optionLetter}
+                  </div>
+                  <div className={`ml-8 sm:ml-12 text-left font-semibold text-sm sm:text-lg \${textColor} drop-shadow-md`}>
+                    {optionText}
+                  </div>
                 </button>
               );
             })}
           </div>
 
+          {/* Explanation Toast during revealing */}
           {gameState === 'revealing' && (
-            <div className="mt-8 p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 animate-in slide-in-from-bottom-4">
-              <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b082e]/95 border border-[#a18641]/80 p-6 rounded-2xl backdrop-blur-md w-full max-w-md animate-in zoom-in text-center z-50 shadow-[0_0_40px_rgba(161,134,65,0.4)]">
+              <p className="text-white text-sm sm:text-base font-medium">
                 {questions[currentIndex].explanation}
               </p>
             </div>
           )}
+
         </div>
       )}
 
       {gameState === 'gameover' && (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center shadow-lg">
-          {score >= 8 ? (
-            <div className="w-24 h-24 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="w-12 h-12 text-emerald-500" />
-            </div>
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center mx-auto mb-6">
-              <Trophy className="w-12 h-12 text-amber-500" />
-            </div>
-          )}
-          
-          <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">
-            {score === 10 ? 'Tuyệt đỉnh!' : score >= 8 ? 'Xuất sắc!' : score >= 5 ? 'Làm tốt lắm!' : 'Cần cố gắng hơn'}
-          </h2>
-          <p className="text-slate-500 mb-8">Bạn đã trả lời đúng {score}/10 câu hỏi.</p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              onClick={onBack}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold transition-colors"
-            >
-              Về thư viện
-            </button>
-            <button
-              onClick={() => {
-                fetchQuestions();
-                setGameState('intro');
-              }}
-              className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
-            >
-              <RefreshCw className="w-5 h-5" />
-              <span>Chơi lại (Đề mới)</span>
-            </button>
-          </div>
+        <div className="relative z-10 w-full h-full min-h-[80vh] flex flex-col items-center justify-center p-6 text-center mt-6">
+           <div className="w-32 h-32 rounded-full flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(161,134,65,0.3)] overflow-hidden">
+             <img src="/ai-la-nha-van-logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+           </div>
+           
+           <h2 className="text-3xl sm:text-4xl font-black text-[#ebd288] mb-2 uppercase tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+             {score === 10 ? 'Tuyệt Đỉnh!' : score >= 8 ? 'Xuất Sắc!' : score >= 5 ? 'Làm Tốt Lắm!' : 'Cần Cố Gắng Thêm'}
+           </h2>
+           <p className="text-xl text-purple-200 mb-8 font-medium">Bạn đã trả lời đúng {score}/10 câu hỏi.</p>
+           
+           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
+             <button
+               onClick={onBack}
+               className="flex-1 py-3 px-6 bg-[#180528] hover:bg-[#2a0e44] border border-white/20 text-white/80 font-bold rounded-full transition-all uppercase tracking-wider text-sm cursor-pointer"
+             >
+               Kết thúc
+             </button>
+             <button
+               onClick={() => {
+                 fetchQuestions();
+                 setGameState('intro');
+               }}
+               className="flex-1 py-3 px-6 bg-gradient-to-b from-purple-700 to-purple-950 hover:from-purple-600 hover:to-purple-900 border border-purple-500 text-[#ebd288] font-bold rounded-full transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] flex items-center justify-center gap-2 uppercase tracking-wider text-sm cursor-pointer"
+             >
+               <RefreshCw className="w-4 h-4" />
+               Chơi lại
+             </button>
+           </div>
         </div>
       )}
     </div>

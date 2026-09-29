@@ -12,11 +12,26 @@ import {
   CheckCircle2,
   Calendar,
   Flame,
-  Target
+  Target,
+  Home,
+  CheckSquare,
+  BarChart3,
+  Settings,
+  Gamepad2
 } from 'lucide-react';
 import { UserProgress, Topic, Exam } from '../types';
 import { ALL_TOPICS } from '../data/topicsData';
 import { ALL_EXAMS } from '../data/examsData';
+
+const APP_FEATURES = [
+  { id: 'home', title: 'Trang chủ', desc: 'Màn hình chính', icon: Home },
+  { id: 'knowledge', title: 'Kiến thức', desc: 'Chuyên đề ôn thi lớp 10', icon: BookOpen },
+  { id: 'practice', title: 'Luyện tập', desc: 'Làm bài tập trắc nghiệm', icon: CheckSquare },
+  { id: 'exams', title: 'Thư viện đề thi', desc: 'Đề thi tuyển sinh chính thức', icon: FileText },
+  { id: 'minigame', title: 'Minigame', desc: 'Vừa học vừa chơi', icon: Gamepad2 },
+  { id: 'benchmarks', title: 'Điểm chuẩn THPT', desc: 'Tra cứu điểm chuẩn các năm', icon: BarChart3 },
+  { id: 'account', title: 'Cài đặt tài khoản', desc: 'Chỉnh sửa hồ sơ cá nhân', icon: Settings },
+];
 
 interface TopHeaderProps {
   onToggleSidebar: () => void;
@@ -53,26 +68,41 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Real-time search in ALL_TOPICS and ALL_EXAMS
+  // Real-time search in ALL_TOPICS, ALL_EXAMS, and APP_FEATURES
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return { topics: [], exams: [] };
+    if (!q) return { topics: [], exams: [], features: [] };
+
+    const matchedFeatures = APP_FEATURES.filter(f => 
+      f.title.toLowerCase().includes(q) || 
+      f.desc.toLowerCase().includes(q)
+    ).slice(0, 3);
 
     const matchedTopics = ALL_TOPICS.filter(t => 
       t.title.toLowerCase().includes(q) || 
       t.description.toLowerCase().includes(q)
-    ).slice(0, 4);
+    ).slice(0, 3);
 
     const matchedExams = ALL_EXAMS.filter(e => 
       e.title.toLowerCase().includes(q) || 
       e.province.toLowerCase().includes(q) ||
       (e.schoolOrDept && e.schoolOrDept.toLowerCase().includes(q))
-    ).slice(0, 4);
+    ).slice(0, 3);
 
-    return { topics: matchedTopics, exams: matchedExams };
+    return { topics: matchedTopics, exams: matchedExams, features: matchedFeatures };
   }, [searchQuery]);
 
-  const hasResults = searchResults.topics.length > 0 || searchResults.exams.length > 0;
+  const hasResults = searchResults.topics.length > 0 || searchResults.exams.length > 0 || searchResults.features.length > 0;
+
+  const handleSelectFeatureResult = (featureId: string) => {
+    setShowSearchResults(false);
+    setSearchQuery('');
+    if (featureId === 'account') {
+      onOpenAccount();
+    } else if (onNavigate) {
+      onNavigate(featureId);
+    }
+  };
 
   // Real notifications based strictly on user's real state
   const realNotifications = useMemo(() => {
@@ -197,10 +227,40 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               <div className="absolute left-0 right-0 mt-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 shadow-xl z-50 animate-in fade-in duration-150 max-h-96 overflow-y-auto">
                 {!hasResults ? (
                   <p className="text-xs text-slate-400 py-3 text-center">
-                    Không tìm thấy bài học hay đề thi phù hợp với "{searchQuery}"
+                    Không tìm thấy chức năng, bài học hay đề thi phù hợp với "{searchQuery}"
                   </p>
                 ) : (
                   <div className="space-y-3">
+                    {/* Features Match */}
+                    {searchResults.features.length > 0 && (
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-1">
+                          Chức năng hệ thống ({searchResults.features.length})
+                        </div>
+                        <div className="space-y-1">
+                          {searchResults.features.map(f => {
+                            const IconComponent = f.icon;
+                            return (
+                              <div
+                                key={f.id}
+                                onClick={() => handleSelectFeatureResult(f.id)}
+                                className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer transition-colors"
+                              >
+                                <IconComponent className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                                    {f.title}
+                                  </div>
+                                  <div className="text-[10px] text-slate-400 truncate">
+                                    {f.desc}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                     {/* Topics Match */}
                     {searchResults.topics.length > 0 && (
                       <div>

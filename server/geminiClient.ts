@@ -71,12 +71,12 @@ export async function testGeminiApiKey(apiKey: string): Promise<{ success: boole
     });
 
     const response = await testClient.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.8-flash",
       contents: "Chào bạn! Hãy trả lời đúng chữ 'SẴN SÀNG'.",
     });
 
     if (response?.text) {
-      return { success: true, model: "gemini-2.5-flash" };
+      return { success: true, model: "gemini-3.8-flash" };
     }
     return { success: false, error: "Không nhận được phản hồi từ mô hình Gemini." };
   } catch (err: any) {
@@ -109,18 +109,18 @@ export async function generateContentWithFallback(
   }
 
   const candidateModels = [
-    params.primaryModel || "gemini-2.5-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash"
+    "gemini-3.8-flash",
+    "gemini-3.7-flash",
+    "gemini-3.5-flash"
   ];
 
   for (const model of candidateModels) {
     try {
       const configForModel: any = { ...(params.config || {}) };
-      // Chỉ áp dụng thinkingConfig cho các model hỗ trợ (gemini-2.5 trở lên)
-      if (model.includes("2.5") && !configForModel.thinkingConfig) {
+      // Chỉ áp dụng thinkingConfig cho các model hỗ trợ (gemini-3.5 trở lên)
+      if (model.includes("3.") && !configForModel.thinkingConfig) {
         configForModel.thinkingConfig = { thinkingBudget: 0 };
-      } else if (!model.includes("2.5")) {
+      } else if (!model.includes("3.")) {
         delete configForModel.thinkingConfig;
       }
 
@@ -138,9 +138,11 @@ export async function generateContentWithFallback(
       if (
         errMsg.includes("RESOURCE_EXHAUSTED") ||
         errMsg.includes("429") ||
+        errMsg.includes("503") ||
+        errMsg.includes("high demand") ||
         errMsg.includes("quota")
       ) {
-        console.warn("[Gemini API] Quota tạm thời đầy hoặc giới hạn lượt, kích hoạt ngay fallback không độ trễ.");
+        console.warn(`[Gemini API] Hệ thống Google AI đang bận hoặc quá tải (${errMsg.includes("503") ? "503 High Demand" : "429 Quota"}), tự động kích hoạt bộ chấm dự phòng trong 60 giây...`);
         quotaCooldownUntil = Date.now() + 60_000;
         return null;
       }

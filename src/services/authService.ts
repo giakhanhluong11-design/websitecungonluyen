@@ -165,6 +165,24 @@ export async function loginWithEmail(email: string, password: string): Promise<A
     return { success: false, field: 'password', error: 'Mật khẩu không được để trống.' };
   }
 
+  // --- TÀI KHOẢN TEST (KHÔNG CẦN FIREBASE) ---
+  if (email.trim() === 'tester@gmail.com' && password === 'tEsTkEy9@3') {
+    const testUser: AuthUser = {
+      id: 'test_user_id_123',
+      email: 'tester@gmail.com',
+      name: 'Test Account',
+      avatar: '👨‍💻',
+      authProvider: 'email',
+    };
+    const token = 'fake-test-token-12345';
+    
+    setStoredToken(token);
+    setStoredUser(testUser);
+    
+    return { success: true, token, user: testUser };
+  }
+  // -------------------------------------------
+
   try {
     const result = await signInWithEmailAndPassword(auth, email.trim(), password);
     const user = firebaseUserToAuthUser(result.user, 'email');
@@ -401,8 +419,13 @@ export function onAuthChange(callback: (user: AuthUser | null) => void): () => v
       setStoredUser(user);
       callback(user);
     } else {
-      removeStoredToken();
-      callback(null);
+      const cachedUser = getStoredUser();
+      if (cachedUser?.id === 'test_user_id_123') {
+        callback(cachedUser);
+      } else {
+        removeStoredToken();
+        callback(null);
+      }
     }
   });
 }
@@ -411,5 +434,10 @@ export function onAuthChange(callback: (user: AuthUser | null) => void): () => v
  * Lấy Firebase UID của user hiện tại
  */
 export function getCurrentUserId(): string | null {
-  return auth.currentUser?.uid || null;
+  if (auth.currentUser?.uid) return auth.currentUser.uid;
+  
+  const cachedUser = getStoredUser();
+  if (cachedUser?.id === 'test_user_id_123') return cachedUser.id;
+  
+  return null;
 }

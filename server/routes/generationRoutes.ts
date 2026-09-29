@@ -296,10 +296,86 @@ Return strictly JSON matching:
   }
 });
 router.post("/literature-minigame", async (req, res) => {
+  const fallbackQuestions = [
+    {
+      "id": "q1",
+      "question": "Câu ca dao sau đây còn thiếu từ gì: 'Công cha như núi Thái Sơn / Nghĩa mẹ như nước ... chảy ra'?",
+      "options": ["A. trong nguồn", "B. ngoài biển", "C. sông Đà", "D. suối Tiên"],
+      "correctAnswer": "A",
+      "explanation": "Câu ca dao gốc là 'Công cha như núi Thái Sơn / Nghĩa mẹ như nước trong nguồn chảy ra'."
+    },
+    {
+      "id": "q2",
+      "question": "Tác giả của bài thơ 'Đồng chí' là ai?",
+      "options": ["A. Chính Hữu", "B. Phạm Tiến Duật", "C. Huy Cận", "D. Xuân Quỳnh"],
+      "correctAnswer": "A",
+      "explanation": "Bài thơ 'Đồng chí' được sáng tác bởi nhà thơ Chính Hữu vào năm 1948."
+    },
+    {
+      "id": "q3",
+      "question": "Tác phẩm 'Chuyện người con gái Nam Xương' trích từ tập truyện nào?",
+      "options": ["A. Truyền kỳ mạn lục", "B. Lĩnh Nam chích quái", "C. Thánh Tông di thảo", "D. Truyền kỳ tân phả"],
+      "correctAnswer": "A",
+      "explanation": "'Chuyện người con gái Nam Xương' là thiên thứ 16 trong 20 truyện của 'Truyền kỳ mạn lục' của Nguyễn Dữ."
+    },
+    {
+      "id": "q4",
+      "question": "Tên thật của nhà thơ Viễn Phương là gì?",
+      "options": ["A. Phan Thanh Viễn", "B. Nguyễn Thành Viễn", "C. Trần Thanh Viễn", "D. Lê Thanh Viễn"],
+      "correctAnswer": "A",
+      "explanation": "Viễn Phương tên thật là Phan Thanh Viễn, quê ở An Giang."
+    },
+    {
+      "id": "q5",
+      "question": "Nhân vật anh thanh niên trong 'Lặng lẽ Sa Pa' làm công việc gì?",
+      "options": ["A. Khí tượng kiêm vật lý địa cầu", "B. Trồng rừng", "C. Lái xe", "D. Nghiên cứu sinh học"],
+      "correctAnswer": "A",
+      "explanation": "Anh thanh niên làm công tác khí tượng kiêm vật lý địa cầu trên đỉnh Yên Sơn."
+    },
+    {
+      "id": "q6",
+      "question": "Bài thơ 'Bếp lửa' của Bằng Việt sáng tác năm nào?",
+      "options": ["A. 1963", "B. 1965", "C. 1968", "D. 1970"],
+      "correctAnswer": "A",
+      "explanation": "Bài thơ Bếp lửa được Bằng Việt sáng tác năm 1963 khi đang là sinh viên học ở nước ngoài."
+    },
+    {
+      "id": "q7",
+      "question": "Nhân vật Phương Định trong 'Những ngôi sao xa xôi' có sở thích gì?",
+      "options": ["A. Hát và ngắm mình trong gương", "B. Đọc sách", "C. Thêu thùa", "D. Nấu ăn"],
+      "correctAnswer": "A",
+      "explanation": "Phương Định là cô gái Hà Nội mộng mơ, thích hát và hay ngắm mình trong gương."
+    },
+    {
+      "id": "q8",
+      "question": "Biện pháp tu từ nào nổi bật nhất trong câu: 'Mặt trời của bắp thì nằm trên đồi / Mặt trời của mẹ, em nằm trên lưng'?",
+      "options": ["A. Ẩn dụ", "B. Hoán dụ", "C. Nhân hóa", "D. So sánh"],
+      "correctAnswer": "A",
+      "explanation": "'Mặt trời của mẹ' là hình ảnh ẩn dụ chỉ đứa con, là nguồn sống, niềm tin của người mẹ."
+    },
+    {
+      "id": "q9",
+      "question": "'Làng' của Kim Lân viết về thời kỳ nào?",
+      "options": ["A. Thời kỳ đầu kháng chiến chống Pháp", "B. Kháng chiến chống Mỹ", "C. Trước Cách mạng tháng Tám", "D. Thời kỳ đổi mới"],
+      "correctAnswer": "A",
+      "explanation": "Truyện ngắn Làng được viết năm 1948, thời kỳ đầu của cuộc kháng chiến chống Pháp."
+    },
+    {
+      "id": "q10",
+      "question": "Trong bài thơ 'Mùa xuân nho nhỏ', tác giả muốn làm gì để cống hiến cho đời?",
+      "options": ["A. Một cành hoa, một con chim hót, một nốt trầm", "B. Một vầng trăng, một vì sao", "C. Một cây cổ thụ, một dòng sông", "D. Một cánh diều, một đám mây"],
+      "correctAnswer": "A",
+      "explanation": "Thanh Hải viết: 'Ta làm con chim hót / Ta làm một cành hoa / Ta nhập vào hòa ca / Một nốt trầm xao xuyến'."
+    }
+  ];
+
   try {
     const ai = getAiClient();
+    
+    // Nếu chưa cấu hình AI (không có API Key), trả về bộ câu hỏi offline (Không báo lỗi)
     if (!ai) {
-      return res.status(500).json({ success: false, error: "Chưa cấu hình AI" });
+      console.log("No AI key found, using offline fallback questions for Literature Minigame.");
+      return res.json({ success: true, questions: fallbackQuestions });
     }
 
     const { count = 10 } = req.body;
@@ -338,10 +414,13 @@ Return strictly JSON matching this structure:
         return res.json({ success: true, questions: parsed.questions });
       }
     }
-    return res.status(500).json({ success: false, error: "AI failed to generate valid JSON" });
+    
+    // Nếu AI sinh lỗi JSON, trả về bộ offline
+    return res.json({ success: true, questions: fallbackQuestions });
   } catch (error: any) {
     console.warn("Lỗi sinh câu hỏi minigame Văn:", error?.message || error);
-    return res.status(500).json({ success: false, error: error?.message });
+    // Lỗi mạng hoặc lỗi model, trả về bộ offline thay vì báo lỗi đỏ 500
+    return res.json({ success: true, questions: fallbackQuestions });
   }
 });
 
