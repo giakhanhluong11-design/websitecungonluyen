@@ -32,6 +32,7 @@ router.post("/literature", async (req, res) => {
     }
 
     const ai = getAiClient();
+    let text: string | null = null;
 
     if (ai) {
       const p1Passage = exam.part1?.passageText || exam.part1?.readingPassage?.text || "";
@@ -121,8 +122,6 @@ Hướng dẫn đáp án: ${p2Q4Guide}
 Bài làm của học sinh: """${studentAnswers["p2_q4"] || "(Học sinh để trống)"}"""
 `;
 
-    let text: string | null = null;
-    if (ai) {
       text = await generateContentWithFallback(ai, {
         primaryModel: "gemini-2.5-flash",
         contents: prompt,
