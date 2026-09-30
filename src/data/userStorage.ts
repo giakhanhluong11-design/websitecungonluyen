@@ -44,17 +44,17 @@ export const INITIAL_USER_PROGRESS: UserProgress = {
     email: '',
     isGoogleLinked: false,
     targetSchool: '',
-    targetScore: 21.0,
+    targetScore: 0,        // 0 = chưa đặt mục tiêu, KHÔNG hardcode 21.0
     targetScores: {
-      toan: 7.0,
-      van: 7.0,
-      anh: 7.0
+      toan: 0,
+      van: 0,
+      anh: 0
     },
     nv2School: '',
     nv3School: '',
     currentSchool: '',
     currentClass: '',
-    city: 'TP. Hồ Chí Minh'
+    city: ''
   },
   completedTopicIds: [],
   bookmarkedExamIds: [],
@@ -67,24 +67,24 @@ export const INITIAL_USER_PROGRESS: UserProgress = {
 };
 
 export const BLANK_GUEST_PROFILE: UserProfile = {
-  name: 'Khách (Chưa đăng nhập)',
-  avatar: '👤',
+  name: '',
+  avatar: '/avatars/default.svg',
   email: '',
   isGoogleLinked: false,
   googleAccountId: undefined,
   googleDisplayName: undefined,
-  targetSchool: 'Chưa chọn trường mục tiêu',
-  targetScore: 21.0,
+  targetSchool: '',
+  targetScore: 0,          // 0 = chưa đặt mục tiêu
   targetScores: {
-    toan: 7.0,
-    van: 7.0,
-    anh: 7.0
+    toan: 0,
+    van: 0,
+    anh: 0
   },
   nv2School: '',
   nv3School: '',
-  currentSchool: 'THCS tại TP.HCM',
-  currentClass: '9A',
-  city: 'TP. Hồ Chí Minh'
+  currentSchool: '',
+  currentClass: '',
+  city: ''
 };
 
 export const BLANK_GUEST_PROGRESS: UserProgress = {
@@ -264,17 +264,17 @@ export function loginGoogleAccount(email: string, displayName?: string, remember
       googleDisplayName: displayName?.trim() || email.split('@')[0],
       linkedAt: new Date().toLocaleDateString('vi-VN'),
       targetSchool: '',
-      targetScore: 21.0,
+      targetScore: 0,          // Chưa đặt mục tiêu khi mới đăng nhập Google lần đầu
       targetScores: {
-        toan: 7.0,
-        van: 7.0,
-        anh: 7.0
+        toan: 0,
+        van: 0,
+        anh: 0
       },
       nv2School: '',
       nv3School: '',
       currentSchool: '',
       currentClass: '',
-      city: 'TP. Hồ Chí Minh'
+      city: ''
     };
 
     restored = {
@@ -343,15 +343,15 @@ export function loginEmailAccount(
       currentSchool: extraProfile?.currentSchool || '',
       currentClass: extraProfile?.currentClass || '',
       targetSchool: '',
-      targetScore: 21.0,
+      targetScore: 0,          // Chưa đặt mục tiêu khi mới tạo tài khoản
       targetScores: {
-        toan: 7.0,
-        van: 7.0,
-        anh: 7.0
+        toan: 0,
+        van: 0,
+        anh: 0
       },
       nv2School: '',
       nv3School: '',
-      city: 'TP. Hồ Chí Minh'
+      city: ''
     };
 
     restored = {

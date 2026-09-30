@@ -46,8 +46,9 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
   const [activeWaveTab, setActiveWaveTab] = useState<'tong-quan' | 'diem-so'>('tong-quan');
 
   const studentName = progress.profile.name?.trim() || 'Học sinh';
-  const targetScore = progress.profile.targetScore || 21;
-  const targetSchool = progress.profile.targetSchool || 'Chưa chọn trường';
+  const hasTarget = progress.profile.targetScore && progress.profile.targetScore > 0;
+  const targetScore = hasTarget ? progress.profile.targetScore : null;
+  const targetSchool = progress.profile.targetSchool?.trim() || null;
 
   // 1. Accuracy of 5 recent practice attempts
   const accuracyPercent = useMemo(() => {
@@ -226,7 +227,11 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
             {/* Target Legend */}
             <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
               <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400 shrink-0" />
-              <span>Mục tiêu: <strong className="text-slate-700 dark:text-slate-200 font-bold">{targetScore}đ</strong></span>
+              {targetScore !== null ? (
+                <span>Mục tiêu: <strong className="text-slate-700 dark:text-slate-200 font-bold">{targetScore}đ</strong></span>
+              ) : (
+                <span className="italic text-slate-400">Chưa đặt mục tiêu</span>
+              )}
             </div>
           </div>
 

@@ -54,12 +54,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Mục tiêu điểm thi (mặc định 21đ nếu chưa cài)
-  const targetScoreDisplay = progress.profile.targetScore 
-    ? `${progress.profile.targetScore}đ` 
-    : (progress.targetSchool.targetScore ? `${progress.targetSchool.targetScore}đ` : '21đ');
+  // Mục tiêu điểm thi — chỉ hiển thị nếu user đã tự nhập, KHÔNG dùng giá trị mặc định
+  const hasTargetScore = progress.profile.targetScore && progress.profile.targetScore > 0 && progress.profile.targetScore !== 21.0;
+  const targetScoreDisplay = hasTargetScore
+    ? `${progress.profile.targetScore}đ`
+    : 'Chưa đặt';
 
-  const studentName = progress.profile.name || 'Robin Lương';
+  const studentName = progress.profile.name?.trim() || 'Chưa đặt tên';
 
   const navHocTap = [
     { id: 'home', label: 'Trang chủ', icon: Home },
