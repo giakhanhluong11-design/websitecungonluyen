@@ -121,7 +121,9 @@ Hướng dẫn đáp án: ${p2Q4Guide}
 Bài làm của học sinh: """${studentAnswers["p2_q4"] || "(Học sinh để trống)"}"""
 `;
 
-      const text = await generateContentWithFallback(ai, {
+    let text: string | null = null;
+    if (ai) {
+      text = await generateContentWithFallback(ai, {
         primaryModel: "gemini-2.5-flash",
         contents: prompt,
         config: {
@@ -284,6 +286,7 @@ router.post("/math", async (req, res) => {
     }
 
     const ai = getAiClient();
+    let text: string | null = null;
 
     if (ai) {
       const exercisesData = (exam.exercises || [])
@@ -324,6 +327,7 @@ CÁC NGUYÊN TẮC BẮT BUỘC KHI CHẤM TOÁN:
    - "Trả lời lan man / biến đổi lòng vòng không ra kết quả" → chỉ chấm bước thực sự có ích.
    - "Có nhiều ý, trong đó có ý đúng và ý sai" → chấm từng ý, đúng ý nào cho điểm ý đó.
    - "Giải bằng cách khác đáp án mẫu nhưng hoàn toàn đúng và logic" → phải công nhận và cho đủ điểm.
+   - ĐẶC BIỆT VỚI YÊU CẦU VẼ HÌNH / ĐỒ THỊ (VD Bài 1): Học sinh không thể nộp hình vẽ trên web. BỎ QUA hoàn toàn yêu cầu vẽ đồ thị, mặc định học sinh ĐẠT ĐIỂM phần vẽ hình. CHỈ CHẤM PHẦN TÍNH TOÁN TỌA ĐỘ HOẶC LẬP BẢNG. KHÔNG trừ điểm hay nhắc nhở vì "thiếu đồ thị" hay "chưa vẽ hình".
 5. SỬA BÀI CHI TIẾT & NHẬN XÉT GIÁO DỤC:
    - Từng bài phải ghi rõ: ý đúng (correctPoints), ý sai (incorrectPoints), tại sao sai (whyWrong), cách sửa (suggestedFix), ý/bước còn thiếu (missingPoints).
    - Tuyệt đối không dùng cụm từ "đã chấm theo ma trận tuyển sinh".
@@ -340,7 +344,7 @@ Quy chuẩn kiểm tra từng dạng bài:
 - Bài 7 (Hình học phẳng 3 điểm): Chứng minh tứ giác nội tiếp, tam giác đồng dạng, hệ thức lượng, tiếp tuyến hoặc thẳng hàng.
 `;
 
-      const text = await generateContentWithFallback(ai, {
+      text = await generateContentWithFallback(ai, {
         primaryModel: "gemini-2.5-flash",
         contents: prompt,
         config: {
@@ -495,6 +499,7 @@ router.post("/english", async (req, res) => {
     }
 
     const ai = getAiClient();
+    let text: string | null = null;
 
     // Tính điểm trắc nghiệm cơ sở trước
     let directScore = 0;
@@ -552,7 +557,7 @@ YÊU CẦU ĐÁNH GIÁ SƯ PHẠM CHI TIẾT (tuyệt đối không dùng cụm 
 6. "improvementTips": Mảng gồm 3 - 4 lời khuyên ôn thi thực tế, dễ áp dụng ngay.
 `;
 
-      const text = await generateContentWithFallback(ai, {
+      text = await generateContentWithFallback(ai, {
         primaryModel: "gemini-2.5-flash",
         contents: prompt,
         config: {
