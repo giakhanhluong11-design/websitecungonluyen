@@ -342,7 +342,7 @@ export const EnglishPracticeWorkspace: React.FC<EnglishPracticeWorkspaceProps> =
                     return (
                       <button
                         key={oIdx}
-                        disabled={isGrading}
+                        disabled={isGrading || isSubmitted}
                         onClick={() => handleSelectAnswer(q.id, optLetter)}
                         className={`p-3 min-h-[44px] rounded-xl text-xs sm:text-sm text-left transition-all flex items-center gap-2.5 ${
                           isTheCorrectOne
@@ -364,7 +364,7 @@ export const EnglishPracticeWorkspace: React.FC<EnglishPracticeWorkspaceProps> =
                 <div className="space-y-1">
                   <input
                     type="text"
-                    disabled={isGrading}
+                    disabled={isGrading || isSubmitted}
                     placeholder="Gõ đáp án của bạn..."
                     value={answers[q.id] || ''}
                     onChange={(e) => handleSelectAnswer(q.id, e.target.value)}

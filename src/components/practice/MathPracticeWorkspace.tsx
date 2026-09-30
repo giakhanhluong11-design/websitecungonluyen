@@ -227,27 +227,30 @@ export const MathPracticeWorkspace: React.FC<MathPracticeWorkspaceProps> = ({
                 <span>Lời giải bài {currentExercise.baiNumber}:</span>
               </label>
 
-              <button
-                type="button"
-                onClick={() => setShowMathKeyboard(prev => !prev)}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
-              >
-                <Calculator className="h-3.5 w-3.5" />
-                {showMathKeyboard ? 'Thu gọn bàn phím toán' : 'Mở bàn phím toán học'}
-              </button>
+              {!gradingResult && (
+                <button
+                  type="button"
+                  onClick={() => setShowMathKeyboard(prev => !prev)}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
+                  <Calculator className="h-3.5 w-3.5" />
+                  {showMathKeyboard ? 'Thu gọn bàn phím toán' : 'Mở bàn phím toán học'}
+                </button>
+              )}
             </div>
 
             <textarea
               rows={8}
+              disabled={!!gradingResult}
               placeholder={`Trình bày các bước biến đổi, lập luận và kết luận cho Bài ${currentExercise.baiNumber} tại đây...`}
               value={answers[currentExercise.id] || ''}
               onFocus={() => setActiveInputKey(currentExercise.id)}
               onChange={(e) => setAnswers(prev => ({ ...prev, [currentExercise.id]: e.target.value }))}
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-xs sm:text-sm font-mono text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed"
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-xs sm:text-sm font-mono text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed disabled:opacity-75 disabled:cursor-not-allowed"
             />
 
             {/* Bàn phím ký hiệu toán học */}
-            {showMathKeyboard && (
+            {!gradingResult && showMathKeyboard && (
               <MathKeyboard
                 onInsert={handleInsertSymbol}
                 onBackspace={handleBackspace}
@@ -607,12 +610,7 @@ export const MathPracticeWorkspace: React.FC<MathPracticeWorkspaceProps> = ({
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => setActiveTab('working')}
-            className="px-4 py-2.5 min-h-[44px] rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 transition-colors"
-          >
-            ← Quay lại làm bài
-          </button>
+          <div />
         )}
 
         <button

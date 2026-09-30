@@ -188,10 +188,11 @@ export const LiteraturePracticeWorkspace: React.FC<LiteraturePracticeWorkspacePr
                 <div>
                   <textarea
                     rows={3}
+                    disabled={!!gradingResult}
                     placeholder="Gõ câu trả lời của em ở đây (diễn đạt tự nhiên, rõ ý)..."
                     value={answers[q.id] || ''}
                     onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-75 disabled:cursor-not-allowed"
                   />
                   <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1">
                     <span>Số từ: {calculateWordCount(answers[q.id] || '')}</span>
@@ -249,10 +250,11 @@ export const LiteraturePracticeWorkspace: React.FC<LiteraturePracticeWorkspacePr
 
               <textarea
                 rows={7}
+                disabled={!!gradingResult}
                 placeholder="Nhập đoạn văn của em vào đây..."
                 value={answers['p1_q2_essay'] || ''}
                 onChange={(e) => handleAnswerChange('p1_q2_essay', e.target.value)}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed font-sans"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed font-sans disabled:opacity-75 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -302,10 +304,11 @@ export const LiteraturePracticeWorkspace: React.FC<LiteraturePracticeWorkspacePr
 
             <textarea
               rows={3}
+              disabled={!!gradingResult}
               placeholder="Nhập câu trả lời của em..."
               value={answers['p2_q3'] || ''}
               onChange={(e) => handleAnswerChange('p2_q3', e.target.value)}
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-75 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -334,10 +337,11 @@ export const LiteraturePracticeWorkspace: React.FC<LiteraturePracticeWorkspacePr
 
               <textarea
                 rows={12}
+                disabled={!!gradingResult}
                 placeholder="Viết bài văn nghị luận xã hội của em ở đây (khoảng 1.5 trang giấy thi)..."
                 value={answers['p2_q4'] || ''}
                 onChange={(e) => handleAnswerChange('p2_q4', e.target.value)}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed font-sans"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed font-sans disabled:opacity-75 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -617,7 +621,7 @@ export const LiteraturePracticeWorkspace: React.FC<LiteraturePracticeWorkspacePr
             ) : (
               <>
                 <Send className="h-4 w-4" />
-                <span>Nộp bài & Chấm điểm</span>
+                <span>{gradingResult ? 'Yêu cầu chấm lại' : 'Nộp bài & Chấm điểm'}</span>
               </>
             )}
           </button>
