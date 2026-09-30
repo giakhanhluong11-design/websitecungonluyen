@@ -43,15 +43,11 @@ export function gradeMathLocally(
       missingPoints = "Toàn bộ quá trình giải toán.";
     } else {
       earned = 0;
-      feedback =
-        "Bài làm đã được ghi nhận. Để đảm bảo tính chính xác và không cho điểm bừa bãi theo độ dài, vui lòng kích hoạt Gemini AI để chấm từng bước giải theo đúng barem tuyển sinh.";
-      mistakes = "Chưa qua thẩm định AI nội dung.";
-      whyWrong =
-        "Hệ thống tuân thủ quy tắc không tự động cho điểm chỉ vì học sinh có gõ chữ.";
-      suggestedFix =
-        "Kích hoạt Gemini AI hoặc đối chiếu trực tiếp với đáp án mẫu bên dưới.";
-      suggestions =
-        "Bấm 'Kích hoạt Gemini AI' để nhận phân tích chi tiết từng phép toán và điều kiện xác định.";
+      feedback = 'Hệ thống BẮT BUỘC phải dùng AI để quét và nhận xét bài làm. Vui lòng kết nối Gemini API Key để được chấm điểm.';
+      whyWrong = 'Chưa có kết nối AI để đối chiếu phương pháp giải toán.';
+      suggestedFix = 'Kích hoạt Gemini AI để hệ thống phân tích bài làm toán.';
+      missingPoints = 'Cần AI quét và đối chiếu đáp án chi tiết.';
+      suggestions = 'Bấm "Kích hoạt Gemini AI" ở góc màn hình.';
     }
 
     totalScore += earned;

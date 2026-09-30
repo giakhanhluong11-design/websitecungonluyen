@@ -50,18 +50,18 @@ export const ALL_MINIGAMES: MinigameDefinition[] = [
     bannerGradient: 'from-purple-500 via-pink-500 to-rose-400'
   },
   {
-    id: 'english-ninja-word',
-    title: 'Ninja Từ Vựng Tiếng Anh 9',
-    shortTitle: 'Ninja Từ Vựng',
+    id: 'english-fruit-ninja',
+    title: 'British Fruit Ninja',
+    shortTitle: 'Fruit Ninja',
     subject: 'anh',
     gameType: 'arcade',
-    status: 'coming_soon',
-    badge: 'Sắp ra mắt',
-    difficulty: 'Trung bình',
-    description: 'Né bẫy ngữ pháp, chém trúng từ đồng nghĩa, trái nghĩa và giới từ đi kèm để đạt combo điểm kỷ lục.',
-    tags: ['Tiếng Anh 9', 'Từ vựng', 'Collocations'],
-    features: ['Hơn 500 từ vựng cốt lõi thi vào 10', 'Âm thanh chuẩn quốc tế'],
-    bannerGradient: 'from-emerald-500 via-teal-500 to-cyan-500'
+    status: 'active',
+    badge: 'Đình đám',
+    difficulty: 'Thử thách',
+    description: 'Slash your way to English mastery! Ôn tập từ vựng, ngữ pháp Tiếng Anh 9-10 qua trò chơi chém hoa quả cực cuốn.',
+    tags: ['Tiếng Anh 9', 'Ngữ pháp', 'Phản xạ', 'Từ vựng'],
+    features: ['Chém trái cây mang đáp án đúng', 'Chế độ Classic (Chém sai là thua)', 'Chế độ Practice (Xem lại đáp án sai)'],
+    bannerGradient: 'from-red-500 via-orange-500 to-rose-500'
   }
 ];
 

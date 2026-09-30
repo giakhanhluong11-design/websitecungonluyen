@@ -93,12 +93,13 @@ export async function gradeLiteratureSubmission(
       missingPoints = 'Ý kiến giải thích hoặc câu trả lời trực tiếp.';
     } else {
       // Có bài làm nhưng không có AI
-      // Quy tắc nghiêm ngặt: Có chữ ≠ có điểm. Không cho điểm bừa bãi.
+      // Quy tắc nghiêm ngặt: Có chữ ≠ có điểm. Bắt buộc AI chấm.
       earned = 0;
-      feedback = 'Câu trả lời đã được ghi nhận. Để đảm bảo tính công bằng (không tự động cho điểm theo số lượng từ), vui lòng kết nối Gemini AI để đọc hiểu và chấm điểm chính xác theo rubric.';
-      whyWrong = 'Hệ thống tuân thủ nguyên tắc không chấm điểm tự động chỉ vì học sinh có nhập chữ.';
-      suggestedFix = 'Kích hoạt Gemini AI hoặc đối chiếu với đáp án tham khảo bên dưới để tự đánh giá.';
-      suggestions = 'Bấm "Kích hoạt Gemini AI" để nhận phản hồi phân tích chi tiết về ngữ nghĩa và dẫn chứng.';
+      feedback = 'Hệ thống BẮT BUỘC phải dùng AI để quét và nhận xét bài làm. Vui lòng kết nối Gemini API Key để được chấm điểm.';
+      whyWrong = 'Chưa có kết nối AI để đọc hiểu nội dung.';
+      suggestedFix = 'Kích hoạt Gemini AI để hệ thống phân tích bài làm.';
+      missingPoints = 'Cần AI quét và đối chiếu rubric.';
+      suggestions = 'Bấm "Kích hoạt Gemini AI" ở góc màn hình.';
     }
 
     return {
@@ -133,8 +134,8 @@ export async function gradeLiteratureSubmission(
     q2Missing = 'Đoạn văn hoàn chỉnh khoảng 200 chữ.';
   } else {
     q2Score = 0;
-    q2Feedback = 'Đoạn văn đã được ghi nhận. Theo quy chuẩn đổi mới GDPT 2018, môn Ngữ văn không chấm theo số từ mà phải đọc hiểu cảm xúc, hình tượng và nghệ thuật. Vui lòng kết nối Gemini AI để thẩm định chi tiết.';
-    q2WhyWrong = 'Không áp dụng cơ chế tự động cho điểm theo độ dài bài viết.';
+    q2Feedback = 'Bài văn đã được ghi nhận. Hệ thống BẮT BUỘC AI quét văn bản để phân tích lập luận. Vui lòng kết nối Gemini AI.';
+    q2WhyWrong = 'Thiếu kết nối AI, hệ thống không tự động chấm theo dung lượng bài.';
   }
 
   // 3. Câu 3: Đọc hiểu phần II (1.0 điểm)
@@ -146,7 +147,7 @@ export async function gradeLiteratureSubmission(
     q3Feedback = 'Chưa làm câu hỏi này.';
   } else {
     q3Score = 0;
-    q3Feedback = 'Câu trả lời đã ghi nhận. Cần AI đọc hiểu để đánh giá tính xác thực của thông tin trích xuất từ văn bản.';
+    q3Feedback = 'Câu trả lời đã ghi nhận. BẮT BUỘC có AI để đánh giá tính chính xác của thông tin.';
   }
 
   // 4. Câu 4: Bài văn NLXH (4.0 điểm)
@@ -158,7 +159,7 @@ export async function gradeLiteratureSubmission(
     q4Feedback = 'Chưa viết bài văn nghị luận xã hội.';
   } else {
     q4Score = 0;
-    q4Feedback = 'Bài văn đã được ghi nhận. Để thẩm định hệ thống luận điểm, lí lẽ, dẫn chứng thực tế và tính sáng tạo, cần có Gemini AI đọc toàn bộ bài làm. Hệ thống không tự tiện chấm điểm theo dung lượng bài viết.';
+    q4Feedback = 'BẮT BUỘC sử dụng Gemini AI để quét và nhận xét bài văn NLXH (không chấm mặc định).';
   }
 
   const allScores = [

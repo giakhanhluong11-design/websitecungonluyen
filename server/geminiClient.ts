@@ -71,12 +71,12 @@ export async function testGeminiApiKey(apiKey: string): Promise<{ success: boole
     });
 
     const response = await testClient.models.generateContent({
-      model: "gemini-3.8-flash",
+      model: "gemini-2.5-flash",
       contents: "Chào bạn! Hãy trả lời đúng chữ 'SẴN SÀNG'.",
     });
 
     if (response?.text) {
-      return { success: true, model: "gemini-3.8-flash" };
+      return { success: true, model: "gemini-2.5-flash" };
     }
     return { success: false, error: "Không nhận được phản hồi từ mô hình Gemini." };
   } catch (err: any) {
@@ -109,9 +109,9 @@ export async function generateContentWithFallback(
   }
 
   const candidateModels = [
-    "gemini-3.8-flash",
-    "gemini-3.7-flash",
-    "gemini-3.5-flash"
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash"
   ];
 
   for (const model of candidateModels) {

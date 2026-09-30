@@ -26,6 +26,8 @@ interface HomeDashboardWidgetsProps {
   overallPercent: number;
   totalCompletedTopics: number;
   totalTopicsCount: number;
+  darkMode?: boolean;
+  showHeader?: boolean;
   allScores: Array<{
     type: 'practice' | 'exam';
     title?: string;
@@ -41,6 +43,8 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
   overallPercent,
   totalCompletedTopics,
   totalTopicsCount,
+  darkMode = false,
+  showHeader = true,
   allScores,
 }) => {
   const [activeWaveTab, setActiveWaveTab] = useState<'tong-quan' | 'diem-so'>('tong-quan');
@@ -157,25 +161,39 @@ export const HomeDashboardWidgets: React.FC<HomeDashboardWidgetsProps> = ({
 
   return (
     <section className="space-y-4 sm:space-y-6">
-      {/* Top Header: Title "Home Dashboard" + CTA button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Home Dashboard
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Bảng điều khiển học tập & theo dõi tiến trình thực tế của bạn
-          </p>
-        </div>
+      {showHeader && (
+        <>
+          {/* Logo căn giữa — to gấp 3 */}
+          <div className="flex justify-center py-2">
+            <img
+              src={darkMode ? '/images/logo-dark.png' : '/images/logo-light.png'}
+              alt="Cùng Ôn Luyện Tuyển Sinh"
+              className="h-56 sm:h-64 md:h-72 w-auto object-contain select-none drop-shadow-sm transition-all duration-300"
+              draggable={false}
+            />
+          </div>
 
-        <button
-          onClick={() => onNavigate('exams')}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs sm:text-sm shadow-xs hover:shadow transition-all active:scale-95 cursor-pointer shrink-0 self-start sm:self-auto"
-        >
-          <Sparkles className="w-4 h-4" />
-          <span>+ Luyện đề ngay</span>
-        </button>
-      </div>
+          {/* Top Header: Tiêu đề "Trang Chủ" + CTA button */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Trang Chủ
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                Bảng điều khiển học tập & theo dõi tiến trình thực tế của bạn
+              </p>
+            </div>
+
+            <button
+              onClick={() => onNavigate('exams')}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs sm:text-sm shadow-xs hover:shadow transition-all active:scale-95 cursor-pointer shrink-0 self-start sm:self-auto"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>+ Luyện đề ngay</span>
+            </button>
+          </div>
+        </>
+      )}
 
       {/* Row 1: 3 Stat Cards (Based 100% on real user progress) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">

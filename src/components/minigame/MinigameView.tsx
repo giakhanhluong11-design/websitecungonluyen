@@ -16,6 +16,7 @@ import { UserProgress, MinigameResult } from '../../types';
 import { saveMinigameResult, getUserProgress } from '../../data/userStorage';
 import { MathyBirdGame } from './MathyBirdGame';
 import { LiteratureGame } from './LiteratureGame';
+import { FruitNinjaApp } from '../games/fruit-ninja/FruitNinjaApp';
 
 interface MinigameViewProps {
   progress?: UserProgress;
@@ -59,6 +60,12 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
         onBack={() => setActiveGameId(null)}
         onSaveResult={handleSaveResult}
       />
+    );
+  }
+
+  if (activeGameId === 'english-fruit-ninja') {
+    return (
+      <FruitNinjaApp onClose={() => setActiveGameId(null)} />
     );
   }
 

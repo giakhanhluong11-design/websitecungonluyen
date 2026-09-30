@@ -121,14 +121,14 @@ export async function gradeMathSubmission(
       suggestedFix = 'Cần thực hiện các bước biến đổi toán học hoặc lập luận để tìm ra kết quả.';
       missingPoints = 'Các bước biến đổi đại số, giải phương trình hoặc chứng minh hình học.';
     } else {
-      // Có nhập nội dung nhưng không có AI thẩm định trực tiếp
-      // Theo nguyên tắc: Có chữ ≠ có điểm. Không cho điểm bừa bãi.
+      // Có bài làm nhưng không có AI
+      // Quy tắc nghiêm ngặt: Có chữ ≠ có điểm. Bắt buộc AI chấm.
       earned = 0;
-      feedback = 'Bài làm đã được ghi nhận. Để đảm bảo tính công bằng (không chấm điểm theo độ dài gõ chữ), vui lòng kích hoạt Gemini AI để đọc và chấm điểm từng bước giải theo đúng barem tuyển sinh.';
-      mistakes = 'Chưa qua thẩm định AI nội dung.';
-      whyWrong = 'Hệ thống tuân thủ nguyên tắc không chấm điểm tự động chỉ vì học sinh có nhập chữ.';
-      suggestedFix = 'Kích hoạt Gemini AI hoặc đối chiếu trực tiếp với đáp án mẫu và biểu điểm từng bước ở bên dưới.';
-      suggestions = 'Hãy bấm "Kích hoạt Gemini AI" để nhận phân tích chi tiết từng phép toán, biểu thức và điều kiện xác định.';
+      feedback = 'Hệ thống BẮT BUỘC phải dùng AI để quét và nhận xét bài làm. Vui lòng kết nối Gemini API Key để được chấm điểm.';
+      whyWrong = 'Chưa có kết nối AI để đối chiếu phương pháp giải toán.';
+      suggestedFix = 'Kích hoạt Gemini AI để hệ thống phân tích bài làm toán.';
+      missingPoints = 'Cần AI quét và đối chiếu đáp án chi tiết.';
+      suggestions = 'Bấm "Kích hoạt Gemini AI" ở góc màn hình.';
     }
 
     totalScore += earned;

@@ -39,15 +39,14 @@ export function gradeLiteratureLocally(
         "Cần chọn lọc chi tiết và trả lời trực tiếp vào câu hỏi.";
       missingPoints = "Ý giải thích hoặc phân tích theo yêu cầu.";
     } else {
+      // Có bài làm nhưng không có AI
+      // Quy tắc nghiêm ngặt: Có chữ ≠ có điểm. Bắt buộc AI chấm.
       score = 0;
-      feedback =
-        "Hệ thống đã ghi nhận bài làm. Theo quy chuẩn đổi mới GDPT 2018, hệ thống KHÔNG chấm điểm tự động dựa trên số từ. Vui lòng kết nối Gemini AI để thẩm định chi tiết nội dung.";
-      whyWrong =
-        "Hệ thống tuân thủ nguyên tắc: có chữ ≠ có điểm. Cần AI đọc hiểu nội dung để cho điểm công bằng.";
-      suggestedFix =
-        "Kích hoạt Gemini AI hoặc đối chiếu trực tiếp với gợi ý đáp án bên dưới.";
-      suggestions =
-        "Bật cấu hình Gemini AI để nhận diện chính xác các ý đúng/sai và nhận xét chi tiết.";
+      feedback = 'Hệ thống BẮT BUỘC phải dùng AI để quét và nhận xét bài làm. Vui lòng kết nối Gemini API Key để được chấm điểm.';
+      whyWrong = 'Chưa có kết nối AI để đọc hiểu nội dung.';
+      suggestedFix = 'Kích hoạt Gemini AI để hệ thống phân tích bài làm.';
+      missingPoints = 'Cần AI quét và đối chiếu rubric.';
+      suggestions = 'Bấm "Kích hoạt Gemini AI" ở góc màn hình.';
     }
 
     return {
@@ -71,25 +70,27 @@ export function gradeLiteratureLocally(
 
   // Câu 2: Đoạn văn 200 chữ
   const q2Ans = (studentAnswers["p1_q2_essay"] || "").trim();
-  const q2Score = 0;
-  const q2Feedback = !q2Ans
-    ? "Học sinh chưa làm bài viết đoạn văn cảm thụ."
-    : "Đoạn văn đã được ghi nhận. Để đánh giá đúng nghệ thuật, liên kết câu và cảm thụ, cần có AI đọc toàn bộ đoạn văn thay vì đếm số chữ.";
+  let q2Score = 0;
+  let q2Feedback = "Học sinh chưa làm bài viết đoạn văn cảm thụ.";
+  if (q2Ans.length > 0) {
+    q2Feedback = 'Bài văn đã được ghi nhận. Hệ thống BẮT BUỘC AI quét văn bản để phân tích lập luận. Vui lòng kết nối Gemini AI.';
+  }
 
   // Câu 3: Đọc hiểu phần II
   const q3Ans = (studentAnswers["p2_q3"] || "").trim();
-  const q3Score = 0;
-  const q3Feedback = !q3Ans
-    ? "Chưa làm câu hỏi này."
-    : "Câu trả lời đã được ghi nhận. Cần AI đọc hiểu để đánh giá tính xác thực của thông tin trích xuất.";
+  let q3Score = 0;
+  let q3Feedback = "Chưa làm câu hỏi này.";
+  if (q3Ans.length > 0) {
+    q3Feedback = 'Câu trả lời đã ghi nhận. BẮT BUỘC có AI để đánh giá tính chính xác của thông tin.';
+  }
 
   // Câu 4: Bài văn NLXH
   const q4Ans = (studentAnswers["p2_q4"] || "").trim();
-  const q4Score = 0;
-  const q4Feedback = !q4Ans
-    ? "Chưa làm bài văn nghị luận xã hội."
-    : "Bài văn đã được ghi nhận. Để thẩm định hệ thống luận điểm, lí lẽ, dẫn chứng thực tế và tính sáng tạo, cần có Gemini AI đọc toàn bộ bài làm. Tuyệt đối không cho điểm chỉ vì bài viết dài.";
-
+  let q4Score = 0;
+  let q4Feedback = "Chưa làm bài văn nghị luận xã hội.";
+  if (q4Ans.length > 0) {
+    q4Feedback = 'BẮT BUỘC sử dụng Gemini AI để quét và nhận xét bài văn NLXH (không chấm mặc định).';
+  }
   const allScores = [
     ...qScores,
     {

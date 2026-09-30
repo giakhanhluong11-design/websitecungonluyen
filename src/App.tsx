@@ -260,6 +260,7 @@ export default function App() {
             onToggleBookmark={handleToggleBookmark}
             onReviewTopic={handleReviewTopic}
             onClearHistory={handleResetProgress}
+            darkMode={darkMode}
           />
         )}
 
