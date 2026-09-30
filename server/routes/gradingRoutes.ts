@@ -234,21 +234,40 @@ Bài làm của học sinh: """${studentAnswers["p2_q4"] || "(Học sinh để t
       }
     }
 
-    // Fallback khi chưa có API key hoặc AI đang bận
+    // Fallback logic
     const fallbackResult = gradeLiteratureLocally(exam, studentAnswers);
+    let specificErrorMsg = "Hệ thống BẮT BUỘC phải dùng AI để quét và nhận xét bài làm. Vui lòng kết nối Gemini API Key.";
+    if (!ai) {
+      specificErrorMsg = "Chưa tìm thấy Gemini API Key. Vui lòng nhập Key trên web hoặc thêm vào biến môi trường.";
+    } else if (!text) {
+      specificErrorMsg = "Gemini API đã được cấu hình nhưng bị lỗi khi gọi (có thể sai Key, sai Model, hoặc hết Quota/Bị chặn do timeout). Vui lòng thử lại hoặc dùng Key khác.";
+    }
+
+    fallbackResult.overallComment = specificErrorMsg;
+    fallbackResult.questionScores.forEach(q => {
+      q.feedback = specificErrorMsg;
+    });
+
     return res.json({
       success: true,
       isAiGraded: false,
-      gradedBy: "Bộ thẩm định dự phòng nội bộ",
+      gradedBy: "Hệ thống chặn (Cần AI)",
       gradingResult: { ...fallbackResult, isAiGraded: false },
     });
   } catch (error: any) {
     console.warn("Chuyển sang bộ thẩm định dự phòng môn Văn:", error?.message || error);
     const fallbackResult = gradeLiteratureLocally(req.body.exam, req.body.studentAnswers);
+    const errMsg = error?.message ? `Lỗi AI: ${error.message}` : "Lỗi hệ thống AI không xác định.";
+    
+    fallbackResult.overallComment = errMsg;
+    fallbackResult.questionScores.forEach(q => {
+      q.feedback = errMsg;
+    });
+
     return res.json({
       success: true,
       isAiGraded: false,
-      gradedBy: "Bộ thẩm định dự phòng nội bộ",
+      gradedBy: "Hệ thống chặn (Lỗi AI)",
       gradingResult: { ...fallbackResult, isAiGraded: false },
     });
   }
@@ -428,19 +447,38 @@ Quy chuẩn kiểm tra từng dạng bài:
 
     // Fallback cục bộ
     const fallbackResult = gradeMathLocally(exam, studentAnswers);
+    let specificErrorMsg = "Hệ thống BẮT BUỘC phải dùng AI để quét và nhận xét bài làm. Vui lòng kết nối Gemini API Key.";
+    if (!ai) {
+      specificErrorMsg = "Chưa tìm thấy Gemini API Key. Vui lòng nhập Key trên web hoặc thêm vào biến môi trường.";
+    } else if (!text) {
+      specificErrorMsg = "Gemini API đã được cấu hình nhưng bị lỗi khi gọi (có thể sai Key, sai Model, hoặc hết Quota/Bị chặn do timeout). Vui lòng thử lại hoặc dùng Key khác.";
+    }
+
+    fallbackResult.overallComment = specificErrorMsg;
+    fallbackResult.exerciseScores.forEach(ex => {
+      ex.feedback = specificErrorMsg;
+    });
+
     return res.json({
       success: true,
       isAiGraded: false,
-      gradedBy: "Bộ thẩm định dự phòng nội bộ",
+      gradedBy: "Hệ thống chặn (Cần AI)",
       gradingResult: { ...fallbackResult, isAiGraded: false },
     });
   } catch (error: any) {
     console.warn("Chuyển sang bộ thẩm định dự phòng môn Toán:", error?.message || error);
     const fallbackResult = gradeMathLocally(req.body.exam, req.body.studentAnswers);
+    const errMsg = error?.message ? `Lỗi AI: ${error.message}` : "Lỗi hệ thống AI không xác định.";
+    
+    fallbackResult.overallComment = errMsg;
+    fallbackResult.exerciseScores.forEach(ex => {
+      ex.feedback = errMsg;
+    });
+
     return res.json({
       success: true,
       isAiGraded: false,
-      gradedBy: "Bộ thẩm định dự phòng nội bộ",
+      gradedBy: "Hệ thống chặn (Lỗi AI)",
       gradingResult: { ...fallbackResult, isAiGraded: false },
     });
   }
