@@ -1,18 +1,18 @@
 // Firebase Configuration for "Cùng Ôn Luyện"
+// Tất cả giá trị lấy từ biến môi trường (VITE_ prefix để Vite expose ra client)
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  // Dùng env var khi deploy (Netlify), dùng key thật khi local dev
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDj8Kz2kV-CpFoFOjRx-mI4n7hpUi9Wk5M",
-  authDomain: "nckh9a3.firebaseapp.com",
-  projectId: "nckh9a3",
-  storageBucket: "nckh9a3.firebasestorage.app",
-  messagingSenderId: "210424539361",
-  appId: "1:210424539361:web:c5d5117d636c96a138efa0",
-  measurementId: "G-HQHZ9Y64PB"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
