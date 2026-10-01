@@ -93,7 +93,7 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
         y: CANVAS_HEIGHT + 50,
         vx: (CANVAS_WIDTH / 2 - startX) * 0.008 + (Math.random() - 0.5) * 3, // Hướng về giữa
         vy: -14 - Math.random() * 2, // Nhảy lên (cân chỉnh với GRAVITY mới)
-        radius: opt.isBomb ? 40 : 45,
+        radius: 45,
         text: opt.text,
         isCorrect: opt.isCorrect,
         isBomb: opt.isBomb,
@@ -292,11 +292,12 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
               state.particles.push(...createExplosion(fruit.x, fruit.y, fruit.color));
               
               if (fruit.isBomb) {
-                // Chém trúng bom -> GAME OVER
-                handleWrongAnswer("Oops! You slashed a bomb!");
+                // Chém trúng bom -> GAME OVER luôn
+                state.status = 'GAME_OVER';
+                state.reviewMessage = "Bùm! Bạn đã chém trúng bom!";
               } else if (fruit.isCorrect) {
                 // Chém trúng đáp án ĐÚNG
-                state.score += 10 + (state.combo * 2);
+                state.score += 2;
                 state.combo += 1;
                 
                 // Vô hiệu hóa các quả còn lại
@@ -321,7 +322,8 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
                 state.score -= 1;
                 state.combo = 0;
                 if (state.score < 0) {
-                   handleWrongAnswer(`Game Over! Điểm của bạn đã rơi xuống dưới 0.`);
+                   state.status = 'GAME_OVER';
+                   state.reviewMessage = "Game Over! Điểm của bạn đã rơi xuống dưới 0.";
                 }
               }
               updateUi();

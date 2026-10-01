@@ -14,7 +14,8 @@ import {
   User,
   Users,
   X,
-  ShieldCheck
+  ShieldCheck,
+  CalendarDays
 } from 'lucide-react';
 import { UserProgress } from '../types';
 import { UserAvatar } from './UserAvatar';
@@ -70,6 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const navTienIch = [
+    { id: 'schedule', label: 'Lên lịch học', icon: CalendarDays },
     { id: 'minigame', label: 'Minigame', icon: Gamepad2 },
     { id: 'benchmarks', label: 'Điểm chuẩn THPT', icon: BarChart3 },
     { id: 'community', label: 'Chuyện chúng mình', icon: Users },

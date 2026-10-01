@@ -11,6 +11,7 @@ import { HCMBenchmarkView } from './components/HCMBenchmarkView';
 import { MinigameView } from './components/minigame/MinigameView';
 import { CommunityView } from './components/CommunityView';
 import { AdminDashboardView } from './components/AdminDashboardView';
+import { ScheduleBuilderView } from './components/ScheduleBuilderView';
 import { ExamRunnerModal } from './components/ExamRunnerModal';
 import { ExamPreviewModal } from './components/ExamPreviewModal';
 import { GoogleAuthModal } from './components/GoogleAuthModal';
@@ -329,6 +330,10 @@ export default function App() {
           <AdminDashboardView />
         )}
 
+        {currentTab === 'schedule' && (
+          <ScheduleBuilderView />
+        )}
+
         {currentTab === 'account' && (
           <AccountView
             progress={progress}
@@ -359,7 +364,7 @@ export default function App() {
             <span>– Đồng hành cùng học sinh chinh phục kỳ thi Tuyển sinh 10</span>
           </div>
           <div className="flex items-center gap-6">
-            {['knowledge', 'practice', 'exams', 'minigame', 'benchmarks', 'account'].map((tab) => (
+            {['knowledge', 'practice', 'exams', 'schedule', 'minigame', 'benchmarks', 'account'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setCurrentTab(tab)}
@@ -367,10 +372,11 @@ export default function App() {
               >
                 {tab === 'knowledge' ? 'Hệ thống kiến thức'
                   : tab === 'practice' ? 'Luyện tập chuyên đề'
-                  : tab === 'exams' ? 'Kho đề thi TP.HCM'
+                  : tab === 'exams' ? 'Kho đề thi'
+                  : tab === 'schedule' ? 'Lên lịch học'
                   : tab === 'minigame' ? 'Minigame'
                   : tab === 'benchmarks' ? 'Điểm chuẩn các năm'
-                  : 'Mục tiêu nguyện vọng'}
+                  : 'Tài khoản'}
               </button>
             ))}
           </div>

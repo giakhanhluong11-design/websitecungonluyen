@@ -28,6 +28,10 @@ interface AppStore {
 
   // Toast
   toast: Toast | null;
+  
+  // Unsaved changes flag
+  isDirty: boolean;
+  setIsDirty: (dirty: boolean) => void;
 
   // Navigation actions
   setCurrentTab: (tab: string) => void;
@@ -48,7 +52,7 @@ interface AppStore {
   clearToast: () => void;
 }
 
-export const useAppStore = create<AppStore>((set) => ({
+export const useAppStore = create<AppStore>((set, get) => ({
   currentTab: "home",
   activeSubject: "toan",
   selectedPracticeSubject: "toan",
@@ -61,8 +65,14 @@ export const useAppStore = create<AppStore>((set) => ({
   showGeminiConfigModal: false,
 
   toast: null,
+  isDirty: false,
+  setIsDirty: (dirty) => set({ isDirty: dirty }),
 
   setCurrentTab: (tab) => {
+    if (get().isDirty) {
+      if (!window.confirm('Bạn có thay đổi chưa lưu. Bạn có muốn rời đi không?')) return;
+      set({ isDirty: false });
+    }
     set({ currentTab: tab });
     window.scrollTo({ top: 0, behavior: "smooth" });
   },
@@ -70,6 +80,10 @@ export const useAppStore = create<AppStore>((set) => ({
   setActiveSubject: (subject) => set({ activeSubject: subject }),
 
   handleNavigate: (tab, subjectFilter, topicId) => {
+    if (get().isDirty) {
+      if (!window.confirm('Bạn có thay đổi chưa lưu. Bạn có muốn rời đi không?')) return;
+      set({ isDirty: false });
+    }
     set((state) => {
       const next: Partial<AppStore> = { currentTab: tab };
       if (subjectFilter) {
@@ -87,6 +101,10 @@ export const useAppStore = create<AppStore>((set) => ({
   },
 
   handleReviewTopic: (topicId) => {
+    if (get().isDirty) {
+      if (!window.confirm('Bạn có thay đổi chưa lưu. Bạn có muốn rời đi không?')) return;
+      set({ isDirty: false });
+    }
     const topic = ALL_TOPICS.find((t) => t.id === topicId);
     if (topic) {
       set({
