@@ -123,10 +123,10 @@ export async function saveProfileToFirestore(userId: string, profile: UserProfil
 export async function savePracticeAttemptToFirestore(userId: string, attempt: PracticeAttempt): Promise<void> {
   try {
     const attemptsRef = collection(db, 'users', userId, 'practiceAttempts');
-    await addDoc(attemptsRef, {
+    await addDoc(attemptsRef, removeUndefined({
       ...attempt,
       createdAt: serverTimestamp(),
-    });
+    }));
   } catch (err) {
     console.error('Lỗi lưu practice attempt lên Firestore:', err);
   }
@@ -158,10 +158,10 @@ async function loadPracticeAttemptsFromFirestore(userId: string): Promise<Practi
 export async function saveExamAttemptToFirestore(userId: string, attempt: ExamAttempt): Promise<void> {
   try {
     const attemptsRef = collection(db, 'users', userId, 'examAttempts');
-    await addDoc(attemptsRef, {
+    await addDoc(attemptsRef, removeUndefined({
       ...attempt,
       createdAt: serverTimestamp(),
-    });
+    }));
   } catch (err) {
     console.error('Lỗi lưu exam attempt lên Firestore:', err);
   }
@@ -192,10 +192,10 @@ async function loadExamAttemptsFromFirestore(userId: string): Promise<ExamAttemp
 export async function saveMinigameResultToFirestore(userId: string, result: MinigameResult): Promise<void> {
   try {
     const resultsRef = collection(db, 'users', userId, 'minigameResults');
-    await addDoc(resultsRef, {
+    await addDoc(resultsRef, removeUndefined({
       ...result,
       createdAt: serverTimestamp(),
-    });
+    }));
   } catch (err) {
     console.error('Lỗi lưu minigame result lên Firestore:', err);
   }

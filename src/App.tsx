@@ -88,16 +88,15 @@ export default function App() {
 
   // ── Firebase auth listener ───────────────────────────────────────────────
   useEffect(() => {
-    const remember = typeof window !== 'undefined' && localStorage.getItem('cung_on_luyen_remember_login') === 'true';
-    if (!remember) {
-      // Khi vào web, mặc định tài khoản là Khách trừ khi người dùng đã nhấn Lưu đăng nhập
-      return;
-    }
+    // Luôn lắng nghe Firebase Auth state để tự động khôi phục phiên đăng nhập
     const unsubscribe = onAuthChange(async (user) => {
       if (user) {
-        handleLoginEmail(user.email, user.name, undefined, true);
-        await handleSyncCloud(user.id);
+        const remember = typeof window !== 'undefined' && localStorage.getItem('cung_on_luyen_remember_login') === 'true';
+        // Khôi phục progress đúng cho user này và sync Firestore
+        handleLoginEmail(user.email, user.name, undefined, remember);
+        await handleSyncCloudAfterLogin(user.id, user.email);
       }
+      // Nếu user = null: Firebase logout → không làm gì (handleLogoutAuth xử lý khi user chủ động đăng xuất)
     });
     return () => unsubscribe();
   }, []);

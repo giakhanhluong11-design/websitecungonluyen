@@ -421,13 +421,9 @@ export function onAuthChange(callback: (user: AuthUser | null) => void): () => v
       setStoredUser(user);
       callback(user);
     } else {
-      const cachedUser = getStoredUser();
-      if (cachedUser?.id === 'test_user_id_123') {
-        callback(cachedUser);
-      } else {
-        removeStoredToken();
-        callback(null);
-      }
+      // Không có Firebase session -> đăng xuất
+      removeStoredToken();
+      callback(null);
     }
   });
 }
@@ -436,10 +432,12 @@ export function onAuthChange(callback: (user: AuthUser | null) => void): () => v
  * Lấy Firebase UID của user hiện tại
  */
 export function getCurrentUserId(): string | null {
+  // Ưu tiên Firebase Auth hiện tại
   if (auth.currentUser?.uid) return auth.currentUser.uid;
   
+  // Fallback: tài khoản admin test (không dùng Firebase Auth)
   const cachedUser = getStoredUser();
-  if (cachedUser?.id === 'test_user_id_123') return cachedUser.id;
+  if (cachedUser?.id === 'admin_user_id_999') return cachedUser.id;
   
   return null;
 }
