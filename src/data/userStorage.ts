@@ -155,7 +155,9 @@ export const getUserProgress = loadUserProgress;
 export function saveUserProgress(progress: UserProgress): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-    if (progress.profile?.isGoogleLinked && progress.profile?.email) {
+    // FIX: Lưu vault cho TẤT CẢ user có email (không phân biệt Google hay Email login)
+    // Bug cũ: chỉ lưu khi isGoogleLinked=true → user email không bao giờ có vault → mất data mỗi lần login
+    if (progress.profile?.email && progress.profile.email.trim() !== '') {
       saveToAccountVault(progress.profile.email, progress);
     }
   } catch (err) {
