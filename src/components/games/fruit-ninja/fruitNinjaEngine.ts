@@ -22,6 +22,7 @@ export interface Fruit {
   color: string;
   slicedPieces?: { x: number; y: number; vx: number; vy: number; rotation: number }[];
   slicedTime?: number;
+  spawnDelay?: number;
 }
 
 export interface Particle {
@@ -49,7 +50,7 @@ export interface GameState {
   lastSpawnTime: number;
 }
 
-export const GRAVITY = 0.25;
+export const GRAVITY = 0.15;
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 600;
 

@@ -84,17 +84,15 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
 
     const shuffledOptions = shuffleArray(options);
     
-    const numFruits = shuffledOptions.length;
-    const spacing = CANVAS_WIDTH / (numFruits + 1);
-
     const newFruits: Fruit[] = shuffledOptions.map((opt, index) => {
       const color = opt.isBomb ? '#111827' : FRUIT_COLORS[index % FRUIT_COLORS.length];
+      const startX = CANVAS_WIDTH * 0.15 + Math.random() * (CANVAS_WIDTH * 0.7); // Rộng hơn
       return {
         id: Math.random().toString(36).substr(2, 9),
-        x: spacing * (index + 1) + (Math.random() - 0.5) * 40,
-        y: CANVAS_HEIGHT + 50 + Math.random() * 50,
-        vx: (CANVAS_WIDTH / 2 - (spacing * (index + 1))) * 0.015 + (Math.random() - 0.5) * 2,
-        vy: -15 - Math.random() * 3, // Nhảy lên
+        x: startX,
+        y: CANVAS_HEIGHT + 50,
+        vx: (CANVAS_WIDTH / 2 - startX) * 0.008 + (Math.random() - 0.5) * 3, // Hướng về giữa
+        vy: -14 - Math.random() * 2, // Nhảy lên (cân chỉnh với GRAVITY mới)
         radius: opt.isBomb ? 40 : 45,
         text: opt.text,
         isCorrect: opt.isCorrect,
@@ -103,6 +101,7 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
         rotation: 0,
         rotationSpeed: (Math.random() - 0.5) * 0.2,
         color,
+        spawnDelay: index * 1200 + Math.random() * 400, // Ném lần lượt từng quả (cách nhau ~1.2s)
       };
     });
 
@@ -165,6 +164,12 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
       for (let i = state.fruits.length - 1; i >= 0; i--) {
         const fruit = state.fruits[i];
         
+        if (fruit.spawnDelay !== undefined && fruit.spawnDelay > 0) {
+           fruit.spawnDelay -= 16.6; // ~60fps delta
+           allFruitsGone = false; // still waiting to spawn
+           continue;
+        }
+
         fruit.vy += GRAVITY;
         fruit.x += fruit.vx;
         fruit.y += fruit.vy;
@@ -287,12 +292,19 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
               state.particles.push(...createExplosion(fruit.x, fruit.y, fruit.color));
               
               if (fruit.isBomb) {
-                // Chém trúng bom
+                // Chém trúng bom -> GAME OVER
                 handleWrongAnswer("Oops! You slashed a bomb!");
               } else if (fruit.isCorrect) {
                 // Chém trúng đáp án ĐÚNG
                 state.score += 10 + (state.combo * 2);
                 state.combo += 1;
+                
+                // Vô hiệu hóa các quả còn lại
+                state.fruits.forEach(f => {
+                   if (!f.isSliced && !f.isBomb) {
+                      f.isSliced = true;
+                   }
+                });
                 
                 // Mở câu mới ngay sau khi chém đúng
                 setTimeout(() => {
@@ -301,9 +313,16 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
                   }
                 }, 1000);
                 
+                // Prevent allFruitsGone logic from triggering incorrectly during delay
+                state.lastSpawnTime = performance.now() + 5000;
+                
               } else {
-                // Chém trúng đáp án SAI
-                handleWrongAnswer(`Wrong! The correct answer was "${state.currentQuestion?.correctAnswer}".`);
+                // Chém trúng đáp án SAI -> Trừ điểm, không game over
+                state.score -= 1;
+                state.combo = 0;
+                if (state.score < 0) {
+                   handleWrongAnswer(`Game Over! Điểm của bạn đã rơi xuống dưới 0.`);
+                }
               }
               updateUi();
             }
@@ -311,12 +330,12 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
         }
       }
 
-      // Xử lý rơi rớt: Nếu rơi hết trái mà chưa chém trúng trái đúng -> sai
+      // Xử lý rơi rớt: Nếu rơi hết trái mà chưa chém trúng trái đúng -> Bỏ qua, không trừ điểm, spawn câu mới
       if (allFruitsGone && state.fruits.length > 0 && time - state.lastSpawnTime > 2000) {
         const hasCorrectSliced = state.fruits.some(f => f.isCorrect && f.isSliced);
         if (!hasCorrectSliced) {
-          handleWrongAnswer(`Missed! The correct answer was "${state.currentQuestion?.correctAnswer}".`);
           state.combo = 0;
+          spawnQuestion(performance.now());
           updateUi();
         }
       }
