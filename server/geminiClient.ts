@@ -114,6 +114,7 @@ export async function generateContentWithFallback(
     "gemini-1.5-flash"
   ];
 
+  let lastErrorMsg = "Unknown error";
   for (const model of candidateModels) {
     try {
       const configForModel: any = { ...(params.config || {}) };
@@ -135,6 +136,7 @@ export async function generateContentWithFallback(
       }
     } catch (err: any) {
       const errMsg = String(err?.message || err || "");
+      lastErrorMsg = errMsg;
       if (
         errMsg.includes("RESOURCE_EXHAUSTED") ||
         errMsg.includes("429") ||
@@ -144,12 +146,12 @@ export async function generateContentWithFallback(
       ) {
         console.warn(`[Gemini API] Hệ thống Google AI đang bận hoặc quá tải (${errMsg.includes("503") ? "503 High Demand" : "429 Quota"}), tự động kích hoạt bộ chấm dự phòng trong 60 giây...`);
         quotaCooldownUntil = Date.now() + 60_000;
-        return null;
+        throw new Error("Lỗi hạn ngức (Quota 429) hoặc hệ thống Google bận. Hãy thử lại sau 1 phút.");
       }
       console.warn(`[Gemini Fallback] Model ${model} gặp lỗi: ${errMsg.slice(0, 100)}`);
     }
   }
 
-  return null;
+  throw new Error(`Tất cả model AI đều lỗi. Lỗi cuối cùng: ${lastErrorMsg}`);
 }
 

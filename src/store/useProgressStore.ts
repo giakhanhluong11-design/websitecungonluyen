@@ -6,6 +6,7 @@ import { create } from "zustand";
 import {
   getUserProgress,
   syncWithCloud,
+  syncWithCloudAfterLogin,
   toggleTopicCompleted,
   completeTopic,
   TopicCompletionResult,
@@ -34,6 +35,7 @@ interface ProgressStore {
     rememberLogin?: boolean
   ) => void;
   handleSyncCloud: (userId: string) => Promise<void>;
+  handleSyncCloudAfterLogin: (userId: string, email: string) => Promise<void>;
   handleLogout: () => void;
   handleLoginGoogle: (email: string, displayName?: string, rememberLogin?: boolean) => void;
 
@@ -69,6 +71,15 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       set({ progress: synced });
     } catch (e) {
       console.warn("Sync cloud error:", e);
+    }
+  },
+
+  handleSyncCloudAfterLogin: async (userId, email) => {
+    try {
+      const synced = await syncWithCloudAfterLogin(userId, email);
+      set({ progress: synced });
+    } catch (e) {
+      console.warn("Sync cloud after login error:", e);
     }
   },
 

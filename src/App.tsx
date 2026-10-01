@@ -38,6 +38,7 @@ export default function App() {
     setStreakCelebration,
     handleLoginEmail,
     handleSyncCloud,
+    handleSyncCloudAfterLogin,
     handleLogout,
     handleLoginGoogle,
     handleToggleTopicComplete,
@@ -103,6 +104,7 @@ export default function App() {
 
   // ── Auth handlers ────────────────────────────────────────────────────────
   const handleLoginSuccess = async (user: AuthUser, _token: string, rememberLogin?: boolean) => {
+    // Bước 1: Cập nhật profile của user trong store (từ vault hoặc tạo mới)
     handleLoginEmail(
       user.email,
       user.name,
@@ -117,7 +119,8 @@ export default function App() {
       `Đăng nhập thành công! Chào mừng ${user.name || user.email}${rememberLogin ? ' (Đã lưu đăng nhập)' : ''}.`,
       'success'
     );
-    await handleSyncCloud(user.id);
+    // Bước 2: Sync với Firestore dùng đúng email của user (không bị ghi đè bởi vault trống)
+    await handleSyncCloudAfterLogin(user.id, user.email);
     setTimeout(clearToast, 4500);
   };
 

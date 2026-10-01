@@ -19,6 +19,23 @@ import {
 } from 'firebase/firestore';
 import { UserProgress, UserProfile, PracticeAttempt, ExamAttempt, MinigameResult } from '../types';
 
+/**
+ * Firestore KHÔNG chấp nhận giá trị `undefined`.
+ * Hàm này loại bỏ đệ quy tất cả key có giá trị undefined khỏi object.
+ */
+function removeUndefined<T>(obj: T): T {
+  if (obj === null || obj === undefined) return obj;
+  if (Array.isArray(obj)) return obj.map(removeUndefined) as unknown as T;
+  if (typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj as Record<string, unknown>)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, removeUndefined(v)])
+    ) as unknown as T;
+  }
+  return obj;
+}
+
 // ============================================================
 // USER PROGRESS (main document)
 // ============================================================
@@ -29,15 +46,19 @@ import { UserProgress, UserProfile, PracticeAttempt, ExamAttempt, MinigameResult
 export async function saveProgressToFirestore(userId: string, progress: UserProgress): Promise<void> {
   try {
     const userRef = doc(db, 'users', userId);
-    await setDoc(userRef, {
+    const payload = removeUndefined({
       profile: progress.profile,
       completedTopicIds: progress.completedTopicIds || [],
       bookmarkedExamIds: progress.bookmarkedExamIds || [],
       studyTimeMinutes: progress.studyTimeMinutes || 0,
       streakDays: progress.streakDays || 0,
+      lastActiveDate: progress.lastActiveDate || null,
+      dailyStudyTime: progress.dailyStudyTime || {},
       minigameBestScores: progress.minigameBestScores || {},
+      topicProgress: progress.topicProgress || {},
       updatedAt: serverTimestamp(),
-    }, { merge: true });
+    });
+    await setDoc(userRef, payload, { merge: true });
   } catch (err) {
     console.error('Lỗi lưu tiến độ lên Firestore:', err);
   }
@@ -69,8 +90,11 @@ export async function loadProgressFromFirestore(userId: string): Promise<UserPro
       examAttempts,
       studyTimeMinutes: data.studyTimeMinutes || 0,
       streakDays: data.streakDays || 0,
+      lastActiveDate: data.lastActiveDate || undefined,
+      dailyStudyTime: data.dailyStudyTime || {},
       minigameResults,
       minigameBestScores: data.minigameBestScores || {},
+      topicProgress: data.topicProgress || {},
     };
   } catch (err) {
     console.error('Lỗi tải tiến độ từ Firestore:', err);
@@ -85,7 +109,8 @@ export async function loadProgressFromFirestore(userId: string): Promise<UserPro
 export async function saveProfileToFirestore(userId: string, profile: UserProfile): Promise<void> {
   try {
     const userRef = doc(db, 'users', userId);
-    await setDoc(userRef, { profile, updatedAt: serverTimestamp() }, { merge: true });
+    const cleanProfile = removeUndefined(profile);
+    await setDoc(userRef, { profile: cleanProfile, updatedAt: serverTimestamp() }, { merge: true });
   } catch (err) {
     console.error('Lỗi lưu profile lên Firestore:', err);
   }
@@ -216,13 +241,22 @@ export async function syncProgressWithFirestore(
     }
 
     // Merge: ưu tiên cloud, nhưng giữ lại dữ liệu local nếu cloud rỗng
+    // topicProgress: merge cả hai, lấy giá trị cao nhất theo từng topic
+    const mergedTopicProgress: Record<string, number> = {
+      ...(localProgress.topicProgress || {}),
+    };
+    const cloudTopicProgress = cloudProgress.topicProgress || {};
+    for (const [topicId, pct] of Object.entries(cloudTopicProgress)) {
+      mergedTopicProgress[topicId] = Math.max(pct, mergedTopicProgress[topicId] || 0);
+    }
+
     const merged: UserProgress = {
       profile: cloudProgress.profile || localProgress.profile,
       completedTopicIds: cloudProgress.completedTopicIds.length > 0
-        ? cloudProgress.completedTopicIds
+        ? [...new Set([...cloudProgress.completedTopicIds, ...localProgress.completedTopicIds])]
         : localProgress.completedTopicIds,
       bookmarkedExamIds: cloudProgress.bookmarkedExamIds.length > 0
-        ? cloudProgress.bookmarkedExamIds
+        ? [...new Set([...cloudProgress.bookmarkedExamIds, ...localProgress.bookmarkedExamIds])]
         : localProgress.bookmarkedExamIds,
       practiceAttempts: cloudProgress.practiceAttempts.length > 0
         ? cloudProgress.practiceAttempts
@@ -232,6 +266,11 @@ export async function syncProgressWithFirestore(
         : localProgress.examAttempts,
       studyTimeMinutes: Math.max(cloudProgress.studyTimeMinutes, localProgress.studyTimeMinutes),
       streakDays: Math.max(cloudProgress.streakDays, localProgress.streakDays),
+      lastActiveDate: cloudProgress.lastActiveDate || localProgress.lastActiveDate,
+      dailyStudyTime: {
+        ...(localProgress.dailyStudyTime || {}),
+        ...(cloudProgress.dailyStudyTime || {}),
+      },
       minigameResults: cloudProgress.minigameResults && cloudProgress.minigameResults.length > 0
         ? cloudProgress.minigameResults
         : localProgress.minigameResults,
@@ -239,6 +278,7 @@ export async function syncProgressWithFirestore(
         ...(localProgress.minigameBestScores || {}),
         ...(cloudProgress.minigameBestScores || {}),
       },
+      topicProgress: mergedTopicProgress,
     };
 
     return merged;

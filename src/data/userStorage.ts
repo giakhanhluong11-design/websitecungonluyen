@@ -187,6 +187,30 @@ export async function syncWithCloud(userId: string): Promise<UserProgress> {
   }
 }
 
+/**
+ * Sync cloud cho user vừa đăng nhập: không dùng localStorage hiện tại
+ * (vì có thể đã bị ghi đè bởi loginEmailAccount),
+ * mà lấy thẳng từ Firestore và merge với vault của user đó.
+ */
+export async function syncWithCloudAfterLogin(userId: string, email: string): Promise<UserProgress> {
+  try {
+    // Lấy dữ liệu local của đúng user này (không phải localStorage chung)
+    const localVault = loadFromAccountVault(email) || loadUserProgress();
+    const synced = await syncProgressWithFirestore(userId, localVault);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(synced));
+      if (synced.profile?.email) {
+        saveToAccountVault(synced.profile.email, synced);
+      }
+    } catch {}
+    return synced;
+  } catch (err) {
+    console.error('Lỗi sync sau đăng nhập:', err);
+    // Fallback: trả về vault của user
+    return loadFromAccountVault(email) || loadUserProgress();
+  }
+}
+
 export function logoutGoogleAccount(): UserProgress {
   const current = loadUserProgress();
   if (current.profile?.email && current.profile?.isGoogleLinked) {
