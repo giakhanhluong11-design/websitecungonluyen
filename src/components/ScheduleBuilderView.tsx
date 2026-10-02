@@ -40,20 +40,20 @@ const HOUR_HEIGHT = 50; // Giảm kích thước ô
 const MINUTE_HEIGHT = HOUR_HEIGHT / 60;
 
 const PASTEL_COLORS = [
-  'bg-blue-100 text-blue-800 border-blue-200',
-  'bg-rose-100 text-rose-800 border-rose-200',
-  'bg-amber-100 text-amber-800 border-amber-200',
-  'bg-emerald-100 text-emerald-800 border-emerald-200',
-  'bg-purple-100 text-purple-800 border-purple-200',
-  'bg-teal-100 text-teal-800 border-teal-200',
-  'bg-orange-100 text-orange-800 border-orange-200',
-  'bg-slate-100 text-slate-800 border-slate-200',
-  'bg-sky-100 text-sky-800 border-sky-200',
-  'bg-pink-100 text-pink-800 border-pink-200',
+  'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800',
+  'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-800',
+  'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800',
+  'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800',
+  'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800',
+  'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-900/40 dark:text-teal-300 dark:border-teal-800',
+  'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/40 dark:text-orange-300 dark:border-orange-800',
+  'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-800',
+  'bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900/40 dark:text-pink-300 dark:border-pink-800',
 ];
 
 const TEXT_COLORS = [
-  'text-slate-700', 'text-red-600', 'text-blue-600', 'text-emerald-600', 'text-purple-600', 'text-amber-600'
+  'text-slate-700 dark:text-slate-300', 'text-red-600 dark:text-red-400', 'text-blue-600 dark:text-blue-400', 'text-emerald-600 dark:text-emerald-400', 'text-purple-600 dark:text-purple-400', 'text-amber-600 dark:text-amber-400'
 ];
 
 const PREDEFINED_BLOCKS: Record<string, { title: string, color: string }[]> = {
@@ -479,10 +479,10 @@ export const ScheduleBuilderView = () => {
     }
 
     return (
-      <div className="flex-1 flex flex-col bg-white">
-        <div className="grid grid-cols-7 border-b border-slate-200">
+      <div className="flex-1 flex flex-col bg-white dark:bg-slate-900">
+        <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800">
           {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(d => (
-            <div key={d} className="py-2 text-center text-xs font-bold text-slate-500 uppercase">{d}</div>
+            <div key={d} className="py-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{d}</div>
           ))}
         </div>
         <div className="flex-1 grid grid-cols-7 auto-rows-fr">
@@ -495,10 +495,10 @@ export const ScheduleBuilderView = () => {
             return (
               <div 
                 key={i} 
-                className={`border-r border-b border-slate-100 p-1 flex flex-col ${!isCurrentMonth ? 'bg-slate-50 opacity-50' : ''}`}
+                className={`border-r border-b border-slate-100 dark:border-slate-800 p-1 flex flex-col ${!isCurrentMonth ? 'bg-slate-50 dark:bg-slate-900/50 opacity-50' : ''}`}
                 onClick={() => { setViewMode('day'); setCurrentDate(d); }}
               >
-                <div className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full mb-1 ${isToday ? 'bg-indigo-600 text-white' : 'text-slate-700'}`}>
+                <div className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full mb-1 ${isToday ? 'bg-indigo-600 text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                   {d.getDate()}
                 </div>
                 <div className="flex-1 overflow-hidden space-y-1">
@@ -527,24 +527,24 @@ export const ScheduleBuilderView = () => {
   };
 
   return (
-    <div className="flex flex-col h-full min-h-screen bg-white font-sans text-slate-800" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
+    <div className="flex flex-col h-full min-h-screen bg-white dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-200" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
       
       {/* HEADER */}
-      <header className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 gap-4 shrink-0 bg-white z-20">
+      <header className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 gap-4 shrink-0 bg-white dark:bg-slate-900 z-20">
         <div>
-          <h1 className="text-2xl font-black flex items-center gap-2 text-slate-800">
+          <h1 className="text-2xl font-black flex items-center gap-2 text-slate-800 dark:text-white">
             <CalendarIcon className="w-6 h-6 text-indigo-500" /> Thời khóa biểu
           </h1>
-          <p className="text-sm text-slate-500 font-medium">Lên kế hoạch học tập và quản lý thời gian của bạn.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Lên kế hoạch học tập và quản lý thời gian của bạn.</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-2">
           {/* View Toggle */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg mr-2">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-lg mr-2">
             {(['week', 'day', 'month'] as ViewMode[]).map(mode => (
               <button
                 key={mode} onClick={() => setViewMode(mode)}
-                className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-all ${viewMode === mode ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-all ${viewMode === mode ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
               >
                 {mode === 'week' ? 'Tuần' : mode === 'day' ? 'Ngày' : 'Tháng'}
               </button>
@@ -552,26 +552,26 @@ export const ScheduleBuilderView = () => {
           </div>
 
           {/* Date Navigation */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
             <button 
               onClick={() => setCurrentDate(viewMode === 'month' ? new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1) : addDays(currentDate, viewMode === 'week' ? -7 : -1))} 
-              className="p-1 hover:bg-white rounded text-slate-600 shadow-sm"
+              className="p-1 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400 shadow-sm"
             ><ChevronLeft className="w-5 h-5"/></button>
             <button 
               onClick={() => setCurrentDate(new Date())} 
-              className="px-3 py-1 text-sm font-bold text-slate-700 hover:bg-white rounded shadow-sm whitespace-nowrap"
+              className="px-3 py-1 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 rounded shadow-sm whitespace-nowrap"
             >
               {viewMode === 'month' ? 'Tháng này' : 'Hôm nay'}
             </button>
             <button 
               onClick={() => setCurrentDate(viewMode === 'month' ? new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1) : addDays(currentDate, viewMode === 'week' ? 7 : 1))} 
-              className="p-1 hover:bg-white rounded text-slate-600 shadow-sm"
+              className="p-1 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400 shadow-sm"
             ><ChevronRight className="w-5 h-5"/></button>
           </div>
           
           <button 
             onClick={() => handleGridClick(todayStr, 8, 0)}
-            className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-200 transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
           >
             <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Tạo block</span>
           </button>
@@ -590,7 +590,7 @@ export const ScheduleBuilderView = () => {
       </header>
 
       {/* WARNING BANNER */}
-      <div className="bg-slate-50 border-b border-slate-100 px-4 py-2 flex items-center justify-center gap-2 text-xs font-medium text-slate-500">
+      <div className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 px-4 py-2 flex items-center justify-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
         <Info className="w-4 h-4" />
         Lưu ý: Dữ liệu lịch và thời khóa biểu của các tháng trước sẽ tự động bị xoá để tiết kiệm bộ nhớ, chỉ hiển thị từ tháng hiện tại trở đi.
       </div>
@@ -598,15 +598,15 @@ export const ScheduleBuilderView = () => {
       <div className="flex-1 flex overflow-hidden">
         
         {/* SIDEBAR */}
-        <aside className="hidden md:flex flex-col w-64 border-r border-slate-100 bg-slate-50/50 shrink-0 overflow-y-auto custom-scrollbar">
+        <aside className="hidden md:flex flex-col w-64 border-r border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 shrink-0 overflow-y-auto custom-scrollbar">
           
           {/* Section: Việc cần làm */}
-          <div className="border-b border-slate-200">
+          <div className="border-b border-slate-200 dark:border-slate-800">
             <div 
-              className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-colors"
+              className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               onClick={() => setOpenSections(s => ({...s, todos: !s.todos}))}
             >
-              <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-indigo-500" /> Việc cần làm hôm nay
               </h3>
               {openSections.todos ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRightIcon className="w-4 h-4 text-slate-400" />}
@@ -619,7 +619,7 @@ export const ScheduleBuilderView = () => {
                     <button onClick={() => toggleTodo(todo.id)} className="mt-0.5 shrink-0 text-slate-400 hover:text-indigo-500 transition-colors">
                       {todo.completed ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Circle className="w-4 h-4" />}
                     </button>
-                    <span className={`text-sm break-words flex-1 cursor-pointer select-none ${todo.color || 'text-slate-700'} ${todo.completed ? 'line-through opacity-50' : 'font-medium'}`} onClick={() => cycleTodoColor(todo.id)}>
+                    <span className={`text-sm break-words flex-1 cursor-pointer select-none ${todo.color || 'text-slate-700 dark:text-slate-300'} ${todo.completed ? 'line-through opacity-50' : 'font-medium'}`} onClick={() => cycleTodoColor(todo.id)}>
                       {todo.title}
                     </span>
                     <button onClick={() => deleteTodo(todo.id)} className="opacity-0 group-hover:opacity-100 text-rose-400 hover:text-rose-600 transition-opacity">
@@ -629,7 +629,7 @@ export const ScheduleBuilderView = () => {
                 ))}
                 <input 
                   placeholder="+ Thêm việc..."
-                  className="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-sm font-medium mt-2 outline-none focus:border-indigo-400 transition-colors placeholder-slate-400"
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-2 py-1.5 text-sm font-medium mt-2 outline-none focus:border-indigo-400 dark:focus:border-indigo-500 transition-colors placeholder-slate-400 dark:text-white"
                   onKeyDown={(e) => { if (e.key === 'Enter') { addTodo(e.currentTarget.value); e.currentTarget.value = ''; } }}
                 />
               </div>
@@ -639,10 +639,10 @@ export const ScheduleBuilderView = () => {
           {/* Section: Blocks */}
           <div className="">
             <div 
-              className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-colors"
+              className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               onClick={() => setOpenSections(s => ({...s, blocks: !s.blocks}))}
             >
-              <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                 <ToyBrick className="w-4 h-4 text-indigo-500" /> Block
               </h3>
               {openSections.blocks ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRightIcon className="w-4 h-4 text-slate-400" />}
@@ -653,10 +653,10 @@ export const ScheduleBuilderView = () => {
                 {Object.entries(PREDEFINED_BLOCKS).map(([category, blocks]) => (
                   <div key={category} className="mb-1">
                     <div 
-                      className="px-2 py-1.5 flex items-center justify-between cursor-pointer hover:bg-slate-200 rounded-md transition-colors"
+                      className="px-2 py-1.5 flex items-center justify-between cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 rounded-md transition-colors"
                       onClick={() => setOpenCategories(s => ({...s, [category]: !s[category]}))}
                     >
-                      <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{category}</span>
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{category}</span>
                       {openCategories[category] ? <ChevronDown className="w-3 h-3 text-slate-400" /> : <ChevronRightIcon className="w-3 h-3 text-slate-400" />}
                     </div>
                     
@@ -684,16 +684,16 @@ export const ScheduleBuilderView = () => {
 
         {/* MAIN CALENDAR GRID */}
         {viewMode === 'month' ? renderMonthView() : (
-          <main className="flex-1 flex flex-col overflow-hidden relative bg-white" ref={gridRef}>
+          <main className="flex-1 flex flex-col overflow-hidden relative bg-white dark:bg-slate-900" ref={gridRef}>
             
             {/* Days Header */}
-            <div className="flex border-b border-slate-100 bg-white sticky top-0 z-20 shadow-sm">
-              <div className="w-14 sm:w-16 shrink-0 border-r border-slate-100" />
+            <div className="flex border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20 shadow-sm">
+              <div className="w-14 sm:w-16 shrink-0 border-r border-slate-100 dark:border-slate-800" />
               {currentDays.map((d, i) => {
                 const isToday = formatDate(d) === todayStr;
                 return (
-                  <div key={i} className="flex-1 py-2 text-center border-r border-slate-100 last:border-r-0 min-w-[80px]">
-                    <div className={`text-[10px] font-bold uppercase tracking-wider ${isToday ? 'text-indigo-600' : 'text-slate-500'}`}>
+                  <div key={i} className="flex-1 py-2 text-center border-r border-slate-100 dark:border-slate-800 last:border-r-0 min-w-[80px]">
+                    <div className={`text-[10px] font-bold uppercase tracking-wider ${isToday ? 'text-indigo-600' : 'text-slate-500 dark:text-slate-400'}`}>
                       {d.toLocaleDateString('vi-VN', { weekday: 'short' })}
                     </div>
                     <div className={`text-lg sm:text-xl mt-0.5 w-7 h-7 sm:w-8 sm:h-8 mx-auto flex items-center justify-center rounded-full ${isToday ? 'bg-indigo-600 text-white font-black' : 'font-semibold'}`}>
@@ -712,9 +712,9 @@ export const ScheduleBuilderView = () => {
               <div className="flex relative" style={{ height: HOURS_COUNT * HOUR_HEIGHT }}>
                 
                 {/* Time Labels */}
-                <div className="w-14 sm:w-16 shrink-0 border-r border-slate-100 bg-white sticky left-0 z-10">
+                <div className="w-14 sm:w-16 shrink-0 border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky left-0 z-10">
                   {Array.from({ length: HOURS_COUNT }).map((_, i) => (
-                    <div key={i} className="flex items-start justify-end pr-2 pt-1 text-[10px] sm:text-xs font-semibold text-slate-400" style={{ height: HOUR_HEIGHT }}>
+                    <div key={i} className="flex items-start justify-end pr-2 pt-1 text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500" style={{ height: HOUR_HEIGHT }}>
                       {`${START_HOUR + i}`.padStart(2, '0')}:00
                     </div>
                   ))}
@@ -730,7 +730,7 @@ export const ScheduleBuilderView = () => {
                   return (
                     <div 
                       key={colIdx} 
-                      className="flex-1 border-r border-slate-100 last:border-r-0 relative min-w-[80px]"
+                      className="flex-1 border-r border-slate-100 dark:border-slate-800 last:border-r-0 relative min-w-[80px]"
                       ref={(el) => dayColRefs.current[colIdx] = el}
                       onDragOver={handleDragOverGrid}
                       onDrop={(e) => {
@@ -742,8 +742,8 @@ export const ScheduleBuilderView = () => {
                     >
                       {/* Grid Lines */}
                       {Array.from({ length: HOURS_COUNT }).map((_, h) => (
-                        <div key={h} className="absolute w-full border-b border-slate-100/60 pointer-events-none" style={{ top: h * HOUR_HEIGHT, height: HOUR_HEIGHT }}>
-                          <div className="absolute w-full border-b border-slate-100/30 border-dashed top-1/2" />
+                        <div key={h} className="absolute w-full border-b border-slate-100/60 dark:border-slate-800 pointer-events-none" style={{ top: h * HOUR_HEIGHT, height: HOUR_HEIGHT }}>
+                          <div className="absolute w-full border-b border-slate-100/30 dark:border-slate-800/50 border-dashed top-1/2" />
                         </div>
                       ))}
 
