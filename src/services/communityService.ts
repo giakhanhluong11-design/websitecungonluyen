@@ -277,3 +277,35 @@ export async function fetchUserConnectPosts(userId: string): Promise<ConnectPost
     .filter(p => p.userId === userId);
 }
 
+export async function addConnectComment(postId: string, comment: Omit<CommunityComment, 'id' | 'postId' | 'createdAt'>): Promise<string> {
+  const commentsRef = collection(db, CONNECT_COLLECTION, postId, 'comments');
+  const newCommentRef = await addDoc(commentsRef, {
+    ...comment,
+    createdAt: serverTimestamp(),
+  });
+  
+  const postRef = doc(db, CONNECT_COLLECTION, postId);
+  await updateDoc(postRef, {
+    commentsCount: increment(1)
+  });
+  
+  return newCommentRef.id;
+}
+
+export function subscribeToConnectComments(postId: string, callback: (comments: CommunityComment[]) => void) {
+  const commentsRef = collection(db, CONNECT_COLLECTION, postId, 'comments');
+  const q = query(commentsRef, orderBy('createdAt', 'asc'));
+  
+  return onSnapshot(q, (snap) => {
+    const comments = snap.docs.map(docSnap => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        postId,
+        ...data,
+        createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString(),
+      } as CommunityComment;
+    });
+    callback(comments);
+  });
+}

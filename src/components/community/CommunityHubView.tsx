@@ -85,7 +85,7 @@ export const CommunityHubView: React.FC<CommunityHubViewProps> = ({ onNavigate, 
           {/* Background image for community */}
           <div 
             className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-            style={{ backgroundImage: `url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop')` }}
+            style={{ backgroundImage: `url('https://firebasestorage.googleapis.com/v0/b/nckh9a3.firebasestorage.app/o/ddb503f4898509db5094.jpg?alt=media&token=5af54d64-3c24-4e9e-8770-fd236aa80cbe')` }}
           />
           {/* Overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -154,7 +154,7 @@ export const CommunityHubView: React.FC<CommunityHubViewProps> = ({ onNavigate, 
           <div 
             className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
             style={{ 
-              backgroundImage: `url('https://images.unsplash.com/photo-1529390079861-591de354faf5?q=80&w=2070&auto=format&fit=crop')`, // Two people discussing
+              backgroundImage: `url('https://firebasestorage.googleapis.com/v0/b/nckh9a3.firebasestorage.app/o/afe8154fa23e22607b2f.jpg?alt=media&token=e5231423-33f1-4ab3-963a-e1dc51e9015c')`,
             }}
           />
           {/* Yellow tint overlay */}

@@ -12,9 +12,16 @@ import { vi } from 'date-fns/locale';
 interface UserProfileModalProps {
   userId: string;
   onClose: () => void;
+  onConnectClick?: (post: ConnectPost) => void;
+  onCommunityPostClick?: (post: CommunityPost) => void;
 }
 
-export const UserProfileModal: React.FC<UserProfileModalProps> = ({ userId, onClose }) => {
+export const UserProfileModal: React.FC<UserProfileModalProps> = ({ 
+  userId, 
+  onClose,
+  onConnectClick,
+  onCommunityPostClick
+}) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [connects, setConnects] = useState<ConnectPost[]>([]);
@@ -209,7 +216,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ userId, onCl
                 ) : (
                   <div className="space-y-4">
                     {posts.map(p => (
-                      <div key={p.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+                      <div 
+                        key={p.id} 
+                        onClick={() => onCommunityPostClick && onCommunityPostClick(p)}
+                        className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm ${onCommunityPostClick ? 'cursor-pointer hover:shadow-md transition-shadow hover:border-indigo-200 dark:hover:border-indigo-900' : ''}`}
+                      >
                         <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                           <MessageSquare className="w-3 h-3" />
                           <span>Chuyện chúng mình</span>
@@ -220,7 +231,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ userId, onCl
                       </div>
                     ))}
                     {connects.map(c => (
-                      <div key={c.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+                      <div 
+                        key={c.id} 
+                        onClick={() => onConnectClick && onConnectClick(c)}
+                        className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm ${onConnectClick ? 'cursor-pointer hover:shadow-md transition-shadow hover:border-indigo-200 dark:hover:border-indigo-900' : ''}`}
+                      >
                         <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                           <Users className="w-3 h-3" />
                           <span>Kết nối</span>

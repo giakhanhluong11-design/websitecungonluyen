@@ -11,6 +11,7 @@ import { vi } from 'date-fns/locale';
 interface ConnectViewProps {
   onBack: () => void;
   onUserClick: (userId: string) => void;
+  onPostClick: (post: ConnectPost) => void;
 }
 
 const TITLE_COLORS = [
@@ -24,14 +25,13 @@ const TITLE_COLORS = [
   '#be185d', // pink-700
 ];
 
-export const ConnectView: React.FC<ConnectViewProps> = ({ onBack, onUserClick }) => {
+export const ConnectView: React.FC<ConnectViewProps> = ({ onBack, onUserClick, onPostClick }) => {
   const [posts, setPosts] = useState<ConnectPost[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [selectedColor, setSelectedColor] = useState(TITLE_COLORS[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
 
   const { progress } = useProgressStore();
   const { showToast, openAuthModal } = useAppStore();
@@ -113,6 +113,7 @@ export const ConnectView: React.FC<ConnectViewProps> = ({ onBack, onUserClick })
                 placeholder="Nhập tiêu đề thật kêu..."
                 className="w-full bg-slate-50 dark:bg-slate-800 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 dark:text-white border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-colors"
                 style={{ color: selectedColor }}
+                maxLength={50}
                 required
               />
             </div>
@@ -176,22 +177,19 @@ export const ConnectView: React.FC<ConnectViewProps> = ({ onBack, onUserClick })
             <h3 
               className="text-xl sm:text-2xl font-black cursor-pointer hover:opacity-80 transition-opacity flex items-start gap-2"
               style={{ color: post.titleColor || '#4f46e5' }}
-              onClick={() => setExpandedPostId(expandedPostId === post.id ? null : post.id)}
+              onClick={() => onPostClick(post)}
             >
               <Hash className="w-6 h-6 shrink-0 mt-1 opacity-50" />
               {post.title}
             </h3>
             
-            {expandedPostId === post.id && post.content && (
-              <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-slate-800 dark:text-slate-200 text-sm whitespace-pre-line animate-in fade-in slide-in-from-top-2">
-                {post.content}
-              </div>
-            )}
-            
             <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-4 text-xs font-semibold text-slate-500">
-              <div className="flex items-center gap-1.5 cursor-pointer hover:text-indigo-600 transition-colors">
+              <div 
+                className="flex items-center gap-1.5 cursor-pointer hover:text-indigo-600 transition-colors"
+                onClick={() => onPostClick(post)}
+              >
                 <Users className="w-4 h-4" />
-                <span>{post.commentsCount} phản hồi (Tính năng đang xây dựng)</span>
+                <span>{post.commentsCount} phản hồi</span>
               </div>
             </div>
           </div>
