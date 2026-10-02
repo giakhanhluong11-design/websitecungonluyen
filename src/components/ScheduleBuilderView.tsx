@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Plus, Calendar as CalendarIcon, ChevronLeft, ChevronRight,
-  List, Clock, Trash2, X, MoreHorizontal, MapPin, 
+  List, CornerDownLeft, Trash2, X, MoreHorizontal, MapPin, 
   CheckCircle2, Circle, GripVertical, Copy, Palette, Edit2,
   ChevronDown, ChevronRight as ChevronRightIcon, Ban, Info
 } from 'lucide-react';
@@ -643,7 +643,7 @@ export const ScheduleBuilderView = () => {
               onClick={() => setOpenSections(s => ({...s, blocks: !s.blocks}))}
             >
               <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-indigo-500" /> Block
+                <CornerDownLeft className="w-4 h-4 text-indigo-500" /> Block
               </h3>
               {openSections.blocks ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRightIcon className="w-4 h-4 text-slate-400" />}
             </div>
