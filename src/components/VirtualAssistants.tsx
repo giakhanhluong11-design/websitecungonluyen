@@ -125,7 +125,7 @@ export const VirtualAssistants: React.FC = () => {
               <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                 <div className="flex gap-3">
                   <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-white">
-                    <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[200%] h-[200%] max-w-none top-1/2 left-[75%] -translate-x-1/2 -translate-y-[45%] object-cover" />
+                    <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[200%] h-[200%] max-w-none top-1/2 left-[25%] -translate-x-1/2 -translate-y-[45%] object-cover" />
                   </div>
                   <div className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100 text-sm p-3 rounded-2xl rounded-tl-none">
                     Chào {userName}! Hôm nay bạn cảm thấy như thế nào?
@@ -156,7 +156,7 @@ export const VirtualAssistants: React.FC = () => {
                     {robinResponded && (
                       <div className="flex gap-3 animate-in slide-in-from-bottom-2 fade-in duration-300">
                         <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-white">
-                          <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[200%] h-[200%] max-w-none top-1/2 left-[75%] -translate-x-1/2 -translate-y-[45%] object-cover" />
+                          <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[200%] h-[200%] max-w-none top-1/2 left-[25%] -translate-x-1/2 -translate-y-[45%] object-cover" />
                         </div>
                         <div className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100 text-sm p-3 rounded-2xl rounded-tl-none leading-relaxed">
                           {feeling === 'good' 
@@ -175,7 +175,7 @@ export const VirtualAssistants: React.FC = () => {
               <div className="space-y-4 animate-in slide-in-from-left-4 duration-300">
                 <div className="flex gap-3">
                   <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-white">
-                    <img src={ROBIN_LIO_GIF_URL} alt="Lio" className="absolute w-[200%] h-[200%] max-w-none top-1/2 left-[25%] -translate-x-1/2 -translate-y-[45%] object-cover" />
+                    <img src={ROBIN_LIO_GIF_URL} alt="Lio" className="absolute w-[200%] h-[200%] max-w-none top-1/2 left-[75%] -translate-x-1/2 -translate-y-[45%] object-cover" />
                   </div>
                   <div className="bg-rose-100 dark:bg-rose-900/40 text-rose-900 dark:text-rose-100 text-sm p-3 rounded-2xl rounded-tl-none leading-relaxed space-y-2">
                     <p>Chào bạn, mình là <strong>Lio</strong>! Để mình hướng dẫn bạn cách sử dụng hệ thống Cùng Ôn Luyện nhé:</p>
