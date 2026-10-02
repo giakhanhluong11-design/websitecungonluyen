@@ -98,6 +98,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
   const [name, setName] = useState(progress.profile.name || '');
   const [avatar, setAvatar] = useState(progress.profile.avatar || '/avatars/default.svg');
   const [email, setEmail] = useState(progress.profile.email || '');
+  const [bio, setBio] = useState(progress.profile.bio || '');
   const [currentSchool, setCurrentSchool] = useState(progress.profile.currentSchool || '');
   const [currentClass, setCurrentClass] = useState(progress.profile.currentClass || '');
   const [targetSchool, setTargetSchool] = useState(progress.profile.targetSchool || '');
@@ -128,6 +129,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
       name: name.trim() || progress.profile.name || 'Học sinh',
       avatar,
       email: email.trim() || progress.profile.email || '',
+      bio: bio.trim(),
       currentSchool: currentSchool.trim() || progress.profile.currentSchool || '',
       currentClass: currentClass.trim() || progress.profile.currentClass || '',
       targetSchool,
@@ -462,6 +464,20 @@ export const AccountView: React.FC<AccountViewProps> = ({
                     <GoogleIcon className="h-3.5 w-3.5" />
                   </div>
                 </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Giới thiệu bản thân
+                </label>
+                <textarea
+                  id="input-bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  rows={2}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white resize-none"
+                  placeholder="Viết một chút về sở thích, châm ngôn sống hoặc mục tiêu của bạn..."
+                />
               </div>
 
               <div>

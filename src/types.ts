@@ -146,6 +146,10 @@ export interface UserProfile {
   currentSchool: string;
   currentClass?: string;
   city: string;
+  bio?: string;
+  followers?: string[];
+  following?: string[];
+  blockedUsers?: string[];
 }
 
 export interface MinigameResult {
@@ -202,4 +206,17 @@ export interface CommunityComment {
   userAvatar?: string;
   content: string;
   createdAt: string; // ISO string
+}
+
+export interface ConnectPost {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  title: string;
+  titleColor: string;
+  content?: string;
+  createdAt: string; // ISO string
+  commentsCount: number;
+  likesCount?: number;
 }
