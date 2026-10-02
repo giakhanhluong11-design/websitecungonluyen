@@ -78,16 +78,10 @@ export const VirtualAssistants: React.FC = () => {
         
         {/* GIF Nhân vật */}
         <div className="relative w-40 h-40 z-20 hover:scale-110 transition-transform duration-300 animate-[bounce_3s_infinite_ease-in-out] origin-bottom overflow-hidden">
-          <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-            <filter id="remove-black-bg">
-              <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  2 2 2 0 -0.1" />
-            </filter>
-          </svg>
           <img 
             src={ROBIN_LIO_GIF_URL} 
             alt="Assistants" 
             className="absolute w-[150%] h-[150%] max-w-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] object-cover pointer-events-none" 
-            style={{ filter: 'url(#remove-black-bg)' }}
           />
           {/* Click zones */}
           <div 
@@ -130,7 +124,7 @@ export const VirtualAssistants: React.FC = () => {
             {activeSpeaker === 'robin' && (
               <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                 <div className="flex gap-3">
-                  <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-slate-800">
+                  <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-white">
                     <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[180%] h-[180%] max-w-none top-1/2 left-[20%] -translate-x-1/2 -translate-y-[40%] object-cover" />
                   </div>
                   <div className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100 text-sm p-3 rounded-2xl rounded-tl-none">
@@ -161,7 +155,7 @@ export const VirtualAssistants: React.FC = () => {
 
                     {robinResponded && (
                       <div className="flex gap-3 animate-in slide-in-from-bottom-2 fade-in duration-300">
-                        <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-slate-800">
+                        <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-white">
                           <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[180%] h-[180%] max-w-none top-1/2 left-[20%] -translate-x-1/2 -translate-y-[40%] object-cover" />
                         </div>
                         <div className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100 text-sm p-3 rounded-2xl rounded-tl-none leading-relaxed">
@@ -180,7 +174,7 @@ export const VirtualAssistants: React.FC = () => {
             {activeSpeaker === 'lio' && (
               <div className="space-y-4 animate-in slide-in-from-left-4 duration-300">
                 <div className="flex gap-3">
-                  <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-slate-800">
+                  <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-white">
                     <img src={ROBIN_LIO_GIF_URL} alt="Lio" className="absolute w-[180%] h-[180%] max-w-none top-1/2 left-[80%] -translate-x-1/2 -translate-y-[40%] object-cover" />
                   </div>
                   <div className="bg-rose-100 dark:bg-rose-900/40 text-rose-900 dark:text-rose-100 text-sm p-3 rounded-2xl rounded-tl-none leading-relaxed space-y-2">
@@ -204,16 +198,10 @@ export const VirtualAssistants: React.FC = () => {
         {!isCenteredMode && (
           <div className="flex items-end justify-end pr-4 pointer-events-none">
             <div className="relative w-28 h-28 z-20 overflow-hidden pointer-events-auto">
-              <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-                <filter id="remove-black-bg-small">
-                  <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  2 2 2 0 -0.1" />
-                </filter>
-              </svg>
               <img 
                 src={ROBIN_LIO_GIF_URL} 
                 alt="Assistants" 
                 className="absolute w-[150%] h-[150%] max-w-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] object-cover pointer-events-none" 
-                style={{ filter: 'url(#remove-black-bg-small)' }}
               />
               <div 
                 className="absolute top-0 left-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors" 
