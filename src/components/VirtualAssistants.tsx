@@ -3,11 +3,11 @@ import { X } from 'lucide-react';
 import { useProgressStore } from '../store/useProgressStore';
 import { addMentalHealthLog } from '../services/communityService';
 
-const ROBIN_LIO_GIF_URL = "https://firebasestorage.googleapis.com/v0/b/nckh9a3.firebasestorage.app/o/anh_dong%20(1)%20(1).gif?alt=media&token=0604228a-3c2e-4659-b13f-a2bd94986465";
+const ROBIN_LIO_GIF_URL = "https://firebasestorage.googleapis.com/v0/b/nckh9a3.firebasestorage.app/o/animated_students_transparent%20(1).gif?alt=media&token=afebced9-73e3-46eb-8cd5-f31039fd4ff6";
 
 export const VirtualAssistants: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeSpeaker, setActiveSpeaker] = useState<'intro' | 'robin' | 'lio'>('intro');
+  const [activeSpeaker, setActiveSpeaker] = useState<'robin' | 'lio'>('robin');
   const [isCenteredMode, setIsCenteredMode] = useState(false);
   
   // Robin State
@@ -35,11 +35,7 @@ export const VirtualAssistants: React.FC = () => {
     }
   }, []);
 
-  const resetChat = () => {
-    setActiveSpeaker('intro');
-    setFeeling(null);
-    setRobinResponded(false);
-  };
+
 
   const handleRobinResponse = async (type: 'good' | 'bad') => {
     setFeeling(type);
@@ -74,16 +70,16 @@ export const VirtualAssistants: React.FC = () => {
   // Nút gọi trợ lý (khi đang đóng)
   if (!isOpen) {
     return (
-      <div className="fixed bottom-0 right-6 z-50 flex items-end justify-center cursor-pointer group" onClick={() => setIsOpen(true)}>
+      <div className="fixed bottom-0 right-6 z-50 flex items-end justify-center group">
+        {/* Tooltip chung */}
         <div className="absolute -top-10 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm px-4 py-2 rounded-2xl rounded-br-none shadow-lg opacity-0 group-hover:opacity-100 transition-opacity border border-slate-200 dark:border-slate-700 whitespace-nowrap font-medium pointer-events-none">
-          Trợ lý học tập đây! 👋
+          Click để chọn trợ lý 👋
         </div>
         
-        {/* GIF Nhân vật xuất hiện tự nhiên bên ngoài, không có viền/vòng tròn */}
-        <div className="relative w-36 h-36 z-20 hover:scale-110 transition-transform duration-300 animate-[bounce_3s_infinite_ease-in-out] origin-bottom overflow-hidden">
+        {/* GIF Nhân vật */}
+        <div className="relative w-40 h-40 z-20 hover:scale-110 transition-transform duration-300 animate-[bounce_3s_infinite_ease-in-out] origin-bottom overflow-hidden">
           <svg style={{ position: 'absolute', width: 0, height: 0 }}>
             <filter id="remove-black-bg">
-              {/* Loại bỏ nền đen: Nếu RGB tổng hợp nhỏ, Alpha = 0. Ngược lại Alpha = 1 */}
               <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  2 2 2 0 -0.1" />
             </filter>
           </svg>
@@ -92,6 +88,17 @@ export const VirtualAssistants: React.FC = () => {
             alt="Assistants" 
             className="absolute w-[150%] h-[150%] max-w-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] object-cover pointer-events-none" 
             style={{ filter: 'url(#remove-black-bg)' }}
+          />
+          {/* Click zones */}
+          <div 
+            className="absolute top-0 left-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors" 
+            onClick={() => { setIsOpen(true); setActiveSpeaker('robin'); }}
+            title="Trò chuyện với Robin"
+          />
+          <div 
+            className="absolute top-0 right-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors" 
+            onClick={() => { setIsOpen(true); setActiveSpeaker('lio'); }}
+            title="Hỏi bài Lio"
           />
         </div>
       </div>
@@ -120,36 +127,6 @@ export const VirtualAssistants: React.FC = () => {
           </div>
 
           <div className="p-5 flex-1 max-h-[60vh] overflow-y-auto">
-            {/* Lựa chọn trợ lý ban đầu */}
-            {activeSpeaker === 'intro' && (
-              <div className="space-y-4 animate-in fade-in duration-500">
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-300 text-center">
-                  Xin chào {userName}! Chúng mình là Robin và Lio. Hôm nay bạn cần hỗ trợ gì?
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <button 
-                    onClick={() => setActiveSpeaker('robin')}
-                    className="flex flex-col items-center gap-2 p-3 rounded-2xl border-2 border-indigo-100 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors"
-                  >
-                    <div className="w-12 h-12 rounded-full border-2 border-white dark:border-slate-800 shadow-sm overflow-hidden relative bg-slate-800">
-                       <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[180%] h-[180%] max-w-none top-1/2 left-[20%] -translate-x-1/2 -translate-y-[40%] object-cover" />
-                    </div>
-                    <span className="text-xs font-bold text-indigo-700 dark:text-indigo-400">Robin (Tâm sự)</span>
-                  </button>
-                  <button 
-                    onClick={() => setActiveSpeaker('lio')}
-                    className="flex flex-col items-center gap-2 p-3 rounded-2xl border-2 border-rose-100 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-900/20 hover:border-rose-300 dark:hover:border-rose-700 transition-colors"
-                  >
-                    <div className="w-12 h-12 rounded-full border-2 border-white dark:border-slate-800 shadow-sm overflow-hidden relative bg-slate-800">
-                       <img src={ROBIN_LIO_GIF_URL} alt="Lio" className="absolute w-[180%] h-[180%] max-w-none top-1/2 left-[80%] -translate-x-1/2 -translate-y-[40%] object-cover" />
-                    </div>
-                    <span className="text-xs font-bold text-rose-700 dark:text-rose-400">Lio (Hướng dẫn)</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Chat của Robin */}
             {activeSpeaker === 'robin' && (
               <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                 <div className="flex gap-3">
@@ -221,18 +198,7 @@ export const VirtualAssistants: React.FC = () => {
             )}
           </div>
 
-          {/* Quay lại Intro */}
-          {(activeSpeaker !== 'intro' && !isCenteredMode) && (
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700 flex justify-center">
-              <button 
-                onClick={resetChat}
-                className="text-xs font-semibold text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors underline underline-offset-2"
-              >
-                Quay lại từ đầu
-              </button>
-            </div>
-          )}
-        </div>
+          </div>
 
         {/* Avatar Below Chat (Chỉ hiện khi ở dạng góc màn hình) */}
         {!isCenteredMode && (
@@ -248,6 +214,16 @@ export const VirtualAssistants: React.FC = () => {
                 alt="Assistants" 
                 className="absolute w-[150%] h-[150%] max-w-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] object-cover pointer-events-none" 
                 style={{ filter: 'url(#remove-black-bg-small)' }}
+              />
+              <div 
+                className="absolute top-0 left-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors" 
+                onClick={() => setActiveSpeaker('robin')}
+                title="Chuyển sang Robin"
+              />
+              <div 
+                className="absolute top-0 right-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors" 
+                onClick={() => setActiveSpeaker('lio')}
+                title="Chuyển sang Lio"
               />
             </div>
           </div>
