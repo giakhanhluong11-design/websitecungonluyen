@@ -16,6 +16,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { UserProgress, Topic } from '../types';
+import { COURSE_MODULES_DATA } from '../data/curriculumData';
 import { StudentCompetencyDashboard } from './StudentCompetencyDashboard';
 import { getCompetencyByScore } from '../services/competencyService';
 
@@ -35,17 +36,17 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
   const [historyTab, setHistoryTab] = useState<'all' | 'exam' | 'practice'>('all');
 
   // Completed counts
-  const mathTopics = topics.filter(t => t.subjectId === 'toan');
-  const mathDone = mathTopics.filter(t => progress.completedTopicIds.includes(t.id)).length;
-  const mathPercent = Math.round((mathDone / Math.max(mathTopics.length, 1)) * 100);
+  const mathModules = COURSE_MODULES_DATA.filter(t => t.subjectId === 'toan');
+  const mathDone = mathModules.filter(m => progress.completedTopicIds.includes(m.id) || progress.completedTopicIds.includes(`toan-${m.code.toLowerCase()}`)).length;
+  const mathPercent = Math.round((mathDone / Math.max(mathModules.length, 1)) * 100);
 
-  const vanTopics = topics.filter(t => t.subjectId === 'van');
-  const vanDone = vanTopics.filter(t => progress.completedTopicIds.includes(t.id)).length;
-  const vanPercent = Math.round((vanDone / Math.max(vanTopics.length, 1)) * 100);
+  const vanModules = COURSE_MODULES_DATA.filter(t => t.subjectId === 'van');
+  const vanDone = vanModules.filter(m => progress.completedTopicIds.includes(m.id) || progress.completedTopicIds.includes(`van-${m.code.toLowerCase()}`)).length;
+  const vanPercent = Math.round((vanDone / Math.max(vanModules.length, 1)) * 100);
 
-  const anhTopics = topics.filter(t => t.subjectId === 'anh');
-  const anhDone = anhTopics.filter(t => progress.completedTopicIds.includes(t.id)).length;
-  const anhPercent = Math.round((anhDone / Math.max(anhTopics.length, 1)) * 100);
+  const anhModules = COURSE_MODULES_DATA.filter(t => t.subjectId === 'anh');
+  const anhDone = anhModules.filter(m => progress.completedTopicIds.includes(m.id) || progress.completedTopicIds.includes(`anh-${m.code.toLowerCase()}`)).length;
+  const anhPercent = Math.round((anhDone / Math.max(anhModules.length, 1)) * 100);
 
   // Overall calculations
   const allScores = [

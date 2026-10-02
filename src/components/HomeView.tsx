@@ -21,6 +21,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { UserProgress, Exam, Topic } from '../types';
+import { COURSE_MODULES_DATA } from '../data/curriculumData';
 import { InteractiveBooks } from './InteractiveBooks';
 import { InteractiveGeometry } from './InteractiveGeometry';
 import { HomeDashboardWidgets } from './HomeDashboardWidgets';
@@ -55,21 +56,21 @@ export const HomeView: React.FC<HomeViewProps> = ({
   // Collapsible toggle for deep progress details (history & weak topics) to keep home page ultra-compact
   const [showProgressDetails, setShowProgressDetails] = useState(false);
 
-  // Subject topic counts & percentages
-  const mathTopics = topics.filter(t => t.subjectId === 'toan');
-  const mathDone = mathTopics.filter(t => progress.completedTopicIds.includes(t.id)).length;
-  const mathPercent = Math.round((mathDone / Math.max(mathTopics.length, 1)) * 100);
+  // Subject topic counts & percentages based on COURSE_MODULES_DATA
+  const mathModules = COURSE_MODULES_DATA.filter(t => t.subjectId === 'toan');
+  const mathDone = mathModules.filter(m => progress.completedTopicIds.includes(m.id) || progress.completedTopicIds.includes(`toan-${m.code.toLowerCase()}`)).length;
+  const mathPercent = Math.round((mathDone / Math.max(mathModules.length, 1)) * 100);
 
-  const vanTopics = topics.filter(t => t.subjectId === 'van');
-  const vanDone = vanTopics.filter(t => progress.completedTopicIds.includes(t.id)).length;
-  const vanPercent = Math.round((vanDone / Math.max(vanTopics.length, 1)) * 100);
+  const vanModules = COURSE_MODULES_DATA.filter(t => t.subjectId === 'van');
+  const vanDone = vanModules.filter(m => progress.completedTopicIds.includes(m.id) || progress.completedTopicIds.includes(`van-${m.code.toLowerCase()}`)).length;
+  const vanPercent = Math.round((vanDone / Math.max(vanModules.length, 1)) * 100);
 
-  const anhTopics = topics.filter(t => t.subjectId === 'anh');
-  const anhDone = anhTopics.filter(t => progress.completedTopicIds.includes(t.id)).length;
-  const anhPercent = Math.round((anhDone / Math.max(anhTopics.length, 1)) * 100);
+  const anhModules = COURSE_MODULES_DATA.filter(t => t.subjectId === 'anh');
+  const anhDone = anhModules.filter(m => progress.completedTopicIds.includes(m.id) || progress.completedTopicIds.includes(`anh-${m.code.toLowerCase()}`)).length;
+  const anhPercent = Math.round((anhDone / Math.max(anhModules.length, 1)) * 100);
 
-  const totalCompletedTopics = progress.completedTopicIds.length;
-  const totalTopicsCount = topics.length;
+  const totalCompletedTopics = mathDone + vanDone + anhDone;
+  const totalTopicsCount = COURSE_MODULES_DATA.length;
   const overallPercent = Math.round((totalCompletedTopics / Math.max(totalTopicsCount, 1)) * 100);
 
   // Score metrics & attempts
@@ -241,7 +242,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="pt-2 sm:pt-3">
                 <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-100 mb-1.5">
                   <span>Tiến độ luyện tập</span>
-                  <span className="font-bold text-white">{mathDone + vanDone + anhDone}/{topics.length} chuyên đề</span>
+                  <span className="font-bold text-white">{mathDone + vanDone + anhDone}/{totalTopicsCount} chuyên đề</span>
                 </div>
                 <div className="w-full max-w-[280px] h-3 rounded-full bg-black/20 dark:bg-black/25 p-0.5 overflow-hidden backdrop-blur-xs">
                   <div className="h-full rounded-full bg-white transition-all duration-500 shadow-xs" style={{ width: `${overallPercent}%` }} />

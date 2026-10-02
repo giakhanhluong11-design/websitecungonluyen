@@ -303,16 +303,14 @@ export function loginGoogleAccount(email: string, displayName?: string, remember
       city: ''
     };
 
+    const currentGuestProgress = loadUserProgress();
+
     restored = {
-      profile,
-      completedTopicIds: [],
-      bookmarkedExamIds: [],
-      practiceAttempts: [],
-      examAttempts: [],
-      studyTimeMinutes: 0,
-      streakDays: 0,
-      minigameResults: [],
-      minigameBestScores: {}
+      ...currentGuestProgress,
+      profile: {
+        ...currentGuestProgress.profile,
+        ...profile
+      },
     };
   }
 
@@ -380,16 +378,14 @@ export function loginEmailAccount(
       city: ''
     };
 
+    const currentGuestProgress = loadUserProgress();
+
     restored = {
-      profile,
-      completedTopicIds: [],
-      bookmarkedExamIds: [],
-      practiceAttempts: [],
-      examAttempts: [],
-      studyTimeMinutes: 0,
-      streakDays: 0,
-      minigameResults: [],
-      minigameBestScores: {}
+      ...currentGuestProgress,
+      profile: {
+        ...currentGuestProgress.profile,
+        ...profile
+      },
     };
   }
 
