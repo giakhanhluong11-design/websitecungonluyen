@@ -351,28 +351,30 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
       </div>
 
       {/* Course Lesson Fullscreen Window: Mở cửa sổ mới hoàn toàn để học bài */}
-      {selectedModule && (selectedModule.subjectId === 'toan' || selectedModule.subjectId === 'anh') ? (
-        <FlashcardLessonMode
-          module={selectedModule}
-          modulesList={subjectModules}
-          onSelectModule={(mod) => setSelectedModule(mod)}
-          onClose={() => setSelectedModule(null)}
-          isCompleted={selectedModule ? (progress.completedTopicIds.includes(selectedModule.id) || progress.completedTopicIds.includes(`toan-${selectedModule.code.toLowerCase()}`)) : false}
-          onCompleteLesson={(moduleId) => onCompleteTopic(moduleId)}
-        />
-      ) : (
-        <CourseLessonModal
-          module={selectedModule}
-          modulesList={subjectModules}
-          onSelectModule={(mod) => setSelectedModule(mod)}
-          onClose={() => setSelectedModule(null)}
-          isCompleted={selectedModule ? (progress.completedTopicIds.includes(selectedModule.id) || progress.completedTopicIds.includes(`toan-${selectedModule.code.toLowerCase()}`)) : false}
-          onCompleteLesson={(moduleId) => onCompleteTopic(moduleId)}
-          onStartPractice={(subjectId, topicId) => {
-            setSelectedModule(null);
-            onStartPractice(subjectId, topicId);
-          }}
-        />
+      {selectedModule && (
+        (selectedModule.subjectId === 'toan' || selectedModule.subjectId === 'anh') ? (
+          <FlashcardLessonMode
+            module={selectedModule}
+            modulesList={subjectModules}
+            onSelectModule={(mod) => setSelectedModule(mod)}
+            onClose={() => setSelectedModule(null)}
+            isCompleted={progress.completedTopicIds.includes(selectedModule.id) || progress.completedTopicIds.includes(`toan-${selectedModule.code.toLowerCase()}`)}
+            onCompleteLesson={(moduleId) => onCompleteTopic(moduleId)}
+          />
+        ) : (
+          <CourseLessonModal
+            module={selectedModule}
+            modulesList={subjectModules}
+            onSelectModule={(mod) => setSelectedModule(mod)}
+            onClose={() => setSelectedModule(null)}
+            isCompleted={progress.completedTopicIds.includes(selectedModule.id) || progress.completedTopicIds.includes(`toan-${selectedModule.code.toLowerCase()}`)}
+            onCompleteLesson={(moduleId) => onCompleteTopic(moduleId)}
+            onStartPractice={(subjectId, topicId) => {
+              setSelectedModule(null);
+              onStartPractice(subjectId, topicId);
+            }}
+          />
+        )
       )}
 
       {/* Lesson 1 Math Modal: Bài học chuyên sâu 12 bước cho Bài 1 Toán 9 */}
