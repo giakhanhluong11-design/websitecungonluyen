@@ -77,22 +77,22 @@ export const VirtualAssistants: React.FC = () => {
         </div>
         
         {/* GIF Nhân vật */}
-        <div className="relative w-40 h-40 z-20 hover:scale-110 transition-transform duration-300 animate-[bounce_3s_infinite_ease-in-out] origin-bottom overflow-hidden">
+        <div className="relative w-36 h-36 z-20 hover:scale-110 transition-transform duration-300 animate-[bounce_3s_infinite_ease-in-out] origin-bottom overflow-visible">
           <img 
             src={ROBIN_LIO_GIF_URL} 
             alt="Assistants" 
-            className="absolute w-[150%] h-[150%] max-w-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] object-cover pointer-events-none" 
+            className="w-full h-full object-contain pointer-events-none drop-shadow-lg" 
           />
           {/* Click zones */}
           <div 
-            className="absolute top-0 left-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors" 
-            onClick={() => { setIsOpen(true); setActiveSpeaker('robin'); }}
-            title="Trò chuyện với Robin"
-          />
-          <div 
-            className="absolute top-0 right-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors" 
+            className="absolute top-0 left-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors rounded-l-2xl" 
             onClick={() => { setIsOpen(true); setActiveSpeaker('lio'); }}
             title="Hỏi bài Lio"
+          />
+          <div 
+            className="absolute top-0 right-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors rounded-r-2xl" 
+            onClick={() => { setIsOpen(true); setActiveSpeaker('robin'); }}
+            title="Trò chuyện với Robin"
           />
         </div>
       </div>
@@ -125,7 +125,7 @@ export const VirtualAssistants: React.FC = () => {
               <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                 <div className="flex gap-3">
                   <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-white">
-                    <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[180%] h-[180%] max-w-none top-1/2 left-[20%] -translate-x-1/2 -translate-y-[40%] object-cover" />
+                    <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[200%] h-[200%] max-w-none top-1/2 left-[75%] -translate-x-1/2 -translate-y-[45%] object-cover" />
                   </div>
                   <div className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100 text-sm p-3 rounded-2xl rounded-tl-none">
                     Chào {userName}! Hôm nay bạn cảm thấy như thế nào?
@@ -156,7 +156,7 @@ export const VirtualAssistants: React.FC = () => {
                     {robinResponded && (
                       <div className="flex gap-3 animate-in slide-in-from-bottom-2 fade-in duration-300">
                         <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-white">
-                          <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[180%] h-[180%] max-w-none top-1/2 left-[20%] -translate-x-1/2 -translate-y-[40%] object-cover" />
+                          <img src={ROBIN_LIO_GIF_URL} alt="Robin" className="absolute w-[200%] h-[200%] max-w-none top-1/2 left-[75%] -translate-x-1/2 -translate-y-[45%] object-cover" />
                         </div>
                         <div className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100 text-sm p-3 rounded-2xl rounded-tl-none leading-relaxed">
                           {feeling === 'good' 
@@ -175,7 +175,7 @@ export const VirtualAssistants: React.FC = () => {
               <div className="space-y-4 animate-in slide-in-from-left-4 duration-300">
                 <div className="flex gap-3">
                   <div className="w-10 h-10 rounded-full border border-slate-200 shadow-xs shrink-0 overflow-hidden relative bg-white">
-                    <img src={ROBIN_LIO_GIF_URL} alt="Lio" className="absolute w-[180%] h-[180%] max-w-none top-1/2 left-[80%] -translate-x-1/2 -translate-y-[40%] object-cover" />
+                    <img src={ROBIN_LIO_GIF_URL} alt="Lio" className="absolute w-[200%] h-[200%] max-w-none top-1/2 left-[25%] -translate-x-1/2 -translate-y-[45%] object-cover" />
                   </div>
                   <div className="bg-rose-100 dark:bg-rose-900/40 text-rose-900 dark:text-rose-100 text-sm p-3 rounded-2xl rounded-tl-none leading-relaxed space-y-2">
                     <p>Chào bạn, mình là <strong>Lio</strong>! Để mình hướng dẫn bạn cách sử dụng hệ thống Cùng Ôn Luyện nhé:</p>
@@ -197,21 +197,21 @@ export const VirtualAssistants: React.FC = () => {
         {/* Avatar Below Chat (Chỉ hiện khi ở dạng góc màn hình) */}
         {!isCenteredMode && (
           <div className="flex items-end justify-end pr-4 pointer-events-none">
-            <div className="relative w-28 h-28 z-20 overflow-hidden pointer-events-auto">
+            <div className="relative w-24 h-24 z-20 overflow-visible pointer-events-auto">
               <img 
                 src={ROBIN_LIO_GIF_URL} 
                 alt="Assistants" 
-                className="absolute w-[150%] h-[150%] max-w-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] object-cover pointer-events-none" 
+                className="w-full h-full object-contain pointer-events-none drop-shadow-lg" 
               />
               <div 
-                className="absolute top-0 left-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors" 
-                onClick={() => setActiveSpeaker('robin')}
-                title="Chuyển sang Robin"
-              />
-              <div 
-                className="absolute top-0 right-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors" 
+                className="absolute top-0 left-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors rounded-l-2xl" 
                 onClick={() => setActiveSpeaker('lio')}
                 title="Chuyển sang Lio"
+              />
+              <div 
+                className="absolute top-0 right-0 w-1/2 h-full cursor-pointer hover:bg-white/10 transition-colors rounded-r-2xl" 
+                onClick={() => setActiveSpeaker('robin')}
+                title="Chuyển sang Robin"
               />
             </div>
           </div>
