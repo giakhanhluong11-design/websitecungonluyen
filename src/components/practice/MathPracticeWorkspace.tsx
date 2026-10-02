@@ -512,7 +512,7 @@ export const MathPracticeWorkspace: React.FC<MathPracticeWorkspaceProps> = ({
                   <span className="text-[11px] font-sans font-bold uppercase text-slate-500 block mb-1">
                     Bài giải của em:
                   </span>
-                  {item.studentAnswer || '(Chưa làm bài này)'}
+                  {answers[item.exerciseId] || item.studentAnswer || '(Chưa làm bài này)'}
                 </div>
 
                 {/* Phân tích Sư phạm: Đúng / Sai / Tại sao sai / Cách sửa / Thiếu ý */}

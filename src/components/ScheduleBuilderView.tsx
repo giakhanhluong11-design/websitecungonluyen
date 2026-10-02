@@ -643,7 +643,7 @@ export const ScheduleBuilderView = () => {
               onClick={() => setOpenSections(s => ({...s, blocks: !s.blocks}))}
             >
               <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-indigo-500" /> Blocks thời gian (Kéo thả)
+                <Clock className="w-4 h-4 text-indigo-500" /> Block
               </h3>
               {openSections.blocks ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRightIcon className="w-4 h-4 text-slate-400" />}
             </div>
@@ -763,15 +763,7 @@ export const ScheduleBuilderView = () => {
                         }}
                       />
 
-                      {/* Current Time Indicator */}
-                      {isToday && (
-                        <div 
-                          className="absolute left-0 right-0 border-t-2 border-red-500 z-10 pointer-events-none flex items-center"
-                          style={{ top: ((currentTime.getHours() - START_HOUR) * 60 + currentTime.getMinutes()) * MINUTE_HEIGHT }}
-                        >
-                          <div className="w-2 h-2 bg-red-500 rounded-full -ml-1" />
-                        </div>
-                      )}
+                      {/* Current Time Indicator removed per user request */}
 
                       {/* Render Blocks */}
                       {layout.map(({ event, left, width }) => {

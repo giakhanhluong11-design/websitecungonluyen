@@ -530,7 +530,7 @@ export const LiteraturePracticeWorkspace: React.FC<LiteraturePracticeWorkspacePr
                   <span className="text-[11px] font-sans font-bold uppercase text-slate-500 block mb-1">
                     Bài làm của em:
                   </span>
-                  {item.studentAnswer || '(Chưa làm bài này)'}
+                  {answers[item.questionId] || item.studentAnswer || '(Chưa làm bài này)'}
                 </div>
 
                 {item.criteriaScores && (
