@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Play, Settings, Trophy, BookOpen, RotateCcw, Home, X } from 'lucide-react';
 import { FruitNinjaGameplay } from './FruitNinjaGameplay';
 import { questionBank } from './questions';
+import { MinigameResult } from '../../../types';
 
 type Screen = 'HOME' | 'PLAY_CLASSIC' | 'PLAY_PRACTICE' | 'LEADERBOARD' | 'SETTINGS';
 
 interface FruitNinjaAppProps {
   onClose: () => void;
+  onSaveResult?: (result: MinigameResult) => { isNewBest: boolean };
 }
 
-export const FruitNinjaApp: React.FC<FruitNinjaAppProps> = ({ onClose }) => {
+export const FruitNinjaApp: React.FC<FruitNinjaAppProps> = ({ onClose, onSaveResult }) => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('HOME');
   
   const [stats, setStats] = useState({
@@ -29,6 +31,22 @@ export const FruitNinjaApp: React.FC<FruitNinjaAppProps> = ({ onClose }) => {
   }, []);
 
   const handleGameOver = (score: number, combo: number, level: number, correct: number) => {
+    if (onSaveResult && score > 0) {
+      onSaveResult({
+        id: Date.now().toString(),
+        player: 'Anonymous',
+        subject: 'anh',
+        gameType: 'arcade',
+        gameId: 'english-fruit-ninja',
+        gameTitle: 'British Fruit Ninja',
+        score,
+        correct,
+        total: correct,
+        bestCombo: combo,
+        timeSeconds: 0,
+        createdAt: new Date().toISOString()
+      });
+    }
     setStats(prev => {
       const newStats = {
         bestScore: Math.max(prev.bestScore, score),

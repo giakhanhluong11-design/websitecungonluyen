@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Gamepad2, 
   Sparkles, 
@@ -9,11 +9,15 @@ import {
   Flame,
   Award,
   ExternalLink,
-  BookOpen
+  BookOpen,
+  RefreshCw,
+  Globe
 } from 'lucide-react';
-import { ALL_MINIGAMES, INITIAL_PEER_LEADERBOARD, LeaderboardItem, MinigameDefinition } from '../../data/minigamesData';
+import { ALL_MINIGAMES, LeaderboardItem, MinigameDefinition } from '../../data/minigamesData';
 import { UserProgress, MinigameResult } from '../../types';
 import { saveMinigameResult, getUserProgress } from '../../data/userStorage';
+import { fetchGlobalLeaderboard, GlobalLeaderboardEntry } from '../../services/firestoreService';
+import { getCurrentUserId } from '../../services/authService';
 import { MathyBirdGame } from './MathyBirdGame';
 import { LiteratureGame } from './LiteratureGame';
 import { FruitNinjaApp } from '../games/fruit-ninja/FruitNinjaApp';
@@ -29,6 +33,32 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
 }) => {
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
   const [leaderboardFilter, setLeaderboardFilter] = useState<string>('all');
+  const [globalEntries, setGlobalEntries] = useState<GlobalLeaderboardEntry[]>([]);
+  const [isLoadingBoard, setIsLoadingBoard] = useState(false);
+  const [boardError, setBoardError] = useState<string | null>(null);
+
+  const loadGlobalBoard = useCallback(async () => {
+    setIsLoadingBoard(true);
+    setBoardError(null);
+    try {
+      const entries = await fetchGlobalLeaderboard();
+      setGlobalEntries(entries);
+    } catch (err) {
+      console.error('Lỗi tải bảng xếp hạng online:', err);
+      setBoardError('Không tải được bảng xếp hạng online. Hãy đăng nhập và thử lại.');
+    } finally {
+      setIsLoadingBoard(false);
+    }
+  }, []);
+
+  // Tải lại BXH online mỗi khi quay về sảnh (sau khi chơi xong)
+  useEffect(() => {
+    if (activeGameId === null) {
+      // Đợi 1 chút để điểm mới kịp đồng bộ lên Firestore
+      const t = setTimeout(loadGlobalBoard, 800);
+      return () => clearTimeout(t);
+    }
+  }, [activeGameId, loadGlobalBoard]);
 
   // Safe fallback if progress is undefined
   const progress = passedProgress || getUserProgress();
@@ -66,36 +96,54 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
 
   if (activeGameId === 'english-fruit-ninja') {
     return (
-      <FruitNinjaApp onClose={() => setActiveGameId(null)} />
+      <FruitNinjaApp onClose={() => setActiveGameId(null)} onSaveResult={handleSaveResult} />
     );
   }
 
 
-  // Build user's real personal leaderboard from minigameResults (chỉ lấy điểm cao nhất của mỗi game)
-  const userResults = progress?.minigameResults || [];
-  
-  // Group by gameId and get max score
-  const bestScoresByGame = new Map<string, MinigameResult>();
-  userResults.forEach(result => {
-    const existing = bestScoresByGame.get(result.gameId);
-    if (!existing || result.score > existing.score) {
-      bestScoresByGame.set(result.gameId, result);
-    }
+  // ===== BẢNG XẾP HẠNG ONLINE: mỗi người chơi chỉ 1 dòng / game = điểm cao nhất =====
+  const currentUid = getCurrentUserId();
+  const myName = progress?.profile?.name?.trim() || 'Bạn';
+  const gameMeta = (gameId: string) => ALL_MINIGAMES.find(g => g.id === gameId);
+  const subjectLabelOf = (s: string) => (s === 'toan' ? 'Toán' : s === 'van' ? 'Ngữ Văn' : 'Tiếng Anh');
+
+  // key = `${playerKey}__${gameId}` -> LeaderboardItem (giữ điểm cao nhất)
+  const boardMap = new Map<string, LeaderboardItem & { gameId: string }>();
+  const upsert = (playerKey: string, playerName: string, gameId: string, score: number, isMe: boolean) => {
+    const meta = gameMeta(gameId);
+    if (!meta || score <= 0) return;
+    const key = `${playerKey}__${gameId}`;
+    const existing = boardMap.get(key);
+    if (existing && existing.score >= score) return;
+    boardMap.set(key, {
+      id: key,
+      rank: 0,
+      playerName,
+      subject: meta.subject,
+      subjectLabel: subjectLabelOf(meta.subject),
+      gameTitle: meta.title,
+      gameId,
+      score,
+      isCurrentUser: isMe
+    });
+  };
+
+  // 1) Điểm thật của mọi người chơi trên Firestore
+  globalEntries.forEach(e => {
+    const isMe = !!currentUid && e.userId === currentUid;
+    upsert(isMe ? 'me' : e.userId, isMe ? myName : e.playerName, e.gameId, e.score, isMe);
   });
 
-  const userBestEntries: LeaderboardItem[] = Array.from(bestScoresByGame.values()).map((item) => ({
-    id: item.id,
-    rank: 0,
-    playerName: progress?.profile?.name?.trim() || 'Bạn',
-    subject: item.subject,
-    subjectLabel: item.subject === 'toan' ? 'Toán' : item.subject === 'van' ? 'Ngữ Văn' : 'Tiếng Anh',
-    gameTitle: item.gameTitle || 'Mathy Bird',
-    score: item.score,
-    isCurrentUser: true
-  }));
+  // 2) Điểm cao nhất của chính mình trên máy này (phòng khi chưa kịp đồng bộ)
+  Object.entries(safeBestScores).forEach(([gameId, score]) => {
+    upsert('me', myName, gameId, Number(score) || 0, true);
+  });
+  (progress?.minigameResults || []).forEach(r => {
+    upsert('me', myName, r.gameId, r.score, true);
+  });
 
-  const sortedLeaderboard: LeaderboardItem[] = [...userBestEntries, ...INITIAL_PEER_LEADERBOARD]
-    .filter(item => leaderboardFilter === 'all' || item.gameTitle === ALL_MINIGAMES.find(g => g.id === leaderboardFilter)?.title)
+  const sortedLeaderboard = Array.from(boardMap.values())
+    .filter(item => leaderboardFilter === 'all' || item.gameId === leaderboardFilter)
     .sort((a, b) => b.score - a.score)
     .map((item, index) => ({
       ...item,
@@ -235,14 +283,15 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
               <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                 Bảng Xếp Hạng & Kỷ Lục Điểm Số
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Lịch sử thành tích và kỷ lục điểm số cao nhất của bạn và người chơi khác
+              <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                <Globe className="h-3 w-3" /> Online – điểm cao nhất của bạn và tất cả người chơi khác
               </p>
             </div>
           </div>
           
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <select
+              id="leaderboard-game-filter"
               value={leaderboardFilter}
               onChange={(e) => setLeaderboardFilter(e.target.value)}
               className="px-3 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-amber-500/50"
@@ -252,8 +301,22 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
                 <option key={g.id} value={g.id}>{g.title}</option>
               ))}
             </select>
+            <button
+              id="leaderboard-refresh-btn"
+              type="button"
+              onClick={loadGlobalBoard}
+              disabled={isLoadingBoard}
+              title="Tải lại bảng xếp hạng"
+              className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoadingBoard ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
+
+        {boardError && (
+          <p className="text-[11px] text-rose-500 bg-rose-50 dark:bg-rose-950/30 rounded-lg px-3 py-2">{boardError}</p>
+        )}
 
         {/* Leaderboard Table or Empty state */}
         {sortedLeaderboard.length === 0 ? (
@@ -271,10 +334,10 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
             <table className="w-full text-left text-xs sm:text-sm">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 text-[11px] uppercase tracking-wider">
-                  <th className="py-2.5 px-3 font-bold w-12 text-center">Lần</th>
+                  <th className="py-2.5 px-3 font-bold w-12 text-center">Hạng</th>
                   <th className="py-2.5 px-3 font-bold">Người chơi</th>
                   <th className="py-2.5 px-3 font-bold">Trò chơi</th>
-                  <th className="py-2.5 px-3 font-bold text-right">Điểm số</th>
+                  <th className="py-2.5 px-3 font-bold text-right">Điểm cao nhất</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -282,10 +345,17 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
                   return (
                     <tr
                       key={item.id}
-                      className="bg-amber-50/50 dark:bg-amber-950/20 font-bold transition-colors"
+                      className={item.isCurrentUser
+                        ? 'bg-amber-50/50 dark:bg-amber-950/20 font-bold transition-colors'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors'}
                     >
                       <td className="py-3 px-3 text-center">
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 font-bold text-xs">
+                        <span className={`inline-flex items-center justify-center w-7 h-6 rounded-full font-bold text-xs ${
+                          item.rank === 1 ? 'bg-yellow-400 text-yellow-900'
+                          : item.rank === 2 ? 'bg-slate-300 text-slate-800'
+                          : item.rank === 3 ? 'bg-orange-300 text-orange-900'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                        }`}>
                           #{item.rank}
                         </span>
                       </td>
@@ -295,9 +365,11 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
                           <span className="font-semibold text-slate-800 dark:text-slate-200">
                             {item.playerName}
                           </span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500 text-white font-bold">
-                            Bạn
-                          </span>
+                          {item.isCurrentUser && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-white font-bold">
+                              Bạn
+                            </span>
+                          )}
                         </div>
                       </td>
 

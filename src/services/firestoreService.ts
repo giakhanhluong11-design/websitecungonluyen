@@ -220,6 +220,47 @@ async function loadMinigameResultsFromFirestore(userId: string): Promise<Minigam
 }
 
 // ============================================================
+// GLOBAL LEADERBOARD (điểm cao nhất thật của mọi người chơi)
+// ============================================================
+
+export interface GlobalLeaderboardEntry {
+  userId: string;
+  playerName: string;
+  gameId: string;
+  score: number;
+}
+
+/**
+ * Lấy điểm cao nhất của TẤT CẢ người chơi thật từ Firestore.
+ * Mỗi user lưu `minigameBestScores: { [gameId]: bestScore }` trong document users/{uid}.
+ * Trả về 1 dòng cho mỗi cặp (người chơi, game) có điểm > 0.
+ */
+export async function fetchGlobalLeaderboard(): Promise<GlobalLeaderboardEntry[]> {
+  const snap = await getDocs(collection(db, 'users'));
+  const entries: GlobalLeaderboardEntry[] = [];
+  snap.docs.forEach(d => {
+    const data = d.data() as { profile?: { name?: string; email?: string }; minigameBestScores?: Record<string, number> };
+    const bestScores = data.minigameBestScores || {};
+    const name = data.profile?.name?.trim() || data.profile?.email?.split('@')[0] || 'Người chơi';
+    Object.entries(bestScores).forEach(([gameId, score]) => {
+      if (typeof score === 'number' && score > 0) {
+        entries.push({ userId: d.id, playerName: name, gameId, score });
+      }
+    });
+  });
+  return entries;
+}
+
+/** Gộp điểm cao nhất của 2 nguồn, luôn giữ giá trị lớn hơn */
+export function mergeBestScores(a: Record<string, number>, b: Record<string, number>): Record<string, number> {
+  const merged: Record<string, number> = { ...a };
+  for (const [k, v] of Object.entries(b)) {
+    merged[k] = Math.max(v || 0, merged[k] || 0);
+  }
+  return merged;
+}
+
+// ============================================================
 // SYNC HELPERS
 // ============================================================
 
@@ -274,10 +315,10 @@ export async function syncProgressWithFirestore(
       minigameResults: cloudProgress.minigameResults && cloudProgress.minigameResults.length > 0
         ? cloudProgress.minigameResults
         : localProgress.minigameResults,
-      minigameBestScores: {
-        ...(localProgress.minigameBestScores || {}),
-        ...(cloudProgress.minigameBestScores || {}),
-      },
+      minigameBestScores: mergeBestScores(
+        localProgress.minigameBestScores || {},
+        cloudProgress.minigameBestScores || {}
+      ),
       topicProgress: mergedTopicProgress,
     };
 
