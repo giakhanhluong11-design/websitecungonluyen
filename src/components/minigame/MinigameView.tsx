@@ -70,19 +70,34 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
   }
 
 
-  // Build user's real personal leaderboard from minigameResults
+  // Build user's real personal leaderboard from minigameResults (chỉ lấy điểm cao nhất của mỗi game)
   const userResults = progress?.minigameResults || [];
-  const sortedLeaderboard: LeaderboardItem[] = [...userResults]
+  
+  // Group by gameId and get max score
+  const bestScoresByGame = new Map<string, MinigameResult>();
+  userResults.forEach(result => {
+    const existing = bestScoresByGame.get(result.gameId);
+    if (!existing || result.score > existing.score) {
+      bestScoresByGame.set(result.gameId, result);
+    }
+  });
+
+  const userBestEntries: LeaderboardItem[] = Array.from(bestScoresByGame.values()).map((item) => ({
+    id: item.id,
+    rank: 0,
+    playerName: progress?.profile?.name?.trim() || 'Bạn',
+    subject: item.subject,
+    subjectLabel: item.subject === 'toan' ? 'Toán' : item.subject === 'van' ? 'Ngữ Văn' : 'Tiếng Anh',
+    gameTitle: item.gameTitle || 'Mathy Bird',
+    score: item.score,
+    isCurrentUser: true
+  }));
+
+  const sortedLeaderboard: LeaderboardItem[] = [...userBestEntries, ...INITIAL_PEER_LEADERBOARD]
     .sort((a, b) => b.score - a.score)
     .map((item, index) => ({
-      id: item.id,
-      rank: index + 1,
-      playerName: progress?.profile?.name?.trim() || 'Bạn',
-      subject: 'toan',
-      subjectLabel: 'Toán',
-      gameTitle: 'Mathy Bird',
-      score: item.score,
-      isCurrentUser: true
+      ...item,
+      rank: index + 1
     }));
 
   return (
@@ -216,16 +231,16 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                Kỷ Lục Điểm Số Của Bạn (Mathy Bird)
+                Bảng Xếp Hạng & Kỷ Lục Điểm Số
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Lịch sử thành tích và kỷ lục điểm số phản xạ thực tế qua các lượt chơi
+                Lịch sử thành tích và kỷ lục điểm số cao nhất của bạn và người chơi khác
               </p>
             </div>
           </div>
           {userBestScore > 0 && (
-            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-3 py-1 rounded-xl border border-amber-200 dark:border-amber-900">
-              Điểm cao nhất: {userBestScore}
+            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-3 py-1 rounded-xl border border-amber-200 dark:border-amber-900 hidden sm:inline-block">
+              Mathy Bird: {userBestScore}
             </span>
           )}
         </div>
