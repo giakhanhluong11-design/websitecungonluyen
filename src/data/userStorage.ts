@@ -312,6 +312,8 @@ export function loginGoogleAccount(email: string, displayName?: string, remember
         ...profile
       },
     };
+  }
+
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(restored));
     saveToAccountVault(normalizedEmail, restored);
@@ -388,6 +390,8 @@ export function loginEmailAccount(
         ...profile
       },
     };
+  }
+
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(restored));
     saveToAccountVault(normalizedEmail, restored);
