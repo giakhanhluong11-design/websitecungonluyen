@@ -3,9 +3,22 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 
+function enforceHeaders() {
+  return {
+    name: 'enforce-headers',
+    configureServer(server: any) {
+      server.middlewares.use((_req: any, res: any, next: any) => {
+        res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+        res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), enforceHeaders()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
