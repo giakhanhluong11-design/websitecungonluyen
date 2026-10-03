@@ -13,6 +13,7 @@ export const VirtualAssistants: React.FC = () => {
   // Robin State
   const [feeling, setFeeling] = useState<'good' | 'bad' | null>(null);
   const [robinResponded, setRobinResponded] = useState(false);
+  const [isHiddenByModal, setIsHiddenByModal] = useState(false);
 
   const { progress } = useProgressStore();
   const userName = progress.profile.name || 'bạn';
@@ -33,6 +34,26 @@ export const VirtualAssistants: React.FC = () => {
     } else {
       setIsCenteredMode(false);
     }
+  }, []);
+
+  // Tự động ẩn Trợ lý nếu có một modal/bài tập toàn màn hình đang được mở
+  useEffect(() => {
+    const checkModals = () => {
+      const modals = document.querySelectorAll('.fixed.inset-0.z-50');
+      let hasExternalModal = false;
+      modals.forEach((m) => {
+        if (!m.closest('#virtual-assistant-container')) {
+          hasExternalModal = true;
+        }
+      });
+      setIsHiddenByModal(hasExternalModal);
+    };
+
+    checkModals();
+    const observer = new MutationObserver(() => checkModals());
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+
+    return () => observer.disconnect();
   }, []);
 
 
@@ -69,8 +90,10 @@ export const VirtualAssistants: React.FC = () => {
 
   // Nút gọi trợ lý (khi đang đóng)
   if (!isOpen) {
+    if (isHiddenByModal) return null; // Ẩn hoàn toàn nếu có cửa sổ bài tập
+    
     return (
-      <div className="fixed bottom-0 right-6 z-40 flex items-end justify-center group">
+      <div id="virtual-assistant-container" className="fixed bottom-0 right-6 z-40 flex items-end justify-center group">
         {/* Tooltip chung */}
         <div className="absolute -top-10 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm px-4 py-2 rounded-2xl rounded-br-none shadow-lg opacity-0 group-hover:opacity-100 transition-opacity border border-slate-200 dark:border-slate-700 whitespace-nowrap font-medium pointer-events-none">
           Click để chọn trợ lý 👋
@@ -105,7 +128,7 @@ export const VirtualAssistants: React.FC = () => {
     : "fixed bottom-6 right-6 z-40 flex flex-col items-end animate-in slide-in-from-bottom-5 fade-in duration-300";
 
   return (
-    <div className={chatContainerClasses}>
+    <div id="virtual-assistant-container" className={chatContainerClasses}>
       
       <div className="flex flex-col items-end">
         {/* Khung Chat */}
