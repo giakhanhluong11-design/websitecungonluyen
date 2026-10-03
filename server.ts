@@ -15,6 +15,13 @@ async function startServer() {
 
   app.use(express.json({ limit: "15mb" }));
 
+  // Cấu hình headers để fix lỗi Firebase Auth popup
+  app.use((_req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+    next();
+  });
+
   // ── Routes ──────────────────────────────────────────────────────────────
   app.get("/api/health", (_req, res) => {
     // health check delegated; re-export for simplicity via configRoutes
