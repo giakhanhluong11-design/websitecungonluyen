@@ -70,7 +70,7 @@ export const VirtualAssistants: React.FC = () => {
   // Nút gọi trợ lý (khi đang đóng)
   if (!isOpen) {
     return (
-      <div className="fixed bottom-0 right-6 z-50 flex items-end justify-center group">
+      <div className="fixed bottom-0 right-6 z-40 flex items-end justify-center group">
         {/* Tooltip chung */}
         <div className="absolute -top-10 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm px-4 py-2 rounded-2xl rounded-br-none shadow-lg opacity-0 group-hover:opacity-100 transition-opacity border border-slate-200 dark:border-slate-700 whitespace-nowrap font-medium pointer-events-none">
           Click để chọn trợ lý 👋
@@ -102,7 +102,7 @@ export const VirtualAssistants: React.FC = () => {
   // Khung Chat (Có thể ở góc dưới phải hoặc giữa màn hình)
   const chatContainerClasses = isCenteredMode 
     ? "fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-300"
-    : "fixed bottom-6 right-6 z-50 flex flex-col items-end animate-in slide-in-from-bottom-5 fade-in duration-300";
+    : "fixed bottom-6 right-6 z-40 flex flex-col items-end animate-in slide-in-from-bottom-5 fade-in duration-300";
 
   return (
     <div className={chatContainerClasses}>
