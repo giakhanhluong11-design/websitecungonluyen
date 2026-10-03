@@ -312,9 +312,10 @@ export function loginGoogleAccount(email: string, displayName?: string, remember
         ...profile
       },
     };
-  }
-
-  saveUserProgress(restored);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(restored));
+    saveToAccountVault(normalizedEmail, restored);
+  } catch {}
   return restored;
 }
 
@@ -387,9 +388,10 @@ export function loginEmailAccount(
         ...profile
       },
     };
-  }
-
-  saveUserProgress(restored);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(restored));
+    saveToAccountVault(normalizedEmail, restored);
+  } catch {}
   return restored;
 }
 

@@ -28,6 +28,7 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
   onUpdateProgress
 }) => {
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
+  const [leaderboardFilter, setLeaderboardFilter] = useState<string>('all');
 
   // Safe fallback if progress is undefined
   const progress = passedProgress || getUserProgress();
@@ -94,6 +95,7 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
   }));
 
   const sortedLeaderboard: LeaderboardItem[] = [...userBestEntries, ...INITIAL_PEER_LEADERBOARD]
+    .filter(item => leaderboardFilter === 'all' || item.gameTitle === ALL_MINIGAMES.find(g => g.id === leaderboardFilter)?.title)
     .sort((a, b) => b.score - a.score)
     .map((item, index) => ({
       ...item,
@@ -224,7 +226,7 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
 
       {/* LEADERBOARD (BẢNG THÀNH TÍCH & KỶ LỤC CỦA BẠN) */}
       <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 gap-4">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
               <Trophy className="h-5 w-5" />
@@ -238,11 +240,19 @@ export const MinigameView: React.FC<MinigameViewProps> = ({
               </p>
             </div>
           </div>
-          {userBestScore > 0 && (
-            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-3 py-1 rounded-xl border border-amber-200 dark:border-amber-900 hidden sm:inline-block">
-              Mathy Bird: {userBestScore}
-            </span>
-          )}
+          
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <select
+              value={leaderboardFilter}
+              onChange={(e) => setLeaderboardFilter(e.target.value)}
+              className="px-3 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+            >
+              <option value="all">Tất cả trò chơi</option>
+              {ALL_MINIGAMES.filter(g => g.status === 'active').map(g => (
+                <option key={g.id} value={g.id}>{g.title}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Leaderboard Table or Empty state */}
