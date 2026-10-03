@@ -27,7 +27,7 @@ export const AdminDashboardView: React.FC = () => {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadTitle, setUploadTitle] = useState('');
   const [uploadSubject, setUploadSubject] = useState('toan');
-  const [uploadYear, setUploadYear] = useState('2024');
+  const [uploadYear, setUploadYear] = useState('2025');
   const [uploadProvince, setUploadProvince] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -235,6 +235,8 @@ export const AdminDashboardView: React.FC = () => {
                 onChange={(e) => setUploadYear(e.target.value)}
                 className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
               >
+                <option value="2027">2027</option>
+                <option value="2026">2026</option>
                 <option value="2025">2025</option>
                 <option value="2024">2024</option>
                 <option value="2023">2023</option>
