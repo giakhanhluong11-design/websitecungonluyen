@@ -66,7 +66,6 @@ const AVATAR_OPTIONS = [
 
 interface AccountViewProps {
   progress: UserProgress;
-  exams: Exam[];
   darkMode: boolean;
   onToggleDarkMode: (event?: React.MouseEvent) => void;
   onUpdateProfile: (profile: UserProfile) => void;
@@ -77,12 +76,11 @@ interface AccountViewProps {
   onLogoutGoogle?: () => void;
   onOpenAuthModal?: (mode?: 'login' | 'register') => void;
   onLogoutAuth?: () => void;
-  onStartExam: (exam: Exam) => void;
+
 }
 
 export const AccountView: React.FC<AccountViewProps> = ({
   progress,
-  exams,
   darkMode,
   onToggleDarkMode,
   onUpdateProfile,
@@ -93,7 +91,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
   onLogoutGoogle,
   onOpenAuthModal,
   onLogoutAuth,
-  onStartExam
+
 }) => {
   const [name, setName] = useState(progress.profile.name || '');
   const [avatar, setAvatar] = useState(progress.profile.avatar || '/avatars/default.svg');
@@ -119,8 +117,6 @@ export const AccountView: React.FC<AccountViewProps> = ({
   // Remember login state
   const [rememberLogin, setRememberLogin] = useState<boolean>(() => isRememberLoginEnabled());
 
-  // Bookmarked exams list (safeguarded against undefined exams)
-  const bookmarkedExams = (exams || []).filter(e => progress?.bookmarkedExamIds?.includes(e.id));
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -611,44 +607,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
             </div>
           </form>
 
-          {/* Bookmarked Exams list */}
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <Bookmark className="h-4 w-4 text-rose-500" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Đề Thi Đã Đánh Dấu Yêu Thích ({bookmarkedExams.length})
-                </h3>
-              </div>
-            </div>
 
-            {bookmarkedExams.length === 0 ? (
-              <div className="p-6 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-400">
-                Bạn chưa lưu đề thi nào. Hãy bấm biểu tượng bookmark ở Thư viện đề thi để lưu lại.
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {bookmarkedExams.map((exam) => (
-                  <div key={exam.id} className="py-3 flex items-center justify-between gap-3 text-xs">
-                    <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white">
-                        {exam.title}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        {exam.year} • {exam.durationMinutes} phút • {exam.questionsCount} câu hỏi
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => onStartExam(exam)}
-                      className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 font-bold transition-colors cursor-pointer"
-                    >
-                      Làm đề
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Right Column: Preferences & Danger Zone */}

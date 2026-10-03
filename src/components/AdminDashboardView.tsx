@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useProgressStore } from '../store/useProgressStore';
 import { 
   BarChart, Users, HeartPulse, Activity, ShieldCheck, UserX,
-  Smile, Frown, Calendar, Clock, Info
+  Smile, Frown, Calendar, Clock, Info, FileText
 } from 'lucide-react';
 import { 
   subscribeToMentalHealthLogs, 
@@ -10,6 +10,7 @@ import {
 } from '../services/communityService';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { uploadExamDocument } from '../services/examDocumentService';
 
 export const AdminDashboardView: React.FC = () => {
   const { progress } = useProgressStore();
@@ -21,6 +22,41 @@ export const AdminDashboardView: React.FC = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  // Upload Form State
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadTitle, setUploadTitle] = useState('');
+  const [uploadSubject, setUploadSubject] = useState('toan');
+  const [uploadYear, setUploadYear] = useState('2024');
+  const [uploadProvince, setUploadProvince] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!uploadFile || !uploadTitle || !uploadProvince) return;
+    
+    setIsUploading(true);
+    setUploadSuccess(false);
+    try {
+      await uploadExamDocument(uploadFile, {
+        title: uploadTitle,
+        subjectId: uploadSubject,
+        year: uploadYear,
+        province: uploadProvince,
+        uploadedBy: progress.profile.name
+      });
+      setUploadSuccess(true);
+      setUploadFile(null);
+      setUploadTitle('');
+      setUploadProvince('');
+      setTimeout(() => setUploadSuccess(false), 3000);
+    } catch (err) {
+      alert('Có lỗi xảy ra khi upload.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   if (!progress.profile.isAdmin) {
     return (
@@ -151,6 +187,84 @@ export const AdminDashboardView: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Quản lý tài liệu đề thi */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-800">
+        <h3 className="text-xl font-bold flex items-center gap-2 mb-6">
+          <FileText className="w-6 h-6 text-indigo-500" />
+          Tải lên Tài liệu Đề thi
+        </h3>
+        
+        <form onSubmit={handleUpload} className="space-y-4 max-w-xl">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">File tài liệu (PDF, Word)</label>
+            <input 
+              type="file" 
+              required
+              onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+              className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tiêu đề tài liệu</label>
+            <input 
+              type="text" 
+              required
+              value={uploadTitle}
+              onChange={(e) => setUploadTitle(e.target.value)}
+              className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-indigo-500"
+              placeholder="VD: Đề thi tuyển sinh lớp 10 THPT Chuyên Lê Hồng Phong"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Môn học</label>
+              <select 
+                value={uploadSubject}
+                onChange={(e) => setUploadSubject(e.target.value)}
+                className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+              >
+                <option value="toan">Toán học</option>
+                <option value="van">Ngữ văn</option>
+                <option value="anh">Tiếng Anh</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Năm thi</label>
+              <select 
+                value={uploadYear}
+                onChange={(e) => setUploadYear(e.target.value)}
+                className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+              >
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tỉnh / Thành phố / Đơn vị</label>
+            <input 
+              type="text" 
+              required
+              value={uploadProvince}
+              onChange={(e) => setUploadProvince(e.target.value)}
+              className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-indigo-500"
+              placeholder="VD: TP.HCM, Hà Nội..."
+            />
+          </div>
+          <button 
+            type="submit"
+            disabled={isUploading}
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
+          >
+            {isUploading ? 'Đang tải lên...' : 'Tải tài liệu lên thư viện'}
+          </button>
+          {uploadSuccess && (
+            <p className="text-emerald-600 font-medium text-center">Tải lên thành công!</p>
+          )}
+        </form>
+      </div>
+
     </div>
   );
 };

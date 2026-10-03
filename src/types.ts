@@ -120,6 +120,20 @@ export interface TargetSchool {
   tier: 'Top 1' | 'Top 2' | 'Top 3' | 'Chuyên';
 }
 
+export interface ExamDocument {
+  id: string;
+  title: string;
+  subjectId: string; // 'toan' | 'van' | 'anh'
+  year: string;
+  province: string;
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+  uploadedAt: number;
+  uploadedBy: string;
+  downloadsCount: number;
+}
+
 export interface UserProfile {
   name: string;
   avatar: string;

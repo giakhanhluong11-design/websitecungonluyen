@@ -28,13 +28,9 @@ import { HomeDashboardWidgets } from './HomeDashboardWidgets';
 
 interface HomeViewProps {
   progress: UserProgress;
-  exams: Exam[];
   topics: Topic[];
   onNavigate: (tab: string, subjectFilter?: string, topicId?: string) => void;
-  onStartExam: (exam: Exam) => void;
-  onPreviewExam: (exam: Exam) => void;
   onSelectTopic: (topic: Topic) => void;
-  onToggleBookmark: (examId: string) => void;
   onReviewTopic?: (topicId: string) => void;
   onClearHistory?: () => void;
   darkMode?: boolean;
@@ -42,13 +38,9 @@ interface HomeViewProps {
 
 export const HomeView: React.FC<HomeViewProps> = ({
   progress,
-  exams,
   topics,
   onNavigate,
-  onStartExam,
-  onPreviewExam,
   onSelectTopic,
-  onToggleBookmark,
   onReviewTopic,
   onClearHistory,
   darkMode = false,
@@ -295,19 +287,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-xs px-3 py-1 text-xs font-bold text-white border border-white/30 mb-2 sm:mb-3">
                 <FileText className="h-3.5 w-3.5 text-amber-200" /><span>Kho đề tuyển sinh</span>
               </div>
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white leading-snug drop-shadow-xs">Kho đề thi Tuyển sinh</h2>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white leading-snug drop-shadow-xs">Thư viện đề thi</h2>
               <p className="text-xs sm:text-sm text-orange-100/95 mt-1 sm:mt-1.5 leading-relaxed line-clamp-2">
-                Tuyển tập trọn bộ {exams.length} đề thi chính thức Sở GD&ĐT TP.HCM và các trường trọng điểm, thi thử trực tuyến có bấm giờ.
+                Tải xuống các tài liệu đề thi chính thức Sở GD&ĐT TP.HCM và các trường trọng điểm.
               </p>
-              <div className="pt-2 sm:pt-3">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-orange-100 mb-1.5">
-                  <span>Tiến độ làm đề</span>
-                  <span className="font-bold text-white">{exams.filter(e => e.userCompleted).length}/{exams.length} đề hoàn thành</span>
-                </div>
-                <div className="w-full max-w-[280px] h-3 rounded-full bg-black/20 dark:bg-black/25 p-0.5 overflow-hidden backdrop-blur-xs">
-                  <div className="h-full rounded-full bg-white transition-all duration-500 shadow-xs" style={{ width: `${Math.round((exams.filter(e => e.userCompleted).length / Math.max(1, exams.length)) * 100)}%` }} />
-                </div>
-              </div>
 
               {/* Các hình học năng động tương tác */}
               <div className="pt-2 sm:pt-3">
@@ -316,10 +299,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
               <div className="pt-2 sm:pt-3 flex flex-wrap gap-1.5 text-xs font-bold text-white">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-xs px-3 py-1 border border-white/30">
-                  <Clock className="h-3 w-3 text-amber-200" /><span>Bấm giờ thi thật</span>
+                  <FileText className="h-3 w-3 text-amber-200" /><span>Tải về dễ dàng</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-xs px-3 py-1 border border-white/30">
-                  <Award className="h-3 w-3 text-amber-200" /><span>Thang điểm chuẩn</span>
+                  <CheckCircle2 className="h-3 w-3 text-amber-200" /><span>Đề thi chính thức</span>
                 </span>
               </div>
             </div>

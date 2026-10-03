@@ -250,11 +250,8 @@ export default function App() {
         {currentTab === 'home' && (
           <HomeView
             progress={progress}
-            exams={ALL_EXAMS}
             topics={ALL_TOPICS}
             onNavigate={handleNavigate}
-            onStartExam={(exam) => setActiveExamToRun(exam)}
-            onPreviewExam={(exam) => setPreviewExam(exam)}
             onSelectTopic={(topic) => {
               setActiveSubject(topic.subjectId);
               useAppStore.setState({ selectedKnowledgeTopic: topic, currentTab: 'knowledge' });
@@ -299,10 +296,7 @@ export default function App() {
 
         {currentTab === 'exams' && (
           <ExamLibraryView
-            exams={ALL_EXAMS}
             progress={progress}
-            onStartExam={(exam) => setActiveExamToRun(exam)}
-            onPreviewExam={(exam) => setPreviewExam(exam)}
             onToggleBookmark={handleToggleBookmark}
           />
         )}
@@ -337,7 +331,6 @@ export default function App() {
         {currentTab === 'account' && (
           <AccountView
             progress={progress}
-            exams={ALL_EXAMS}
             darkMode={darkMode}
             onToggleDarkMode={toggleDarkMode}
             onUpdateProfile={handleUpdateProfile}
@@ -348,7 +341,6 @@ export default function App() {
             onLogoutGoogle={handleLogoutAuth}
             onOpenAuthModal={openAuthModal}
             onLogoutAuth={handleLogoutAuth}
-            onStartExam={(exam) => setActiveExamToRun(exam)}
           />
         )}
         </ErrorBoundary>
