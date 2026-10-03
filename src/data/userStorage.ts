@@ -137,6 +137,31 @@ export function loadUserProgress(): UserProgress {
     }
 
     const parsed = JSON.parse(raw);
+    
+    // Validate and reset streak if missed yesterday
+    if (parsed.streakDays > 0 && parsed.lastActiveDate) {
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${yyyy}-${mm}-${dd}`;
+      
+      const y_yyyy = yesterday.getFullYear();
+      const y_mm = String(yesterday.getMonth() + 1).padStart(2, '0');
+      const y_dd = String(yesterday.getDate()).padStart(2, '0');
+      const yesterdayStr = `${y_yyyy}-${y_mm}-${y_dd}`;
+      
+      if (parsed.lastActiveDate !== todayStr && parsed.lastActiveDate !== yesterdayStr) {
+        parsed.streakDays = 0;
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        } catch {}
+      }
+    }
+
     return {
       ...parsed,
       minigameResults: parsed.minigameResults || [],

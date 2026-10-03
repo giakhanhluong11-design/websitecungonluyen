@@ -192,7 +192,8 @@ export const BenchmarkView: React.FC = () => {
         s.school.toLowerCase().includes(q) || 
         s.regionName.toLowerCase().includes(q) ||
         s.shortName.toLowerCase().includes(q) ||
-        (s.district && s.district.toLowerCase().includes(q))
+        (s.district && s.district.toLowerCase().includes(q)) ||
+        (s.address && s.address.toLowerCase().includes(q))
       );
     }
 
@@ -699,6 +700,11 @@ export const BenchmarkView: React.FC = () => {
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                 Khu vực: <strong>{activeSchool.regionName}</strong> {activeSchool.district ? `(${activeSchool.district})` : ''} • Lịch sử tuyển sinh 4 năm (2023 - 2026)
               </p>
+              {activeSchool.address && (
+                <p className="text-[11px] sm:text-xs text-slate-500 font-sans mt-1 leading-relaxed">
+                  📍 {activeSchool.address}
+                </p>
+              )}
             </div>
 
             <button
@@ -789,13 +795,13 @@ export const BenchmarkView: React.FC = () => {
                           {yrData?.scaleDisplay || '--'}
                         </td>
                         <td className="py-3 px-4 text-right font-bold text-indigo-600 dark:text-indigo-400">
-                          {yrData?.nv1 !== null ? yrData?.nv1.toFixed(2) : '--'}
+                          {yrData?.nv1 != null ? yrData?.nv1.toFixed(2) : '--'}
                         </td>
                         <td className="py-3 px-4 text-right text-emerald-600 dark:text-emerald-400 font-medium">
-                          {yrData?.nv2 !== null && yrData?.nv2 !== undefined ? yrData.nv2.toFixed(2) : '--'}
+                          {yrData?.nv2 != null ? yrData.nv2.toFixed(2) : '--'}
                         </td>
                         <td className="py-3 px-4 text-right text-amber-600 dark:text-amber-400 font-medium">
-                          {yrData?.nv3 !== null && yrData?.nv3 !== undefined ? yrData.nv3.toFixed(2) : '--'}
+                          {yrData?.nv3 != null ? yrData.nv3.toFixed(2) : '--'}
                         </td>
                         <td className="py-3 px-4 text-right font-semibold text-slate-700 dark:text-slate-300">
                           {pct !== null ? `${pct.toFixed(2)}%` : (yrData?.isUnspecifiedScale ? 'Chưa xác định' : '--')}
@@ -1421,11 +1427,9 @@ export const BenchmarkView: React.FC = () => {
                         <div className="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                           {s.school}
                         </div>
-                        {s.district && (
-                          <div className="text-[10px] text-slate-400 font-normal">
-                            {s.district}
-                          </div>
-                        )}
+                        <div className="text-[10px] text-slate-400 font-normal mt-0.5" title={s.address || s.district}>
+                          {s.address || s.district}
+                        </div>
                       </td>
                       <td className="py-3 px-3 font-sans text-slate-600 dark:text-slate-400 whitespace-nowrap">
                         <span className="inline-block px-2 py-0.5 rounded text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
@@ -1433,19 +1437,19 @@ export const BenchmarkView: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-3 px-3 text-right text-slate-600 dark:text-slate-300 font-semibold">
-                        {s23?.nv1 !== null ? s23?.nv1.toFixed(2) : '--'}
+                        {s23?.nv1 != null ? s23?.nv1.toFixed(2) : '--'}
                         <span className="text-[10px] text-slate-400 ml-0.5">/{s23?.scaleDisplay}</span>
                       </td>
                       <td className="py-3 px-3 text-right text-slate-600 dark:text-slate-300 font-semibold">
-                        {s24?.nv1 !== null ? s24?.nv1.toFixed(2) : '--'}
+                        {s24?.nv1 != null ? s24?.nv1.toFixed(2) : '--'}
                         <span className="text-[10px] text-slate-400 ml-0.5">/{s24?.scaleDisplay}</span>
                       </td>
                       <td className="py-3 px-3 text-right text-slate-700 dark:text-slate-200 font-bold">
-                        {s25?.nv1 !== null ? s25?.nv1.toFixed(2) : '--'}
+                        {s25?.nv1 != null ? s25?.nv1.toFixed(2) : '--'}
                         <span className="text-[10px] text-slate-400 ml-0.5">/{s25?.scaleDisplay}</span>
                       </td>
                       <td className="py-3 px-3 text-right text-indigo-600 dark:text-indigo-400 font-black">
-                        {s26?.nv1 !== null ? s26?.nv1.toFixed(2) : '--'}
+                        {s26?.nv1 != null ? s26?.nv1.toFixed(2) : '--'}
                         <span className="text-[10px] text-slate-400 ml-0.5">/{s26?.scaleDisplay}</span>
                       </td>
                       <td className="py-3 px-4 text-right font-semibold text-emerald-600 dark:text-emerald-400">

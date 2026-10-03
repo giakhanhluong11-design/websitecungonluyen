@@ -204,7 +204,7 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
               <div className="h-full bg-blue-600 rounded-full transition-all duration-500" style={{ width: `${mathPercent}%` }} />
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Đã học {mathDone} / {mathTopics.length} chuyên đề
+              Đã học {mathDone} / {mathModules.length} chuyên đề
             </p>
           </div>
 
@@ -218,7 +218,7 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
               <div className="h-full bg-emerald-600 rounded-full transition-all duration-500" style={{ width: `${vanPercent}%` }} />
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Đã học {vanDone} / {vanTopics.length} chuyên đề
+              Đã học {vanDone} / {vanModules.length} chuyên đề
             </p>
           </div>
 
@@ -232,7 +232,7 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
               <div className="h-full bg-amber-600 rounded-full transition-all duration-500" style={{ width: `${anhPercent}%` }} />
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Đã học {anhDone} / {anhTopics.length} chuyên đề
+              Đã học {anhDone} / {anhModules.length} chuyên đề
             </p>
           </div>
         </div>

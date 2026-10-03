@@ -60,6 +60,8 @@ import {
   CHART_COLORS,
 } from '../data/hcmBenchmarkData';
 
+const getLatestScore = (school: HCMSchool) => school.scores['2026'] ?? school.scores['2025'] ?? school.scores['2024'] ?? school.scores['2023'] ?? school.scores['2022'] ?? 0;
+
 interface HCMBenchmarkViewProps {
   targetSchool?: string;
   targetScore?: number;
@@ -123,13 +125,13 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
       if (district !== 'Tất cả quận/huyện' && school.district !== district) {
         return false;
       }
-      const score2025 = school.scores['2025'];
+      const score2025 = getLatestScore(school);
       return Math.abs(score2025 - score) <= tolerance;
-    }).sort((a, b) => Math.abs(a.scores['2025'] - score) - Math.abs(b.scores['2025'] - score));
+    }).sort((a, b) => Math.abs(getLatestScore(a) - score) - Math.abs(getLatestScore(b) - score));
   }, [hasSearched, searchedParams]);
   
   const handleSetNV1WithCheck = (school: HCMSchool, userScore: number | null) => {
-    const schoolScore = school.scores['2025'];
+    const schoolScore = getLatestScore(school);
     if (userScore !== null) {
       const gap = schoolScore - userScore; // If school > user + 1.5
       const reverseGap = userScore - schoolScore; // If user > school + 3
@@ -254,7 +256,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
     const spread = Number((maxScore - minScore).toFixed(2));
     const latestDiff = getScoreDiff(selectedSchool);
 
-    const latestBenchmark = selectedSchool.scores['2025'];
+    const latestBenchmark = getLatestScore(selectedSchool);
     const userScore = parsedUserScore ?? 0;
     const gap = userScore - latestBenchmark;
 
@@ -308,11 +310,12 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
       const name = school.name.toLowerCase();
       const shortName = school.shortName.toLowerCase();
       const district = school.district.toLowerCase();
+      const address = (school.address || '').toLowerCase();
 
       // Search term
       if (searchTerm.trim()) {
         const term = searchTerm.toLowerCase();
-        const match = ticker.includes(term) || name.includes(term) || shortName.includes(term) || district.includes(term);
+        const match = ticker.includes(term) || name.includes(term) || shortName.includes(term) || district.includes(term) || address.includes(term);
         if (!match) return false;
       }
 
@@ -395,7 +398,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
     let unch = 0;
 
     HCM_SCHOOLS_DATA.forEach((s) => {
-      totalScore += s.scores['2025'];
+      totalScore += getLatestScore(s);
       const { diff } = getScoreDiff(s);
       if (diff > 0) gainers++;
       else if (diff < 0) losers++;
@@ -409,7 +412,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
   // Update target school handler
   const [savedTargetNotice, setSavedTargetNotice] = useState<string | null>(null);
   const handleSetTarget = (school: HCMSchool) => {
-    const score = school.scores['2025'];
+    const score = getLatestScore(school);
     if (onUpdateTargetSchool) {
       onUpdateTargetSchool(school.name, score);
     }
@@ -612,7 +615,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-850 bg-white dark:bg-slate-900">
                     {suggestedSchools.map((school) => {
-                      const diff = searchedParams!.score - school.scores['2025'];
+                      const diff = searchedParams!.score - getLatestScore(school);
                       return (
                         <tr key={`sugg-${school.id}`} className="hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors">
                           <td className="py-2.5 px-3">
@@ -621,9 +624,15 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                               <span>{school.name}</span>
                             </div>
                           </td>
-                          <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">{school.district}</td>
+                          <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">
+                            {school.address ? (
+                              <div className="text-[11px] whitespace-normal">{school.address}</div>
+                            ) : (
+                              school.district
+                            )}
+                          </td>
                           <td className="py-2.5 px-3 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                            {school.scores['2025'].toFixed(2)}
+                            {getLatestScore(school).toFixed(2)}
                           </td>
                           <td className="py-2.5 px-3 text-center font-mono">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-bold text-[11px] ${
@@ -716,7 +725,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                       <span className="font-mono font-bold text-indigo-500">[{getSchoolTicker(school)}]</span>
                       <span className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-[150px]">{school.name}</span>
                     </div>
-                    <span className="text-xs font-mono font-bold text-slate-500">{school.scores['2025'].toFixed(2)}</span>
+                    <span className="text-xs font-mono font-bold text-slate-500">{getLatestScore(school).toFixed(2)}</span>
                   </button>
                 ))}
               </div>
@@ -993,7 +1002,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                   filteredSchools.map((school) => {
                     const isSelected = selectedSchool.id === school.id;
                     const ticker = getSchoolTicker(school);
-                    const nv1 = school.scores['2025'];
+                    const nv1 = getLatestScore(school);
                     const nv2 = (nv1 + 1.0).toFixed(2);
                     const nv3 = (nv1 + 2.0).toFixed(2);
                     const { diff, diffPercent } = getScoreDiff(school);
@@ -1019,8 +1028,8 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
                           <div className="font-bold text-slate-900 dark:text-white truncate max-w-[160px] sm:max-w-xs">
                             {school.shortName}
                           </div>
-                          <div className="text-[10px] text-slate-400 font-sans truncate">
-                            {school.district}
+                          <div className="text-[10px] text-slate-400 font-sans truncate mt-0.5" title={school.address || school.district}>
+                            {school.address || school.district}
                           </div>
                         </td>
                         <td className="py-2.5 px-2 text-right font-black text-slate-900 dark:text-white">
@@ -1119,7 +1128,12 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
               <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1.5 leading-snug">
                 {selectedSchool.name}
               </h3>
-              <p className="text-[11px] text-slate-400 font-sans mt-0.5">
+              {selectedSchool.address && (
+                <p className="text-[11px] text-slate-500 font-sans mt-1 leading-relaxed">
+                  📍 {selectedSchool.address}
+                </p>
+              )}
+              <p className="text-[11px] text-slate-400 font-sans mt-1">
                 Chỉ tiêu dự kiến: <span className="text-slate-900 dark:text-white font-bold">{selectedSchool.quota || 675} học sinh</span>
               </p>
             </div>
@@ -1127,7 +1141,7 @@ export const HCMBenchmarkView: React.FC<HCMBenchmarkViewProps> = ({
             <div className="text-right shrink-0">
               <div className="text-[10px] text-slate-400 font-mono font-semibold uppercase">ĐIỂM NV1 2025</div>
               <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
-                {selectedSchool.scores['2025'].toFixed(2)}
+                {getLatestScore(selectedSchool).toFixed(2)}
               </div>
               <div
                 className={`text-xs font-bold font-mono flex items-center justify-end gap-0.5 mt-0.5 ${
