@@ -6,6 +6,7 @@ import {
   ChevronDown, ChevronRight as ChevronRightIcon, Ban, Info
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
+import { useProgressStore } from '../store/useProgressStore';
 
 // --- TYPES ---
 type RepeatType = 'none' | 'daily' | 'weekly';
@@ -185,6 +186,9 @@ const calculateEventLayout = (dayEvents: ScheduleEvent[]) => {
 // --- COMPONENT ---
 export const ScheduleBuilderView = () => {
   const { showToast, isDirty, setIsDirty } = useAppStore();
+  const { progress } = useProgressStore();
+
+  const scheduleKey = `cungonluyen_schedule_v3_${progress.profile?.email || 'guest'}`;
 
   // STATE
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -231,7 +235,7 @@ export const ScheduleBuilderView = () => {
     let loadedEvents: ScheduleEvent[] = [];
     let loadedTodos: TodoItem[] = [];
     
-    const data = localStorage.getItem('cungonluyen_schedule_v3');
+    const data = localStorage.getItem(scheduleKey);
     if (data) {
       try {
         const parsed = JSON.parse(data);
@@ -253,7 +257,7 @@ export const ScheduleBuilderView = () => {
     setTodos(validTodos);
     
     if (validEvents.length < loadedEvents.length || validTodos.length < loadedTodos.length) {
-      localStorage.setItem('cungonluyen_schedule_v3', JSON.stringify({ events: validEvents, todos: validTodos }));
+      localStorage.setItem(scheduleKey, JSON.stringify({ events: validEvents, todos: validTodos }));
       console.log('Cleaned up past schedule data.');
     }
 
@@ -271,14 +275,14 @@ export const ScheduleBuilderView = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       clearInterval(timer);
     };
-  }, []);
+  }, [scheduleKey]); // Rerun if user switches account
 
   const saveToLocal = (newEvents = events, newTodos = todos) => {
     setIsDirty(true);
   };
 
   const handleSaveToLocal = () => {
-    localStorage.setItem('cungonluyen_schedule_v3', JSON.stringify({ events, todos }));
+    localStorage.setItem(scheduleKey, JSON.stringify({ events, todos }));
     setIsDirty(false);
     showToast('Đã lưu thời khóa biểu!', 'success');
   };

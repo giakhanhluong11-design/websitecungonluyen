@@ -282,6 +282,12 @@ export function loginGoogleAccount(email: string, displayName?: string, remember
   } catch {}
 
   const normalizedEmail = email.trim().toLowerCase();
+  
+  const current = loadUserProgress();
+  if (current.profile?.email && current.profile.email.toLowerCase() !== normalizedEmail) {
+    saveToAccountVault(current.profile.email, current);
+  }
+
   const existingVault = loadFromAccountVault(normalizedEmail);
 
   let restored: UserProgress;
@@ -328,7 +334,9 @@ export function loginGoogleAccount(email: string, displayName?: string, remember
       city: ''
     };
 
-    const currentGuestProgress = loadUserProgress();
+    const currentGuestProgress = (current.profile?.email && current.profile.email.toLowerCase() !== normalizedEmail)
+      ? { ...BLANK_GUEST_PROGRESS, completedTopicIds: [], bookmarkedExamIds: [], practiceAttempts: [], examAttempts: [], minigameResults: [], minigameBestScores: {} }
+      : current;
 
     restored = {
       ...currentGuestProgress,
@@ -362,6 +370,12 @@ export function loginEmailAccount(
   } catch {}
 
   const normalizedEmail = email.trim().toLowerCase();
+  
+  const current = loadUserProgress();
+  if (current.profile?.email && current.profile.email.toLowerCase() !== normalizedEmail) {
+    saveToAccountVault(current.profile.email, current);
+  }
+
   const existingVault = loadFromAccountVault(normalizedEmail);
 
   let restored: UserProgress;
@@ -406,7 +420,9 @@ export function loginEmailAccount(
       city: ''
     };
 
-    const currentGuestProgress = loadUserProgress();
+    const currentGuestProgress = (current.profile?.email && current.profile.email.toLowerCase() !== normalizedEmail)
+      ? { ...BLANK_GUEST_PROGRESS, completedTopicIds: [], bookmarkedExamIds: [], practiceAttempts: [], examAttempts: [], minigameResults: [], minigameBestScores: {} }
+      : current;
 
     restored = {
       ...currentGuestProgress,
