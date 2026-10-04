@@ -132,6 +132,11 @@ export interface ExamDocument {
   uploadedAt: number;
   uploadedBy: string;
   downloadsCount: number;
+  /** 'storage' = Firebase Storage (fileUrl), 'firestore' = lưu chia mảnh trong Firestore */
+  storageType?: 'storage' | 'firestore';
+  chunkCount?: number;
+  fileType?: string;
+  ready?: boolean;
 }
 
 export interface UserProfile {

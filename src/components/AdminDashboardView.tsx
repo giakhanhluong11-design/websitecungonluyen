@@ -53,7 +53,7 @@ export const AdminDashboardView: React.FC = () => {
       setTimeout(() => setUploadSuccess(false), 3000);
     } catch (err: any) {
       const code = err?.code || '';
-      if (code === 'app/no-firebase-session') {
+      if (code === 'app/no-firebase-session' || code === 'app/file-too-large') {
         alert(err.message);
       } else if (code === 'storage/unauthorized' || code === 'permission-denied') {
         alert('Firebase từ chối quyền ghi. Hãy đăng xuất rồi đăng nhập lại tài khoản quản trị, và đảm bảo Storage/Firestore Rules đã được cập nhật (xem FIREBASE_RULES_GUIDE.md).');

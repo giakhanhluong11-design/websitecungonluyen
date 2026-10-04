@@ -9,7 +9,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { UserProgress, ExamDocument } from '../types';
-import { getExamDocuments, incrementDownloadCount } from '../services/examDocumentService';
+import { getExamDocuments, incrementDownloadCount, downloadExamDocument } from '../services/examDocumentService';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
@@ -47,8 +47,14 @@ export const ExamLibraryView: React.FC<ExamLibraryViewProps> = ({
   }, [documents, searchQuery, subjectFilter]);
 
   const handleDownload = async (doc: ExamDocument) => {
-    await incrementDownloadCount(doc.id);
-    window.open(doc.fileUrl, '_blank');
+    try {
+      await downloadExamDocument(doc);
+      await incrementDownloadCount(doc.id);
+      setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, downloadsCount: (d.downloadsCount || 0) + 1 } : d));
+    } catch (err) {
+      console.error('Lỗi tải tài liệu:', err);
+      alert('Không thể tải tài liệu này. Vui lòng thử lại sau.');
+    }
   };
 
   const formatFileSize = (bytes: number) => {
