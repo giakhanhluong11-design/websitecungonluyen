@@ -1,0 +1,23 @@
+rules_version = '2';
+// Firebase Storage Rules - Cùng Ôn Luyện
+// Dán nội dung này vào Firebase Console > Storage > Rules rồi bấm Publish.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['tester@gmail.com'];
+    }
+
+    // Tài liệu đề thi: ai cũng tải về được, chỉ admin được upload/xoá
+    match /exams/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && (request.resource == null || request.resource.size < 50 * 1024 * 1024);
+    }
+
+    // Các thư mục khác: người đã đăng nhập được đọc/ghi
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

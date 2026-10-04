@@ -46,11 +46,30 @@ service cloud.firestore {
     match /mental_health_logs/{document=**} {
       allow read, write: if request.auth != null;
     }
+
+    // 4. Tài liệu đề thi: ai cũng xem được, chỉ admin tạo/xoá,
+    //    người dùng đăng nhập chỉ được tăng lượt tải (downloadsCount)
+    match /exam_documents/{docId} {
+      allow read: if true;
+      allow create, delete: if request.auth != null
+        && request.auth.token.email in ['tester@gmail.com'];
+      allow update: if request.auth != null
+        && (request.auth.token.email in ['tester@gmail.com']
+            || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloadsCount']));
+    }
   }
 }
 ```
 
-**(Lưu ý: Nếu bạn đang sử dụng tài khoản Admin cục bộ `tester@gmail.com` thì tính năng Firebase sẽ bị `request.auth == null` từ chối, do tài khoản test này không phải đăng nhập thực. Bạn vui lòng sử dụng tài khoản đăng nhập Firebase thật để test nhé, hoặc sửa `if request.auth != null;` thành `if true;` cho mục đích tạm thời trong lúc test).**
-
-6. Bấm nút **Publish (Xuất bản)** để lưu quy tắc.
+**(Lưu ý: Tài khoản Admin `tester@gmail.com` hiện đã đăng nhập bằng Firebase Auth thật — lần đăng nhập đầu tiên sẽ tự tạo tài khoản trên Firebase. Cần bật Email/Password trong Authentication > Sign-in method.)** để lưu quy tắc.
 7. Tải lại trang web (F5) và các tính năng Cộng đồng sẽ hoạt động bình thường!
+
+---
+
+# Cấu hình Firebase Storage Rules (Upload tài liệu đề thi)
+
+Lỗi `storage/unauthorized` (403) khi admin upload file là do Storage Rules chưa cho phép ghi.
+
+1. Firebase Console > **Storage** > tab **Rules**.
+2. Dán toàn bộ nội dung file [`storage.rules`](./storage.rules) vào và bấm **Publish**.
+3. Trên website: **Đăng xuất** rồi **đăng nhập lại** `tester@gmail.com` để có phiên Firebase thật, sau đó thử upload lại.

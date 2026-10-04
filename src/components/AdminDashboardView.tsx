@@ -51,8 +51,15 @@ export const AdminDashboardView: React.FC = () => {
       setUploadTitle('');
       setUploadProvince('');
       setTimeout(() => setUploadSuccess(false), 3000);
-    } catch (err) {
-      alert('Có lỗi xảy ra khi upload.');
+    } catch (err: any) {
+      const code = err?.code || '';
+      if (code === 'app/no-firebase-session') {
+        alert(err.message);
+      } else if (code === 'storage/unauthorized' || code === 'permission-denied') {
+        alert('Firebase từ chối quyền ghi. Hãy đăng xuất rồi đăng nhập lại tài khoản quản trị, và đảm bảo Storage/Firestore Rules đã được cập nhật (xem FIREBASE_RULES_GUIDE.md).');
+      } else {
+        alert(`Có lỗi xảy ra khi upload${code ? ` (${code})` : ''}.`);
+      }
     } finally {
       setIsUploading(false);
     }

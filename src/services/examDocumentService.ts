@@ -1,4 +1,4 @@
-import { db, storage } from '../config/firebase';
+import { db, storage, auth } from '../config/firebase';
 import { 
   collection, 
   addDoc, 
@@ -23,9 +23,15 @@ export async function uploadExamDocument(
   metadata: Omit<ExamDocument, 'id' | 'fileUrl' | 'fileName' | 'fileSize' | 'uploadedAt' | 'downloadsCount'>
 ): Promise<ExamDocument> {
   try {
+    if (!auth.currentUser) {
+      const e: any = new Error('Phiên đăng nhập Firebase không tồn tại. Vui lòng đăng xuất và đăng nhập lại tài khoản quản trị.');
+      e.code = 'app/no-firebase-session';
+      throw e;
+    }
     // 1. Upload file to Storage
-    const storageRef = ref(storage, `exams/${Date.now()}_${file.name}`);
-    await uploadBytes(storageRef, file);
+    const safeName = file.name.replace(/[^\w.\-]+/g, '_');
+    const storageRef = ref(storage, `exams/${Date.now()}_${safeName}`);
+    await uploadBytes(storageRef, file, { contentType: file.type || undefined });
     const fileUrl = await getDownloadURL(storageRef);
 
     // 2. Save metadata to Firestore

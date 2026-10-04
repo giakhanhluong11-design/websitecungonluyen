@@ -94,14 +94,22 @@ export function setStoredUser(user: AuthUser): void {
 // HELPER: Convert Firebase User to AuthUser
 // ============================================================
 
+export const ADMIN_EMAILS = ['tester@gmail.com'];
+
+export function isAdminEmail(email?: string | null): boolean {
+  return !!email && ADMIN_EMAILS.includes(email.trim().toLowerCase());
+}
+
 function firebaseUserToAuthUser(user: User, provider: 'email' | 'google' = 'email'): AuthUser {
+  const admin = isAdminEmail(user.email);
   return {
     id: user.uid,
     email: user.email || '',
-    name: user.displayName || user.email?.split('@')[0] || 'Học sinh',
-    avatar: '/avatars/default.svg',
+    name: admin ? (user.displayName || 'Quản trị viên') : (user.displayName || user.email?.split('@')[0] || 'Học sinh'),
+    avatar: admin ? '🛡️' : '/avatars/default.svg',
     authProvider: provider,
     photoURL: user.photoURL || undefined,
+    ...(admin ? { isAdmin: true } : {}),
   };
 }
 
@@ -166,22 +174,42 @@ export async function loginWithEmail(email: string, password: string): Promise<A
     return { success: false, field: 'password', error: 'Mật khẩu không được để trống.' };
   }
 
-  // --- TÀI KHOẢN TEST ADMIN (KHÔNG CẦN FIREBASE) ---
-  if (email.trim() === 'tester@gmail.com' && password === 'TeStKeY9@3') {
-    const testUser: AuthUser = {
-      id: 'admin_user_id_999',
-      email: 'tester@gmail.com',
-      name: 'Quản trị viên',
-      avatar: '🛡️',
-      authProvider: 'email',
-      isAdmin: true,
-    };
-    const token = 'fake-admin-token-999';
-    
-    setStoredToken(token);
-    setStoredUser(testUser);
-    
-    return { success: true, token, user: testUser };
+  // --- TÀI KHOẢN ADMIN ---
+  // Admin phải có phiên Firebase Auth THẬT, nếu không Firebase Storage/Firestore
+  // sẽ từ chối (request.auth == null -> storage/unauthorized khi upload).
+  if (email.trim().toLowerCase() === 'tester@gmail.com' && password === 'TeStKeY9@3') {
+    const adminEmail = 'tester@gmail.com';
+    try {
+      let cred;
+      try {
+        cred = await signInWithEmailAndPassword(auth, adminEmail, password);
+      } catch (signInErr: any) {
+        const c = signInErr?.code || '';
+        if (c === 'auth/user-not-found' || c === 'auth/invalid-credential') {
+          // Lần đầu: tạo tài khoản admin thật trên Firebase Auth
+          cred = await createUserWithEmailAndPassword(auth, adminEmail, password);
+          await updateProfile(cred.user, { displayName: 'Quản trị viên' });
+        } else {
+          throw signInErr;
+        }
+      }
+      const user = firebaseUserToAuthUser(cred.user, 'email');
+      user.name = 'Quản trị viên';
+      user.isAdmin = true;
+      const token = await cred.user.getIdToken();
+      setStoredToken(token);
+      setStoredUser(user);
+      return { success: true, token, user };
+    } catch (adminErr: any) {
+      console.error('Không thể đăng nhập Firebase cho tài khoản admin:', adminErr);
+      if (adminErr?.code === 'auth/email-already-in-use') {
+        return { success: false, error: 'Tài khoản admin đã tồn tại trên Firebase với mật khẩu khác. Vui lòng đặt lại mật khẩu trong Firebase Console > Authentication.' };
+      }
+      if (adminErr?.code === 'auth/operation-not-allowed') {
+        return { success: false, error: 'Phương thức Email/Password chưa được bật trong Firebase Console > Authentication > Sign-in method.' };
+      }
+      return { success: false, error: 'Không thể đăng nhập tài khoản quản trị vào Firebase. Vui lòng thử lại sau.' };
+    }
   }
   // -------------------------------------------
 
@@ -434,10 +462,5 @@ export function onAuthChange(callback: (user: AuthUser | null) => void): () => v
 export function getCurrentUserId(): string | null {
   // Ưu tiên Firebase Auth hiện tại
   if (auth.currentUser?.uid) return auth.currentUser.uid;
-  
-  // Fallback: tài khoản admin test (không dùng Firebase Auth)
-  const cachedUser = getStoredUser();
-  if (cachedUser?.id === 'admin_user_id_999') return cachedUser.id;
-  
   return null;
 }
