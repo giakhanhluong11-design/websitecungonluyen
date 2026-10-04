@@ -235,3 +235,16 @@ export async function deleteExamDocument(docId: string, fileUrl: string): Promis
     throw error;
   }
 }
+
+/**
+ * Cập nhật thông tin của một tài liệu đề thi
+ */
+export async function updateExamDocumentInfo(docId: string, data: Partial<ExamDocument>): Promise<void> {
+  try {
+    const docRef = doc(db, COLLECTION_NAME, docId);
+    await updateDoc(docRef, data);
+  } catch (error) {
+    console.error('Lỗi khi cập nhật tài liệu:', error);
+    throw error;
+  }
+}
