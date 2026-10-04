@@ -27,6 +27,7 @@ export const ExamLibraryView: React.FC<ExamLibraryViewProps> = ({
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('all');
+  const [yearFilter, setYearFilter] = useState('all');
 
   useEffect(() => {
     const fetchDocs = async () => {
@@ -38,14 +39,20 @@ export const ExamLibraryView: React.FC<ExamLibraryViewProps> = ({
     fetchDocs();
   }, []);
 
+  const availableYears = useMemo(() => {
+    const years = new Set(documents.map(d => d.year));
+    return Array.from(years).sort((a, b) => b - a);
+  }, [documents]);
+
   const filteredDocs = useMemo(() => {
     return documents.filter(doc => {
       const matchSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           doc.province.toLowerCase().includes(searchQuery.toLowerCase());
       const matchSubject = subjectFilter === 'all' || doc.subjectId === subjectFilter;
-      return matchSearch && matchSubject;
+      const matchYear = yearFilter === 'all' || doc.year.toString() === yearFilter;
+      return matchSearch && matchSubject && matchYear;
     });
-  }, [documents, searchQuery, subjectFilter]);
+  }, [documents, searchQuery, subjectFilter, yearFilter]);
 
   const handleDownload = async (doc: ExamDocument) => {
     try {
@@ -106,7 +113,7 @@ export const ExamLibraryView: React.FC<ExamLibraryViewProps> = ({
           </div>
 
           {/* Filter Môn */}
-          <div className="w-full sm:w-48">
+          <div className="w-full sm:w-40">
             <select
               value={subjectFilter}
               onChange={(e) => setSubjectFilter(e.target.value)}
@@ -116,6 +123,20 @@ export const ExamLibraryView: React.FC<ExamLibraryViewProps> = ({
               <option value="toan">Toán học</option>
               <option value="van">Ngữ văn</option>
               <option value="anh">Tiếng Anh</option>
+            </select>
+          </div>
+
+          {/* Filter Năm */}
+          <div className="w-full sm:w-32">
+            <select
+              value={yearFilter}
+              onChange={(e) => setYearFilter(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="all">Tất cả năm</option>
+              {availableYears.map(year => (
+                <option key={year} value={year.toString()}>Năm {year}</option>
+              ))}
             </select>
           </div>
         </div>
