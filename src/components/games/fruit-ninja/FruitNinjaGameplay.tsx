@@ -243,7 +243,7 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
             // Text bom không xoay
             ctx.rotate(-fruit.rotation);
             ctx.fillStyle = '#ef4444';
-            ctx.font = 'bold 24px Inter';
+            ctx.font = 'bold 24px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('💣', 0, 0);
@@ -261,7 +261,7 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
             // Chữ bên trên KHÔNG xoay để dễ đọc
             ctx.rotate(-fruit.rotation);
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 20px Inter';
+            ctx.font = 'bold 20px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.shadowColor = 'rgba(0,0,0,0.8)';
@@ -271,7 +271,7 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
             // Handle long text wrapping simply by shrinking or splitting
             const lines = fruit.text.split(' ');
             if (lines.length > 2) {
-              ctx.font = 'bold 16px Inter';
+              ctx.font = 'bold 16px sans-serif';
               ctx.fillText(lines.slice(0, Math.ceil(lines.length/2)).join(' '), 0, -10);
               ctx.fillText(lines.slice(Math.ceil(lines.length/2)).join(' '), 0, 10);
             } else {
@@ -466,12 +466,12 @@ export const FruitNinjaGameplay: React.FC<FruitNinjaGameplayProps> = ({ mode, qu
 
         {/* Current Question */}
         <div className="flex-1 max-w-lg mx-4">
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl p-3 sm:p-4 shadow-xl border-2 border-indigo-100 text-center pointer-events-auto">
+          <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-xl border-2 border-indigo-100 text-center pointer-events-auto">
             <span className="inline-block px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-bold uppercase tracking-widest mb-1">
-              {uiState.question?.category}
+              {uiState.question?.category || 'Loading...'}
             </span>
             <h3 className="text-slate-800 font-bold text-sm sm:text-lg leading-snug">
-              {uiState.question?.text}
+              {uiState.question?.text || 'Ready?'}
             </h3>
           </div>
         </div>
